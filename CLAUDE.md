@@ -169,3 +169,8 @@ The AI opponent system has been implemented. See PROMPT_AI_PLAYERS.md for the or
 - [ ] **More maps** - Different arena layouts
 - [ ] **Character abilities** - Unique skills per character
 - [ ] **Sudden death** - Shrinking arena when time runs low
+
+## Recent Fixes (Antigravity)
+- **Z-Sorting**: Unified depth sorting based on Y-position for all entities to fix sprite clipping.
+- **Collision**: Tightened block collision (0.9 scale) and offset player hitbox (0.6 scale, +10y offset) to fix "walking under" blocks while maintaining 3D depth effect.
+- **Player Size**: Fixed bug where players shrank to 0.08 scale after powerups; restored to correct 0.25 scale.

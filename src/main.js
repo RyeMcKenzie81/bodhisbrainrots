@@ -46,30 +46,95 @@ loadSound("callout_1", "/sprites/callout_meowl.mp3");
 loadSound("callout_2", "/sprites/callout_strawberry.mp3");
 loadSound("callout_3", "/sprites/callout_cappucino.mp3");
 
+// Load animated sprite sheets (4x4 grid: down, up, left, right rows)
+loadSprite("tungtung_anim", "/sprites/tungtung_spritesheet.png", {
+  sliceX: 4,
+  sliceY: 4,
+  anims: {
+    walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+    walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+    walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+    walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+    idle_down: { from: 0, to: 0 },
+    idle_up: { from: 4, to: 4 },
+    idle_left: { from: 8, to: 8 },
+    idle_right: { from: 12, to: 12 },
+  },
+});
+
+loadSprite("meowl_anim", "/sprites/meowl_spritesheet.png", {
+  sliceX: 4,
+  sliceY: 4,
+  anims: {
+    walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+    walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+    walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+    walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+    idle_down: { from: 0, to: 0 },
+    idle_up: { from: 4, to: 4 },
+    idle_left: { from: 8, to: 8 },
+    idle_right: { from: 12, to: 12 },
+  },
+});
+
+loadSprite("strawberry_anim", "/sprites/strawberry_spritesheet.png", {
+  sliceX: 4,
+  sliceY: 4,
+  anims: {
+    walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+    walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+    walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+    walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+    idle_down: { from: 0, to: 0 },
+    idle_up: { from: 4, to: 4 },
+    idle_left: { from: 8, to: 8 },
+    idle_right: { from: 12, to: 12 },
+  },
+});
+
+loadSprite("cappucino_anim", "/sprites/cappucino_spritesheet.png", {
+  sliceX: 4,
+  sliceY: 4,
+  anims: {
+    walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+    walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+    walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+    walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+    idle_down: { from: 0, to: 0 },
+    idle_up: { from: 4, to: 4 },
+    idle_left: { from: 8, to: 8 },
+    idle_right: { from: 12, to: 12 },
+  },
+});
+
 // Player configs
 const PLAYERS = [
   {
     name: "Tung Tung",
     spriteFront: "tungtung_front",
     spriteBack: "tungtung_back",
+    spriteAnim: "tungtung_anim",
     keys: { up: "w", down: "s", left: "a", right: "d", bomb: "space" }
   },
   {
     name: "Meowl",
     spriteFront: "meowl_front",
     spriteBack: "meowl_back",
+    spriteAnim: "meowl_anim",
     keys: { up: "up", down: "down", left: "left", right: "right", bomb: "enter" }
   },
   {
     name: "Strawberry",
     spriteFront: "strawberry_front",
     spriteBack: "strawberry_back",
+    spriteAnim: "strawberry_anim",
     keys: { up: "i", down: "k", left: "j", right: "l", bomb: "o" }
   },
   {
     name: "Cappucino",
     spriteFront: "cappucino_front",
     spriteBack: "cappucino_back",
+    spriteAnim: "cappucino_anim",
     keys: { up: "t", down: "g", left: "f", right: "h", bomb: "y" }
   },
 ];
@@ -677,14 +742,14 @@ scene("characterSelect", ({ currentPlayer }) => {
     if (isTaken) {
       add([
         rect(30, 18, { radius: 2 }),
-        pos(x + boxSize/2 - 20, rosterY - boxSize/2 + 15),
+        pos(x + boxSize / 2 - 20, rosterY - boxSize / 2 + 15),
         anchor("center"),
         color(playerColors[takenByPlayer]),
         z(3),
       ]);
       add([
         text(`P${takenByPlayer + 1}`, { size: 10 }),
-        pos(x + boxSize/2 - 20, rosterY - boxSize/2 + 15),
+        pos(x + boxSize / 2 - 20, rosterY - boxSize / 2 + 15),
         anchor("center"),
         color(0, 0, 0),
         z(4),
@@ -1015,6 +1080,7 @@ scene("game", () => {
             color(80, 80, 100),
             area(),
             body({ isStatic: true }),
+            z(y), // Add depth to outer walls
             "wall",
           ]);
         }
@@ -1025,8 +1091,9 @@ scene("game", () => {
             pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
             anchor("center"),
             scale((TILE_SIZE * 0.85) / 400),  // 85% of tile, accounting for image padding
-            area({ scale: 0.5 }),
+            area({ scale: 0.9 }),
             body({ isStatic: true }),
+            z(y),  // Z-order based on Y position
             "wall",
           ]);
         }
@@ -1037,8 +1104,9 @@ scene("game", () => {
             pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
             anchor("center"),
             scale((TILE_SIZE * 0.85) / 400),  // 85% of tile, accounting for image padding
-            area({ scale: 0.5 }),
+            area({ scale: 0.9 }),
             body({ isStatic: true }),
+            z(y),  // Z-order based on Y position
             "block",
             { hasPowerup: Math.random() > 0.5 },
           ]);
@@ -1412,13 +1480,14 @@ scene("game", () => {
     }[difficulty];
 
     const ai = add([
-      sprite(character.spriteFront),
+      sprite(character.spriteAnim),
       pos(startPos.x * TILE_SIZE + TILE_SIZE / 2, startPos.y * TILE_SIZE + TILE_SIZE / 2),
       anchor("center"),
-      scale(0.08),
-      area({ scale: 0.45 }),
+      scale(0.25),  // Adjusted for 256x256 frames
+      area({ scale: 0.6, offset: vec2(0, 10) }),
       body(),
-      z(10),
+      // z(10), // Removed fixed Z
+      z(startPos.y), // Initial Z
       "player",
       "ai",
       {
@@ -1432,7 +1501,9 @@ scene("game", () => {
         name: character.name + " (CPU)",
         spriteFront: character.spriteFront,
         spriteBack: character.spriteBack,
+        spriteAnim: character.spriteAnim,
         facing: "down",
+        isMoving: false,
         isAI: true,
         difficulty,
         aiConfig,
@@ -1444,13 +1515,16 @@ scene("game", () => {
       },
     ]);
 
+    // Start with idle animation
+    ai.play("idle_down");
+
     // Name tag above AI player
     const aiNameTag = add([
       text(`CPU${playerIndex}`, { size: 12 }),
       pos(ai.pos.x, ai.pos.y - 40),
       anchor("center"),
       color(100, 200, 255), // Cyan for CPU
-      z(11),
+      z(12), // Always above players
       "nametag",
       { owner: ai },
     ]);
@@ -1491,6 +1565,11 @@ scene("game", () => {
       }
     });
 
+    // Dynamic Z-ordering for AI
+    ai.onUpdate(() => {
+      ai.z = ai.pos.y / TILE_SIZE;
+    });
+
     gameState.players.push(ai);
     return ai;
   }
@@ -1503,28 +1582,49 @@ scene("game", () => {
       case "up":
         ai.move(0, -speed);
         snapAIToLane(ai, "x");
-        if (ai.facing !== "up") {
-          ai.use(sprite(ai.spriteBack));
+        if (ai.facing !== "up" || !ai.isMoving) {
           ai.facing = "up";
+          ai.isMoving = true;
+          ai.flipX = false;
+          ai.play("walk_up");
         }
         break;
       case "down":
         ai.move(0, speed);
         snapAIToLane(ai, "x");
-        if (ai.facing !== "down") {
-          ai.use(sprite(ai.spriteFront));
+        if (ai.facing !== "down" || !ai.isMoving) {
           ai.facing = "down";
+          ai.isMoving = true;
+          ai.flipX = false;
+          ai.play("walk_down");
         }
         break;
       case "left":
         ai.move(-speed, 0);
         snapAIToLane(ai, "y");
-        ai.flipX = true;
+        if (ai.facing !== "left" || !ai.isMoving) {
+          ai.facing = "left";
+          ai.isMoving = true;
+          ai.flipX = false;
+          ai.play("walk_left");
+        }
         break;
       case "right":
         ai.move(speed, 0);
         snapAIToLane(ai, "y");
-        ai.flipX = false;
+        if (ai.facing !== "right" || !ai.isMoving) {
+          ai.facing = "right";
+          ai.isMoving = true;
+          ai.flipX = false;
+          ai.play("walk_right");
+        }
+        break;
+      case null:
+        // AI stopped moving - play idle animation
+        if (ai.isMoving) {
+          ai.isMoving = false;
+          ai.play("idle_" + ai.facing);
+        }
         break;
     }
   }
@@ -1716,13 +1816,14 @@ scene("game", () => {
     const startPos = START_POSITIONS[playerIndex];
 
     const player = add([
-      sprite(character.spriteFront),
+      sprite(character.spriteAnim),
       pos(startPos.x * TILE_SIZE + TILE_SIZE / 2, startPos.y * TILE_SIZE + TILE_SIZE / 2),
       anchor("center"),
-      scale(0.08),
-      area({ scale: 0.45 }),
+      scale(0.25),  // Adjusted for 256x256 frames
+      area({ scale: 0.6, offset: vec2(0, 10) }),
       body(),
-      z(10),
+      // z(10), // Removed fixed Z
+      z(startPos.y), // Initial Z
       "player",
       {
         playerIndex,
@@ -1735,12 +1836,17 @@ scene("game", () => {
         name: character.name,
         spriteFront: character.spriteFront,
         spriteBack: character.spriteBack,
+        spriteAnim: character.spriteAnim,
         facing: "down",
+        isMoving: false,
         canKick: false,  // For kick powerup
         cursed: false,   // For skull curse
         curseType: null,
       },
     ]);
+
+    // Start with idle animation
+    player.play("idle_down");
 
     // Name tag above player
     const nameTag = add([
@@ -1748,7 +1854,7 @@ scene("game", () => {
       pos(player.pos.x, player.pos.y - 40),
       anchor("center"),
       color(playerColors[playerIndex]),
-      z(11),
+      z(12),
       "nametag",
       { owner: player },
     ]);
@@ -1803,9 +1909,11 @@ scene("game", () => {
       if (player.alive && gameState.gameStarted) {
         player.move(0, -player.speed);
         snapToLane("x"); // Lock to vertical lane
-        if (player.facing !== "up") {
-          player.use(sprite(player.spriteBack));
+        if (player.facing !== "up" || !player.isMoving) {
           player.facing = "up";
+          player.isMoving = true;
+          player.flipX = false;
+          player.play("walk_up");
         }
       }
     });
@@ -1813,9 +1921,11 @@ scene("game", () => {
       if (player.alive && gameState.gameStarted) {
         player.move(0, player.speed);
         snapToLane("x"); // Lock to vertical lane
-        if (player.facing !== "down") {
-          player.use(sprite(player.spriteFront));
+        if (player.facing !== "down" || !player.isMoving) {
           player.facing = "down";
+          player.isMoving = true;
+          player.flipX = false;
+          player.play("walk_down");
         }
       }
     });
@@ -1823,14 +1933,50 @@ scene("game", () => {
       if (player.alive && gameState.gameStarted) {
         player.move(-player.speed, 0);
         snapToLane("y"); // Lock to horizontal lane
-        player.flipX = true;
+        if (player.facing !== "left" || !player.isMoving) {
+          player.facing = "left";
+          player.isMoving = true;
+          player.flipX = false;  // Don't flip - use left animation
+          player.play("walk_left");
+        }
       }
     });
     onKeyDown(keys.right, () => {
       if (player.alive && gameState.gameStarted) {
         player.move(player.speed, 0);
         snapToLane("y"); // Lock to horizontal lane
-        player.flipX = false;
+        if (player.facing !== "right" || !player.isMoving) {
+          player.facing = "right";
+          player.isMoving = true;
+          player.flipX = false;  // Don't flip - use right animation
+          player.play("walk_right");
+        }
+      }
+    });
+
+    // Stop walking animation when keys are released
+    onKeyRelease(keys.up, () => {
+      if (player.alive && player.facing === "up") {
+        player.isMoving = false;
+        player.play("idle_up");
+      }
+    });
+    onKeyRelease(keys.down, () => {
+      if (player.alive && player.facing === "down") {
+        player.isMoving = false;
+        player.play("idle_down");
+      }
+    });
+    onKeyRelease(keys.left, () => {
+      if (player.alive && player.facing === "left") {
+        player.isMoving = false;
+        player.play("idle_left");
+      }
+    });
+    onKeyRelease(keys.right, () => {
+      if (player.alive && player.facing === "right") {
+        player.isMoving = false;
+        player.play("idle_right");
       }
     });
 
@@ -1839,6 +1985,11 @@ scene("game", () => {
       if (player.alive && gameState.gameStarted && player.bombsPlaced < player.bombCount) {
         placeBomb(player);
       }
+    });
+
+    // Dynamic Z-ordering for Player
+    player.onUpdate(() => {
+      player.z = player.pos.y / TILE_SIZE;
     });
 
     gameState.players.push(player);
@@ -1865,8 +2016,8 @@ scene("game", () => {
       pos(gridX * TILE_SIZE + TILE_SIZE / 2, gridY * TILE_SIZE + TILE_SIZE / 2),
       anchor("center"),
       scale(0.05),
-      area({ scale: 0.7 }),
-      z(5),
+      area({ scale: 0.9 }), // Tighter collision for bombs
+      z(gridY), // Match grid row depth
       "bomb",
       "فpassable",  // Tag to mark bomb as currently passable
       {
@@ -1886,6 +2037,11 @@ scene("game", () => {
     bomb.onUpdate(() => {
       const pulse = 1 + Math.sin(time() * 8) * 0.15;
       bomb.scale = vec2(bomb.baseScale * pulse);
+
+      // Update Z if kicked
+      if (bomb.isKicked) {
+        bomb.z = bomb.pos.y / TILE_SIZE;
+      }
 
       // Handle kicked bomb movement
       if (bomb.isKicked && bomb.kickDirection) {
@@ -2162,7 +2318,7 @@ scene("game", () => {
         scale(baseScale),
         area({ scale: 0.7 }),
         opacity(1),
-        z(2),
+        z(gridY), // Match floor depth
         "powerup",
         {
           powerupType: powerupType.type,
@@ -2190,7 +2346,7 @@ scene("game", () => {
         color(puColors[powerupType.type]),
         area({ scale: 0.9 }),
         opacity(1),
-        z(2),
+        z(gridY), // Match floor depth
         "powerup",
         {
           powerupType: powerupType.type,
@@ -2207,7 +2363,7 @@ scene("game", () => {
         pos(baseX, baseY),
         anchor("center"),
         color(0, 0, 0),
-        z(3),
+        z(gridY + 0.1), // Slightly above powerup
         { parentPowerup: pu },
       ]);
 
@@ -2240,7 +2396,7 @@ scene("game", () => {
     });
   }
 
-  
+
   // Player collision with explosions
   onCollide("player", "explosion", (player) => {
     if (player.alive) {
@@ -2291,7 +2447,7 @@ scene("game", () => {
 
     // Pulse and glow effect for 2 seconds (skip for skull - different effect)
     if (!isSkull) {
-      const baseScale = 0.08;
+      const baseScale = 0.25;
       const glowDuration = 2;
       const startTime = time();
 
@@ -2344,7 +2500,7 @@ scene("game", () => {
     ]);
 
     // Make player flash purple
-    const baseScale = 0.08;
+    const baseScale = 0.25;
     const curseDuration = 3;
     const startTime = time();
 
