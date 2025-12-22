@@ -1,0 +1,773 @@
+import { PLAYERS } from "../constants.js";
+import { gameConfig } from "../state.js";
+
+export function initMenuScenes() {
+    // Scene: Main Menu
+    scene("menu", () => {
+        add([
+            text("BODHI'S BRAINROTS", { size: 48 }),
+            pos(width() / 2, 80),
+            anchor("center"),
+            color(255, 100, 150),
+        ]);
+
+        add([
+            text("Exploding Brain Mayhem!", { size: 20 }),
+            pos(width() / 2, 130),
+            anchor("center"),
+            color(200, 200, 200),
+        ]);
+
+        // Character display
+        const charY = 280;
+        PLAYERS.forEach((p, i) => {
+            const xPos = width() / 2 - 225 + i * 150;
+            add([
+                sprite(p.spriteFront),
+                pos(xPos, charY),
+                anchor("center"),
+                scale(0.12),
+            ]);
+            add([
+                text(p.name, { size: 14 }),
+                pos(xPos, charY + 70),
+                anchor("center"),
+                color(255, 255, 255),
+            ]);
+        });
+
+        // Brain bomb display
+        add([
+            sprite("brainbomb"),
+            pos(width() / 2, 450),
+            anchor("center"),
+            scale(0.1),
+        ]);
+
+        add([
+            text("Press SPACE to Start!", { size: 24 }),
+            pos(width() / 2, 530),
+            anchor("center"),
+            color(255, 255, 255),
+        ]);
+
+        onKeyPress("space", () => go("modeSelect"));
+    });
+
+    // Scene: Mode Selection
+    scene("modeSelect", () => {
+        let selectedMode = 0; // 0 = Single Player, 1 = Multiplayer
+        const modes = ["SINGLE PLAYER", "MULTIPLAYER"];
+        const modeDescriptions = [
+            "Battle 1-3 AI opponents",
+            "2-4 players on one keyboard"
+        ];
+
+        add([
+            rect(width(), height()),
+            pos(0, 0),
+            color(20, 20, 40),
+            z(-2),
+        ]);
+
+        add([
+            text("SELECT MODE", { size: 48 }),
+            pos(width() / 2, 80),
+            anchor("center"),
+            color(255, 200, 100),
+        ]);
+
+        const modeButtons = [];
+        const buttonY = 280;
+
+        modes.forEach((mode, i) => {
+            const x = width() / 2 - 150 + i * 300;
+
+            const btn = add([
+                rect(240, 120, { radius: 8 }),
+                pos(x, buttonY),
+                anchor("center"),
+                color(i === selectedMode ? rgb(80, 80, 120) : rgb(40, 40, 60)),
+                outline(4, i === selectedMode ? rgb(255, 200, 100) : rgb(60, 60, 80)),
+                z(0),
+                { modeIndex: i },
+            ]);
+            modeButtons.push(btn);
+
+            add([
+                text(mode, { size: 20 }),
+                pos(x, buttonY - 15),
+                anchor("center"),
+                color(255, 255, 255),
+                z(1),
+            ]);
+
+            add([
+                text(modeDescriptions[i], { size: 12 }),
+                pos(x, buttonY + 20),
+                anchor("center"),
+                color(150, 150, 150),
+                z(1),
+            ]);
+
+            // Icon
+            if (i === 0) {
+                add([
+                    sprite(PLAYERS[0].spriteFront),
+                    pos(x - 50, buttonY + 110),
+                    anchor("center"),
+                    scale(0.06),
+                    z(1),
+                ]);
+                add([
+                    text("VS", { size: 14 }),
+                    pos(x, buttonY + 115),
+                    anchor("center"),
+                    color(255, 100, 100),
+                    z(1),
+                ]);
+                add([
+                    text("CPU", { size: 14 }),
+                    pos(x + 50, buttonY + 115),
+                    anchor("center"),
+                    color(100, 200, 255),
+                    z(1),
+                ]);
+            } else {
+                for (let p = 0; p < 2; p++) {
+                    add([
+                        sprite(PLAYERS[p].spriteFront),
+                        pos(x - 30 + p * 60, buttonY + 110),
+                        anchor("center"),
+                        scale(0.05),
+                        z(1),
+                    ]);
+                }
+            }
+        });
+
+        function updateSelection() {
+            modeButtons.forEach((btn, i) => {
+                btn.color = i === selectedMode ? rgb(80, 80, 120) : rgb(40, 40, 60);
+                btn.outline.color = i === selectedMode ? rgb(255, 200, 100) : rgb(60, 60, 80);
+            });
+        }
+
+        onKeyPress("a", () => { selectedMode = 0; updateSelection(); });
+        onKeyPress("left", () => { selectedMode = 0; updateSelection(); });
+        onKeyPress("d", () => { selectedMode = 1; updateSelection(); });
+        onKeyPress("right", () => { selectedMode = 1; updateSelection(); });
+
+        onKeyPress("space", () => {
+            if (selectedMode === 0) {
+                gameConfig.mode = "singleplayer";
+                go("difficultySelect");
+            } else {
+                gameConfig.mode = "multiplayer";
+                go("playerCount");
+            }
+        });
+
+        onKeyPress("enter", () => {
+            if (selectedMode === 0) {
+                gameConfig.mode = "singleplayer";
+                go("difficultySelect");
+            } else {
+                gameConfig.mode = "multiplayer";
+                go("playerCount");
+            }
+        });
+
+        onKeyPress("escape", () => go("menu"));
+
+        add([
+            text("< A / D > SELECT     SPACE CONFIRM     ESC BACK", { size: 14 }),
+            pos(width() / 2, 500),
+            anchor("center"),
+            color(120, 120, 120),
+        ]);
+    });
+
+    // Scene: Difficulty Selection
+    scene("difficultySelect", () => {
+        let selectedDifficulty = 1; // 0 = Easy, 1 = Medium, 2 = Hard
+        let selectedOpponents = 3; // 1-3 AI opponents
+        const difficulties = ["EASY", "MEDIUM", "HARD"];
+        const diffDescriptions = [
+            "Slow reactions, random movement",
+            "Tactical bombs, avoids danger",
+            "Hunts you down, sets traps"
+        ];
+        const diffColors = [
+            rgb(100, 200, 100),
+            rgb(255, 200, 100),
+            rgb(255, 100, 100),
+        ];
+
+        add([
+            rect(width(), height()),
+            pos(0, 0),
+            color(20, 20, 40),
+            z(-2),
+        ]);
+
+        add([
+            text("SELECT DIFFICULTY", { size: 42 }),
+            pos(width() / 2, 60),
+            anchor("center"),
+            color(255, 200, 100),
+        ]);
+
+        // Difficulty buttons
+        const diffButtons = [];
+        const buttonY = 180;
+        const buttonWidth = 200;
+        const spacing = 220;
+        const startX = width() / 2 - spacing;
+
+        difficulties.forEach((diff, i) => {
+            const x = startX + i * spacing;
+
+            const btn = add([
+                rect(buttonWidth, 100, { radius: 8 }),
+                pos(x, buttonY),
+                anchor("center"),
+                color(i === selectedDifficulty ? rgb(60, 60, 90) : rgb(40, 40, 60)),
+                outline(4, i === selectedDifficulty ? diffColors[i] : rgb(60, 60, 80)),
+                z(0),
+            ]);
+            diffButtons.push(btn);
+
+            add([
+                text(diff, { size: 24 }),
+                pos(x, buttonY - 15),
+                anchor("center"),
+                color(diffColors[i]),
+                z(1),
+            ]);
+
+            add([
+                text(diffDescriptions[i], { size: 10 }),
+                pos(x, buttonY + 20),
+                anchor("center"),
+                color(150, 150, 150),
+                z(1),
+            ]);
+        });
+
+        // Opponent count selection
+        add([
+            text("NUMBER OF OPPONENTS", { size: 28 }),
+            pos(width() / 2, 300),
+            anchor("center"),
+            color(255, 200, 100),
+        ]);
+
+        const countDisplay = add([
+            text(selectedOpponents.toString(), { size: 80 }),
+            pos(width() / 2, 380),
+            anchor("center"),
+            color(255, 255, 255),
+        ]);
+
+        add([
+            text("< W / S >", { size: 18 }),
+            pos(width() / 2, 440),
+            anchor("center"),
+            color(150, 150, 150),
+        ]);
+
+        // Preview of opponents
+        const opponentPreview = [];
+        function updateOpponentPreview() {
+            opponentPreview.forEach(o => destroy(o));
+            opponentPreview.length = 0;
+
+            const previewStartX = width() / 2 - (selectedOpponents - 1) * 50;
+            for (let i = 0; i < selectedOpponents; i++) {
+                const cpuSprite = add([
+                    sprite(PLAYERS[(i + 1) % 4].spriteFront),
+                    pos(previewStartX + i * 100, 520),
+                    anchor("center"),
+                    scale(0.08),
+                ]);
+                opponentPreview.push(cpuSprite);
+
+                const label = add([
+                    text("CPU", { size: 12 }),
+                    pos(previewStartX + i * 100, 570),
+                    anchor("center"),
+                    color(100, 200, 255),
+                ]);
+                opponentPreview.push(label);
+            }
+        }
+        updateOpponentPreview();
+
+        function updateDiffSelection() {
+            diffButtons.forEach((btn, i) => {
+                btn.color = i === selectedDifficulty ? rgb(60, 60, 90) : rgb(40, 40, 60);
+                btn.outline.color = i === selectedDifficulty ? diffColors[i] : rgb(60, 60, 80);
+            });
+        }
+
+        onKeyPress("a", () => { selectedDifficulty = Math.max(0, selectedDifficulty - 1); updateDiffSelection(); });
+        onKeyPress("left", () => { selectedDifficulty = Math.max(0, selectedDifficulty - 1); updateDiffSelection(); });
+        onKeyPress("d", () => { selectedDifficulty = Math.min(2, selectedDifficulty + 1); updateDiffSelection(); });
+        onKeyPress("right", () => { selectedDifficulty = Math.min(2, selectedDifficulty + 1); updateDiffSelection(); });
+
+        onKeyPress("w", () => {
+            selectedOpponents = Math.min(3, selectedOpponents + 1);
+            countDisplay.text = selectedOpponents.toString();
+            updateOpponentPreview();
+        });
+        onKeyPress("up", () => {
+            selectedOpponents = Math.min(3, selectedOpponents + 1);
+            countDisplay.text = selectedOpponents.toString();
+            updateOpponentPreview();
+        });
+        onKeyPress("s", () => {
+            selectedOpponents = Math.max(1, selectedOpponents - 1);
+            countDisplay.text = selectedOpponents.toString();
+            updateOpponentPreview();
+        });
+        onKeyPress("down", () => {
+            selectedOpponents = Math.max(1, selectedOpponents - 1);
+            countDisplay.text = selectedOpponents.toString();
+            updateOpponentPreview();
+        });
+
+        onKeyPress("space", () => confirmDifficulty());
+        onKeyPress("enter", () => confirmDifficulty());
+
+        function confirmDifficulty() {
+            gameConfig.difficulty = ["easy", "medium", "hard"][selectedDifficulty];
+            gameConfig.playerCount = selectedOpponents + 1; // Human + AI opponents
+            gameConfig.playerCharacters = [];
+            go("characterSelect", { currentPlayer: 0 });
+        }
+
+        onKeyPress("escape", () => go("modeSelect"));
+
+        add([
+            text("< A / D > DIFFICULTY     < W / S > OPPONENTS     SPACE CONFIRM", { size: 12 }),
+            pos(width() / 2, 650),
+            anchor("center"),
+            color(120, 120, 120),
+        ]);
+    });
+
+    // Scene: Player Count Selection
+    scene("playerCount", () => {
+        let selectedCount = 2;
+
+        add([
+            text("HOW MANY PLAYERS?", { size: 42 }),
+            pos(width() / 2, 80),
+            anchor("center"),
+            color(255, 200, 100),
+        ]);
+
+        const countDisplay = add([
+            text(selectedCount.toString(), { size: 120 }),
+            pos(width() / 2, 250),
+            anchor("center"),
+            color(255, 255, 255),
+        ]);
+
+        add([
+            text("< A / D >", { size: 24 }),
+            pos(width() / 2, 350),
+            anchor("center"),
+            color(150, 150, 150),
+        ]);
+
+        add([
+            text("Press SPACE to continue", { size: 20 }),
+            pos(width() / 2, 450),
+            anchor("center"),
+            color(200, 200, 200),
+        ]);
+
+        // Player icons preview
+        const playerIcons = [];
+        function updatePlayerIcons() {
+            playerIcons.forEach(icon => destroy(icon));
+            playerIcons.length = 0;
+
+            const startX = width() / 2 - (selectedCount - 1) * 60;
+            for (let i = 0; i < selectedCount; i++) {
+                const icon = add([
+                    sprite(PLAYERS[i].spriteFront),
+                    pos(startX + i * 120, 550),
+                    anchor("center"),
+                    scale(0.1),
+                ]);
+                playerIcons.push(icon);
+
+                const label = add([
+                    text(`P${i + 1}`, { size: 16 }),
+                    pos(startX + i * 120, 610),
+                    anchor("center"),
+                    color(255, 255, 255),
+                ]);
+                playerIcons.push(label);
+            }
+        }
+        updatePlayerIcons();
+
+        onKeyPress("a", () => {
+            selectedCount = Math.max(2, selectedCount - 1);
+            countDisplay.text = selectedCount.toString();
+            updatePlayerIcons();
+        });
+
+        onKeyPress("left", () => {
+            selectedCount = Math.max(2, selectedCount - 1);
+            countDisplay.text = selectedCount.toString();
+            updatePlayerIcons();
+        });
+
+        onKeyPress("d", () => {
+            selectedCount = Math.min(4, selectedCount + 1);
+            countDisplay.text = selectedCount.toString();
+            updatePlayerIcons();
+        });
+
+        onKeyPress("right", () => {
+            selectedCount = Math.min(4, selectedCount + 1);
+            countDisplay.text = selectedCount.toString();
+            updatePlayerIcons();
+        });
+
+        onKeyPress("space", () => {
+            gameConfig.playerCount = selectedCount;
+            gameConfig.playerCharacters = [];
+            go("characterSelect", { currentPlayer: 0 });
+        });
+
+        onKeyPress("escape", () => go("menu"));
+    });
+
+    // Global select music handle
+    let selectMusicHandle = null;
+
+    // Scene: Character Select
+    scene("characterSelect", ({ currentPlayer }) => {
+        if (currentPlayer === 0) {
+            if (selectMusicHandle) selectMusicHandle.stop();
+            selectMusicHandle = play("selectmusic", { loop: true, volume: 0.5 });
+        }
+
+        let selectedChar = 0;
+        const takenCharacters = gameConfig.playerCharacters;
+
+        while (takenCharacters.includes(selectedChar) && selectedChar < 4) {
+            selectedChar++;
+        }
+
+        const playerColors = [
+            rgb(255, 200, 50),
+            rgb(100, 150, 255),
+            rgb(255, 100, 150),
+            rgb(100, 255, 150),
+        ];
+
+        add([
+            rect(width(), height()),
+            pos(0, 0),
+            color(20, 20, 40),
+            z(-2),
+        ]);
+
+        for (let i = 0; i < 20; i++) {
+            add([
+                rect(width(), 1),
+                pos(0, i * 40),
+                color(40, 40, 70),
+                opacity(0.5),
+                z(-1),
+            ]);
+            add([
+                rect(1, height()),
+                pos(i * 60, 0),
+                color(40, 40, 70),
+                opacity(0.5),
+                z(-1),
+            ]);
+        }
+
+        add([
+            rect(500, 50, { radius: 4 }),
+            pos(width() / 2, 40),
+            anchor("center"),
+            color(150, 30, 30),
+            outline(3, rgb(255, 200, 50)),
+        ]);
+
+        add([
+            text("SELECT YOUR FIGHTER", { size: 28 }),
+            pos(width() / 2, 40),
+            anchor("center"),
+            color(255, 255, 100),
+        ]);
+
+        add([
+            rect(200, 36, { radius: 4 }),
+            pos(width() / 2, 90),
+            anchor("center"),
+            color(playerColors[currentPlayer]),
+        ]);
+
+        add([
+            text(`PLAYER ${currentPlayer + 1}`, { size: 22 }),
+            pos(width() / 2, 90),
+            anchor("center"),
+            color(0, 0, 0),
+        ]);
+
+        const charSprites = [];
+        const charBoxes = [];
+        const rosterY = 280;
+        const boxSize = 140;
+        const spacing = 160;
+        const rosterStartX = width() / 2 - (spacing * 1.5);
+
+        PLAYERS.forEach((p, i) => {
+            const x = rosterStartX + i * spacing;
+            const isTaken = takenCharacters.includes(i);
+            const takenByPlayer = takenCharacters.indexOf(i);
+
+            const box = add([
+                rect(boxSize, boxSize, { radius: 4 }),
+                pos(x, rosterY),
+                anchor("center"),
+                color(isTaken ? rgb(30, 30, 40) : rgb(50, 50, 70)),
+                outline(4, isTaken ? playerColors[takenByPlayer] : rgb(80, 80, 100)),
+                z(0),
+                { charIndex: i },
+            ]);
+            charBoxes.push(box);
+
+            const charSprite = add([
+                sprite(p.spriteFront),
+                pos(x, rosterY - 10),
+                anchor("center"),
+                scale(0.1),
+                opacity(isTaken ? 0.4 : 1),
+                z(1),
+            ]);
+            charSprites.push(charSprite);
+
+            add([
+                rect(boxSize - 10, 22, { radius: 2 }),
+                pos(x, rosterY + 55),
+                anchor("center"),
+                color(isTaken ? rgb(40, 40, 50) : rgb(20, 20, 30)),
+                z(1),
+            ]);
+
+            add([
+                text(p.name, { size: 11 }),
+                pos(x, rosterY + 55),
+                anchor("center"),
+                color(isTaken ? rgb(100, 100, 100) : rgb(255, 255, 255)),
+                z(2),
+            ]);
+
+            if (isTaken) {
+                add([
+                    rect(30, 18, { radius: 2 }),
+                    pos(x + boxSize / 2 - 20, rosterY - boxSize / 2 + 15),
+                    anchor("center"),
+                    color(playerColors[takenByPlayer]),
+                    z(3),
+                ]);
+                add([
+                    text(`P${takenByPlayer + 1}`, { size: 10 }),
+                    pos(x + boxSize / 2 - 20, rosterY - boxSize / 2 + 15),
+                    anchor("center"),
+                    color(0, 0, 0),
+                    z(4),
+                ]);
+            }
+        });
+
+        const cursor = add([
+            rect(boxSize + 10, boxSize + 10, { radius: 6 }),
+            pos(rosterStartX + selectedChar * spacing, rosterY),
+            anchor("center"),
+            color(0, 0, 0),
+            opacity(0),
+            outline(5, playerColors[currentPlayer]),
+            z(5),
+        ]);
+
+        cursor.onUpdate(() => {
+            const pulse = 3 + Math.sin(time() * 6) * 2;
+            cursor.outline.width = pulse;
+        });
+
+        const previewSprite = add([
+            sprite(PLAYERS[selectedChar].spriteFront),
+            pos(width() / 2, 500),
+            anchor("center"),
+            scale(0.22),
+        ]);
+
+        add([
+            rect(200, 30, { radius: 4 }),
+            pos(width() / 2, 620),
+            anchor("center"),
+            color(playerColors[currentPlayer]),
+        ]);
+
+        const previewName = add([
+            text(PLAYERS[selectedChar].name, { size: 18 }),
+            pos(width() / 2, 620),
+            anchor("center"),
+            color(0, 0, 0),
+        ]);
+
+        function updateSelection() {
+            cursor.pos.x = rosterStartX + selectedChar * spacing;
+            previewSprite.use(sprite(PLAYERS[selectedChar].spriteFront));
+            previewName.text = PLAYERS[selectedChar].name;
+        }
+
+        if (takenCharacters.length > 0) {
+            add([
+                text("SELECTED:", { size: 12 }),
+                pos(50, 450),
+                anchor("left"),
+                color(150, 150, 150),
+            ]);
+
+            takenCharacters.forEach((charIdx, i) => {
+                add([
+                    sprite(PLAYERS[charIdx].spriteFront),
+                    pos(50 + i * 70, 520),
+                    anchor("center"),
+                    scale(0.08),
+                ]);
+                add([
+                    rect(24, 14, { radius: 2 }),
+                    pos(50 + i * 70, 560),
+                    anchor("center"),
+                    color(playerColors[i]),
+                ]);
+                add([
+                    text(`P${i + 1}`, { size: 9 }),
+                    pos(50 + i * 70, 560),
+                    anchor("center"),
+                    color(0, 0, 0),
+                ]);
+            });
+        }
+
+        function moveSelection(dir) {
+            let newChar = selectedChar;
+
+            if (dir === "left") newChar = selectedChar - 1;
+            if (dir === "right") newChar = selectedChar + 1;
+
+            if (newChar < 0) newChar = 3;
+            if (newChar > 3) newChar = 0;
+
+            let attempts = 0;
+            while (takenCharacters.includes(newChar) && attempts < 4) {
+                newChar = dir === "left" ? newChar - 1 : newChar + 1;
+                if (newChar < 0) newChar = 3;
+                if (newChar > 3) newChar = 0;
+                attempts++;
+            }
+
+            if (!takenCharacters.includes(newChar)) {
+                selectedChar = newChar;
+                updateSelection();
+            }
+        }
+
+        const controls = PLAYERS[currentPlayer].keys;
+
+        onKeyPress(controls.left, () => moveSelection("left"));
+        onKeyPress(controls.right, () => moveSelection("right"));
+        onKeyPress(controls.up, () => moveSelection("left"));
+        onKeyPress(controls.down, () => moveSelection("right"));
+
+        if (currentPlayer !== 0) {
+            onKeyPress("a", () => moveSelection("left"));
+            onKeyPress("d", () => moveSelection("right"));
+            onKeyPress("w", () => moveSelection("left"));
+            onKeyPress("s", () => moveSelection("right"));
+        }
+        if (currentPlayer !== 1) {
+            onKeyPress("left", () => moveSelection("left"));
+            onKeyPress("right", () => moveSelection("right"));
+            onKeyPress("up", () => moveSelection("left"));
+            onKeyPress("down", () => moveSelection("right"));
+        }
+
+        onKeyPress(controls.bomb, () => confirmSelection());
+        onKeyPress("space", () => confirmSelection());
+        onKeyPress("enter", () => confirmSelection());
+
+        function confirmSelection() {
+            if (takenCharacters.includes(selectedChar)) return;
+
+            play(`callout_${selectedChar}`, { volume: 0.9 });
+            gameConfig.playerCharacters.push(selectedChar);
+
+            add([
+                rect(width(), height()),
+                pos(0, 0),
+                color(255, 255, 255),
+                opacity(0.5),
+                z(100),
+                lifespan(0.2, { fade: 0.2 }),
+            ]);
+
+            wait(0.5, () => {
+                if (gameConfig.mode === "singleplayer" && currentPlayer === 0) {
+                    const availableChars = [0, 1, 2, 3].filter(c => !gameConfig.playerCharacters.includes(c));
+                    for (let i = 1; i < gameConfig.playerCount; i++) {
+                        const randomIndex = Math.floor(Math.random() * availableChars.length);
+                        gameConfig.playerCharacters.push(availableChars.splice(randomIndex, 1)[0]);
+                    }
+                    if (selectMusicHandle) {
+                        selectMusicHandle.stop();
+                        selectMusicHandle = null;
+                    }
+                    go("game");
+                } else if (currentPlayer + 1 < gameConfig.playerCount) {
+                    go("characterSelect", { currentPlayer: currentPlayer + 1 });
+                } else {
+                    if (selectMusicHandle) {
+                        selectMusicHandle.stop();
+                        selectMusicHandle = null;
+                    }
+                    go("game");
+                }
+            });
+        }
+
+        onKeyPress("escape", () => {
+            if (selectMusicHandle) {
+                selectMusicHandle.stop();
+                selectMusicHandle = null;
+            }
+            if (gameConfig.mode === "singleplayer") {
+                go("difficultySelect");
+            } else {
+                go("playerCount");
+            }
+        });
+
+        add([
+            text("← → SELECT     SPACE/BOMB CONFIRM     ESC BACK", { size: 12 }),
+            pos(width() / 2, 680),
+            anchor("center"),
+            color(120, 120, 120),
+        ]);
+    });
+}

@@ -163,7 +163,7 @@ New images from `/Users/ryemckenzie/Downloads/brainrots/`:
 The AI opponent system has been implemented. See PROMPT_AI_PLAYERS.md for the original spec.
 
 ## Planned Future Features
-- [ ] **Walking animations** - Needs animated sprite sheets for each character
+- [x] **Walking animations** - Needs animated sprite sheets for each character
 - [ ] **Player registration** - Name input, localStorage or backend storage
 - [ ] **Networked multiplayer** - Play on different devices (requires backend + WebSockets)
 - [ ] **More maps** - Different arena layouts
