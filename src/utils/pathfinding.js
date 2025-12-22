@@ -20,11 +20,11 @@ export function isWalkable(gridX, gridY) {
         if (blockPos.x === gridX && blockPos.y === gridY) return false;
     }
 
-    // Check solid bombs
-    for (const bomb of get("bomb")) {
-        if (bomb.solid) {
-            const bombPos = getGridPos(bomb);
-            if (bombPos.x === gridX && bombPos.y === gridY) return false;
+    // Check solid brains
+    for (const brain of get("brain")) {
+        if (brain.solid) {
+            const brainPos = getGridPos(brain);
+            if (brainPos.x === gridX && brainPos.y === gridY) return false;
         }
     }
 
@@ -35,9 +35,9 @@ export function isWalkable(gridX, gridY) {
 export function getExplosionDangerZones() {
     const dangerZones = [];
 
-    for (const bomb of get("bomb")) {
-        const bombPos = getGridPos(bomb);
-        dangerZones.push({ x: bombPos.x, y: bombPos.y });
+    for (const brain of get("brain")) {
+        const brainPos = getGridPos(brain);
+        dangerZones.push({ x: brainPos.x, y: brainPos.y });
 
         // Add explosion paths
         const directions = [
@@ -48,9 +48,9 @@ export function getExplosionDangerZones() {
         ];
 
         for (const dir of directions) {
-            for (let i = 1; i <= bomb.range; i++) {
-                const ex = bombPos.x + dir.dx * i;
-                const ey = bombPos.y + dir.dy * i;
+            for (let i = 1; i <= brain.range; i++) {
+                const ex = brainPos.x + dir.dx * i;
+                const ey = brainPos.y + dir.dy * i;
 
                 // Check for walls (explosion stops)
                 let blocked = false;
@@ -89,14 +89,14 @@ export function getExplosionDangerZones() {
 
 // NEW: Predictive Danger Map (Heatmap of explosion times)
 // Returns object: { "x,y": remainingSeconds }
-export function getDangerMap(virtualBombs = []) {
+export function getDangerMap(virtualBrains = []) {
     const map = {};
-    const allBombs = [...get("bomb"), ...virtualBombs];
+    const allBrains = [...get("brain"), ...virtualBrains];
 
-    // Add current bombs
-    for (const bomb of allBombs) {
-        const remaining = bomb.timer; // Seconds until explosion
-        const bombPos = getGridPos(bomb);
+    // Add current brains
+    for (const brain of allBrains) {
+        const remaining = brain.timer; // Seconds until explosion
+        const brainPos = getGridPos(brain);
 
         const markDanger = (x, y, time) => {
             const key = `${x},${y}`;
@@ -185,8 +185,8 @@ export function isPathSafe(path, dangerMap, aiSpeed = 100) {
             // Safe padding
             // prePadding: Time buffer BEFORE explosion (must leave by then)
             // postPadding: Time buffer AFTER explosion (must wait until then)
-            const prePadding = 0.5;
-            const postPadding = 3.0;
+            const prePadding = 1.0;
+            const postPadding = 2.0;
 
             // If we arrive and leave before it explodes: Safe
             if (arrivalTime + timeToCross + prePadding < boomStart) continue;

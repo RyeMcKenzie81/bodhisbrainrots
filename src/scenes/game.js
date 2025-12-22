@@ -139,8 +139,8 @@ export function initGameScene() {
             const isSkull = powerup.powerupType === "skull";
 
             switch (powerup.powerupType) {
-                case "bomb":
-                    player.bombCount++;
+                case "brain":
+                    player.brainCount++;
                     play("powerup_bomb");
                     break;
                 case "fire":
@@ -331,7 +331,7 @@ export function initGameScene() {
                 if (hud.isStats) {
                     const player = gameState.players.find(p => p.playerIndex === hud.playerId);
                     if (player && player.alive) {
-                        hud.text = `B:${player.bombCount} F:${player.fireRange} S:${Math.floor(player.speed / 40)}`;
+                        hud.text = `B:${player.brainCount} F:${player.fireRange} S:${Math.floor(player.speed / 40)}`;
                     } else if (player && !player.alive) {
                         hud.text = "DEAD";
                         hud.color = rgb(100, 100, 100);

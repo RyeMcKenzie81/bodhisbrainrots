@@ -1,5 +1,5 @@
 
-import { TILE_SIZE, BOMB_TIMER, PLAYERS, START_POSITIONS } from "../constants.js";
+import { TILE_SIZE, BRAIN_TIMER, PLAYERS, START_POSITIONS } from "../constants.js";
 import { getGridPos } from "../utils/grid.js";
 import { gameState } from "../state.js";
 import {
@@ -11,7 +11,7 @@ import {
     getDangerMap,
     isPathSafe
 } from "../utils/pathfinding.js";
-import { placeBomb } from "./bomb.js";
+import { placeBrain } from "./brain.js";
 
 // Spawn an AI Player (LAYER 3: THE BOMBER)
 export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
@@ -32,8 +32,8 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
             playerIndex,
             characterIndex,
             speed: 180,
-            bombCount: 1,
-            bombsPlaced: 0,
+            brainCount: 1,
+            brainsPlaced: 0,
             fireRange: 2,
             alive: true,
             name: character.name + " (CPU)",
@@ -101,15 +101,15 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
         }
 
         // LAYER 3: ATTACK
-        // If safe, consider dropping a bomb
-        else if (ai.bombsPlaced < ai.bombCount) {
-            // Simple logic: Drop bomb if we are next to a breakable block or a player
-            if (shouldDropBomb(ai)) {
+        // If safe, consider dropping a brain
+        else if (ai.brainsPlaced < ai.brainCount) {
+            // Simple logic: Drop brain if we are next to a breakable block or a player
+            if (shouldDropBrain(ai)) {
                 // CRITICAL SAFETY CHECK:
-                // Simulate if we drop a bomb here, can we escape?
-                const sim = canSmartBomb(ai, myPos.x, myPos.y);
+                // Simulate if we drop a brain here, can we escape?
+                const sim = canSmartBrain(ai, myPos.x, myPos.y);
                 if (sim.safe) {
-                    placeBomb(ai);
+                    placeBrain(ai);
                     // Immediately switch to fleeing logic next frame naturally
                     // But we can also set direction to escapeDir right now
                     executeMove(ai, sim.escapeDir);
@@ -127,7 +127,8 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
         // ALSO: If our current move takes us INTO danger, cancel it.
 
         // 1. Check if current direction is leading us into doom
-        if (ai.moveDirection) {
+        // (Skip this check if we are already fleeing an immediate danger, as our pathfinder knows best)
+        if (ai.moveDirection && ai.currentAction !== "flee") {
             if (willWalkIntoDanger(ai, ai.moveDirection, dangerZones)) {
                 ai.moveDirection = null; // Stop!
                 ai.isMoving = false;
@@ -152,7 +153,7 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
     return ai;
 }
 
-function shouldDropBomb(ai) {
+function shouldDropBrain(ai) {
     // 5% Chance per frame to check (don't spam check)
     if (Math.random() > 0.05) return false;
 
@@ -181,25 +182,25 @@ function shouldDropBomb(ai) {
     return false;
 }
 
-// Simulation: If I drop a bomb at (x,y), can I escape?
-function canSmartBomb(ai, gridX, gridY) {
-    const virtualBomb = {
+// Simulation: If I drop a brain at (x,y), can I escape?
+function canSmartBrain(ai, gridX, gridY) {
+    const virtualBrain = {
         pos: vec2(gridX * TILE_SIZE + TILE_SIZE / 2, gridY * TILE_SIZE + TILE_SIZE / 2),
         range: ai.fireRange,
-        timer: BOMB_TIMER
+        timer: BRAIN_TIMER
     };
 
-    // 1. Where is the nearest safe spot considering this NEW bomb?
-    const safeTarget = findSafeSpot(gridX, gridY, [virtualBomb]);
+    // 1. Where is the nearest safe spot considering this NEW brain?
+    const safeTarget = findSafeSpot(gridX, gridY, [virtualBrain]);
     if (!safeTarget) return { safe: false };
 
     // 2. Can I get there?
-    // We must find a path that is safe considering the new bomb AND existing bombs
+    // We must find a path that is safe considering the new brain AND existing brains
     const path = findPath(gridX, gridY, safeTarget.x, safeTarget.y, false); // false = use isPathSafe check manually below
     if (!path || path.length === 0) return { safe: false };
 
     // 3. Is that path actually safe in time?
-    const dangerMap = getDangerMap([virtualBomb]);
+    const dangerMap = getDangerMap([virtualBrain]);
     const isSafe = isPathSafe(path, dangerMap, ai.speed);
 
     return { safe: isSafe, escapeDir: path[0].dir };

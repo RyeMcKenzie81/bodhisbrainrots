@@ -1,6 +1,6 @@
 import { TILE_SIZE, PLAYERS, START_POSITIONS } from "../constants.js";
 import { gameState } from "../state.js";
-import { placeBomb } from "./bomb.js";
+import { placeBrain } from "./brain.js";
 
 // Spawn a player
 export function spawnPlayer(playerIndex, characterIndex) {
@@ -21,8 +21,8 @@ export function spawnPlayer(playerIndex, characterIndex) {
             playerIndex,
             characterIndex,
             speed: 200,
-            bombCount: 1,
-            bombsPlaced: 0,
+            brainCount: 1,
+            brainsPlaced: 0,
             fireRange: 2,
             alive: true,
             name: character.name,
@@ -180,10 +180,10 @@ export function spawnPlayer(playerIndex, characterIndex) {
         }
     });
 
-    // Bomb placement
+    // Brain placement
     onKeyPress(keys.bomb, () => {
-        if (player.alive && gameState.gameStarted && player.bombsPlaced < player.bombCount) {
-            placeBomb(player);
+        if (player.alive && gameState.gameStarted && player.brainsPlaced < player.brainCount) {
+            placeBrain(player);
         }
     });
 

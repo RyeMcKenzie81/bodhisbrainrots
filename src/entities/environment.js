@@ -16,7 +16,7 @@ export function destroyBlock(block) {
 export function spawnPowerup(gridX, gridY) {
     // Weighted powerup types - kick and skull are rarer
     const types = [
-        { type: "bomb", sprite: "powerup_bomb", weight: 30 },
+        { type: "brain", sprite: "powerup_bomb", weight: 30 },
         { type: "fire", sprite: "powerup_fire", weight: 30 },
         { type: "speed", sprite: "powerup_speed", weight: 25 },
         { type: "kick", sprite: null, weight: 10 },   // No sprite - use text

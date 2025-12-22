@@ -2,39 +2,38 @@ import { TILE_SIZE, BOMB_TIMER, EXPLOSION_DURATION } from "../constants.js";
 import { getGridPos } from "../utils/grid.js";
 import { destroyBlock } from "./environment.js";
 
-// Place a bomb
-export function placeBomb(player) {
+// Place a brain
+export function placeBrain(player) {
     const gridX = Math.round((player.pos.x - TILE_SIZE / 2) / TILE_SIZE);
     const gridY = Math.round((player.pos.y - TILE_SIZE / 2) / TILE_SIZE);
 
-    // Check if there's already a bomb here
-    for (const bomb of get("bomb")) {
-        const bombGridX = Math.round((bomb.pos.x - TILE_SIZE / 2) / TILE_SIZE);
-        const bombGridY = Math.round((bomb.pos.y - TILE_SIZE / 2) / TILE_SIZE);
-        if (bombGridX === gridX && bombGridY === gridY) return;
+    // Check if there's already a brain here
+    for (const brain of get("brain")) {
+        const brainGridX = Math.round((brain.pos.x - TILE_SIZE / 2) / TILE_SIZE);
+        const brainGridY = Math.round((brain.pos.y - TILE_SIZE / 2) / TILE_SIZE);
+        if (brainGridX === gridX && brainGridY === gridY) return;
     }
 
-    player.bombsPlaced++;
+    player.brainsPlaced++;
 
-    // Create the brain bomb!
-    const bomb = add([
+    // Create the brain!
+    const brain = add([
         sprite("brainbomb"),
         pos(gridX * TILE_SIZE + TILE_SIZE / 2, gridY * TILE_SIZE + TILE_SIZE / 2),
         anchor("center"),
         scale(0.05),
-        area({ scale: 0.9 }), // Tighter collision for bombs
+        area({ scale: 0.9 }), // Tighter collision for brains
         z(gridY), // Match grid row depth
-        "bomb",
-        "فpassable",  // Tag to mark bomb as currently passable
+        "brain",
+        "passable",  // Tag to mark brain as currently passable
         {
             owner: player,
             range: player.fireRange,
             gridX,
             gridY,
             baseScale: 0.05,
-            solid: false, // Track if bomb has become solid yet
+            solid: false, // Track if brain has become solid yet
             isKicked: false,
-            kickDirection: null,
             kickDirection: null,
             kickSpeed: 300,
             timer: BOMB_TIMER,
@@ -42,23 +41,23 @@ export function placeBomb(player) {
     ]);
 
     // Pulsing animation + check if owner has left + handle kicks
-    bomb.onUpdate(() => {
+    brain.onUpdate(() => {
         const pulse = 1 + Math.sin(time() * 8) * 0.15;
-        bomb.scale = vec2(bomb.baseScale * pulse);
+        brain.scale = vec2(brain.baseScale * pulse);
 
         // Update Z if kicked
-        if (bomb.isKicked) {
-            bomb.z = bomb.pos.y / TILE_SIZE;
+        if (brain.isKicked) {
+            brain.z = brain.pos.y / TILE_SIZE;
         }
 
-        // Handle kicked bomb movement
-        if (bomb.isKicked && bomb.kickDirection) {
-            const dir = bomb.kickDirection;
-            const moveAmount = bomb.kickSpeed * dt();
+        // Handle kicked brain movement
+        if (brain.isKicked && brain.kickDirection) {
+            const dir = brain.kickDirection;
+            const moveAmount = brain.kickSpeed * dt();
 
             // Calculate new position
-            const newX = bomb.pos.x + dir.dx * moveAmount;
-            const newY = bomb.pos.y + dir.dy * moveAmount;
+            const newX = brain.pos.x + dir.dx * moveAmount;
+            const newY = brain.pos.y + dir.dy * moveAmount;
 
             // Check if we'd hit something
             const targetGridX = Math.round((newX - TILE_SIZE / 2) / TILE_SIZE);
@@ -86,11 +85,11 @@ export function placeBomb(player) {
                 }
             }
 
-            // Check other bombs
+            // Check other brains
             if (!blocked) {
-                for (const otherBomb of get("bomb")) {
-                    if (otherBomb !== bomb) {
-                        const otherPos = getGridPos(otherBomb);
+                for (const otherBrain of get("brain")) {
+                    if (otherBrain !== brain) {
+                        const otherPos = getGridPos(otherBrain);
                         if (otherPos.x === targetGridX && otherPos.y === targetGridY) {
                             blocked = true;
                             break;
@@ -101,49 +100,49 @@ export function placeBomb(player) {
 
             if (blocked) {
                 // Stop at grid-aligned position
-                bomb.isKicked = false;
-                bomb.kickDirection = null;
-                bomb.gridX = Math.round((bomb.pos.x - TILE_SIZE / 2) / TILE_SIZE);
-                bomb.gridY = Math.round((bomb.pos.y - TILE_SIZE / 2) / TILE_SIZE);
-                bomb.pos.x = bomb.gridX * TILE_SIZE + TILE_SIZE / 2;
-                bomb.pos.y = bomb.gridY * TILE_SIZE + TILE_SIZE / 2;
+                brain.isKicked = false;
+                brain.kickDirection = null;
+                brain.gridX = Math.round((brain.pos.x - TILE_SIZE / 2) / TILE_SIZE);
+                brain.gridY = Math.round((brain.pos.y - TILE_SIZE / 2) / TILE_SIZE);
+                brain.pos.x = brain.gridX * TILE_SIZE + TILE_SIZE / 2;
+                brain.pos.y = brain.gridY * TILE_SIZE + TILE_SIZE / 2;
             } else {
                 // Keep moving
-                bomb.pos.x = newX;
-                bomb.pos.y = newY;
-                bomb.gridX = targetGridX;
-                bomb.gridY = targetGridY;
+                brain.pos.x = newX;
+                brain.pos.y = newY;
+                brain.gridX = targetGridX;
+                brain.gridY = targetGridY;
             }
         }
 
-        // If bomb isn't solid yet, check if owner has escaped
-        if (!bomb.solid && !bomb.isKicked) {
-            const ownerGridX = Math.round((bomb.owner.pos.x - TILE_SIZE / 2) / TILE_SIZE);
-            const ownerGridY = Math.round((bomb.owner.pos.y - TILE_SIZE / 2) / TILE_SIZE);
+        // If brain isn't solid yet, check if owner has escaped
+        if (!brain.solid && !brain.isKicked) {
+            const ownerGridX = Math.round((brain.owner.pos.x - TILE_SIZE / 2) / TILE_SIZE);
+            const ownerGridY = Math.round((brain.owner.pos.y - TILE_SIZE / 2) / TILE_SIZE);
 
-            // Owner has left the bomb tile - make it solid
-            if (ownerGridX !== bomb.gridX || ownerGridY !== bomb.gridY) {
-                bomb.solid = true;
-                bomb.use(body({ isStatic: true }));
-                bomb.unuse("فpassable");
+            // Owner has left the brain tile - make it solid
+            if (ownerGridX !== brain.gridX || ownerGridY !== brain.gridY) {
+                brain.solid = true;
+                brain.use(body({ isStatic: true }));
+                brain.unuse("passable");
             }
         }
 
         // Update timer
-        bomb.timer -= dt();
-        if (bomb.timer <= 0) {
-            explodeBomb(bomb);
+        brain.timer -= dt();
+        if (brain.timer <= 0) {
+            explodeBrain(brain);
         }
     });
 }
 
-// Explode a bomb
-export function explodeBomb(bomb) {
-    if (!bomb.exists()) return;
+// Explode a brain
+export function explodeBrain(brain) {
+    if (!brain.exists()) return;
 
-    const { gridX, gridY, range, owner } = bomb;
-    owner.bombsPlaced--;
-    destroy(bomb);
+    const { gridX, gridY, range, owner } = brain;
+    owner.brainsPlaced--;
+    destroy(brain);
 
     // Create explosions in cross pattern
     createExplosion(gridX, gridY); // Center
@@ -211,10 +210,10 @@ function createExplosion(gridX, gridY, playSound = true) {
         { gridX, gridY },
     ]);
 
-    // Check for chain reaction with other bombs
-    for (const bomb of get("bomb")) {
-        if (bomb.gridX === gridX && bomb.gridY === gridY) {
-            wait(0.1, () => explodeBomb(bomb));
+    // Check for chain reaction with other brains
+    for (const brain of get("brain")) {
+        if (brain.gridX === gridX && brain.gridY === gridY) {
+            wait(0.1, () => explodeBrain(brain));
         }
     }
 
