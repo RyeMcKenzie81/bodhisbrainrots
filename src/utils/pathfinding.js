@@ -105,7 +105,7 @@ export function getDangerMap(virtualBrains = []) {
             }
         };
 
-        markDanger(bombPos.x, bombPos.y, remaining);
+        markDanger(brainPos.x, brainPos.y, remaining);
 
         const directions = [
             { dx: 1, dy: 0 }, { dx: -1, dy: 0 },
@@ -113,9 +113,9 @@ export function getDangerMap(virtualBrains = []) {
         ];
 
         for (const dir of directions) {
-            for (let i = 1; i <= bomb.range; i++) {
-                const ex = bombPos.x + dir.dx * i;
-                const ey = bombPos.y + dir.dy * i;
+            for (let i = 1; i <= brain.range; i++) {
+                const ex = brainPos.x + dir.dx * i;
+                const ey = brainPos.y + dir.dy * i;
 
                 let blocked = false;
                 // Check walls
@@ -247,8 +247,8 @@ export function findPath(startX, startY, targetX, targetY, avoidDanger = true) {
 }
 
 // Find nearest safe spot from current position
-export function findSafeSpot(startX, startY, extraBombs = []) {
-    const dangerMap = getDangerMap(extraBombs);
+export function findSafeSpot(startX, startY, extraBrains = []) {
+    const dangerMap = getDangerMap(extraBrains);
 
     // Helper to check if a spot is safe (undefined in dangerMap)
     const isSpotSafe = (x, y) => dangerMap[`${x},${y}`] === undefined;

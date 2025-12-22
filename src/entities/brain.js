@@ -1,4 +1,4 @@
-import { TILE_SIZE, BOMB_TIMER, EXPLOSION_DURATION } from "../constants.js";
+import { TILE_SIZE, BRAIN_TIMER, EXPLOSION_DURATION } from "../constants.js";
 import { getGridPos } from "../utils/grid.js";
 import { destroyBlock } from "./environment.js";
 
@@ -36,7 +36,7 @@ export function placeBrain(player) {
             isKicked: false,
             kickDirection: null,
             kickSpeed: 300,
-            timer: BOMB_TIMER,
+            timer: BRAIN_TIMER,
         },
     ]);
 

@@ -119,6 +119,32 @@ export function initGameScene() {
             }
         });
 
+        // Handle Kick: Player hitting Brain
+        onCollide("player", "brain", (player, brain) => {
+            // Only kick if:
+            // 1. Player has kick powerup
+            // 2. Brain is solid (can't kick if we're standing on it)
+            // 3. Brain is not already moving
+            if (player.canKick && brain.solid && !brain.isKicked) {
+                // Determine direction based on relative position
+                // (Using center positions for accuracy)
+                const dx = brain.pos.x - player.pos.x;
+                const dy = brain.pos.y - player.pos.y;
+
+                // Must be primarily horizontal or vertical
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    // Horizontal
+                    brain.kickDirection = { dx: Math.sign(dx), dy: 0 };
+                } else {
+                    // Vertical
+                    brain.kickDirection = { dx: 0, dy: Math.sign(dy) };
+                }
+
+                brain.isKicked = true;
+                play("kick_sound", { volume: 0.8 });
+            }
+        });
+
         // Handle Powerup collection
         onCollide("player", "powerup", (player, powerup) => {
             if (!player.alive) return;
@@ -172,6 +198,12 @@ export function initGameScene() {
                 if (player.glowCancel) player.glowCancel();
 
                 const glowUpdate = player.onUpdate(() => {
+                    if (!player.alive) {
+                        glowUpdate.cancel();
+                        player.glowCancel = null;
+                        return;
+                    }
+
                     const elapsed = time() - startTime;
                     if (elapsed > glowDuration) {
                         // Reset to normal
@@ -224,6 +256,13 @@ export function initGameScene() {
             if (player.glowCancel) player.glowCancel();
 
             const curseUpdate = player.onUpdate(() => {
+                if (!player.alive) {
+                    curseUpdate.cancel();
+                    player.glowCancel = null;
+                    if (curseText.exists()) destroy(curseText);
+                    return;
+                }
+
                 const elapsed = time() - startTime;
 
                 // Update floating text position

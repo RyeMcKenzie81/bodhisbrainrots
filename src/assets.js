@@ -30,6 +30,12 @@ export function loadAssets() {
     loadSound("callout_2", "/sprites/callout_strawberry.mp3");
     loadSound("callout_3", "/sprites/callout_cappucino.mp3");
 
+    // New Audio Polish sounds
+    loadSound("kick_sound", "/sprites/kick.mp3");
+    loadSound("footsteps", "/sprites/footsteps.mp3");
+    loadSound("win", "/sprites/win.mp3");
+    loadSound("loss", "/sprites/loss.mp3");
+
     // Load animated sprite sheets (4x4 grid: down, up, left, right rows)
     loadSprite("tungtung_anim", "/sprites/tungtung_spritesheet.png", {
         sliceX: 4,

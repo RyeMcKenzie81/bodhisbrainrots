@@ -1,5 +1,15 @@
 export function initGameOverScene() {
     scene("gameover", (winnerName) => {
+        // Play appropriate sound
+        if (winnerName === "Nobody" || winnerName.includes("DRAW")) {
+            play("loss");
+        } else {
+            // If it's singleplayer and the human (P1) won, play win. 
+            // If AI won, might still just play win music or loss? 
+            // For now, simple logic:
+            play("win");
+        }
+
         add([
             sprite("brainboom"),
             pos(width() / 2, 300),

@@ -154,6 +154,22 @@ export function spawnPlayer(playerIndex, characterIndex) {
         }
     });
 
+    // Footstep Sound Logic
+    let stepTimer = 0;
+    const stepInterval = 0.35; // Seconds between steps
+
+    player.onUpdate(() => {
+        if (player.alive && player.isMoving && gameState.gameStarted) {
+            stepTimer -= dt();
+            if (stepTimer <= 0) {
+                play("footsteps", { volume: 0.3, detune: rand(-50, 50) }); // Slight pitch variation
+                stepTimer = stepInterval;
+            }
+        } else {
+            stepTimer = 0; // Reset so it plays immediately on start
+        }
+    });
+
     // Stop walking animation when keys are released
     onKeyRelease(keys.up, () => {
         if (player.alive && player.facing === "up") {
@@ -181,7 +197,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     });
 
     // Brain placement
-    onKeyPress(keys.bomb, () => {
+    onKeyPress(keys.brain, () => {
         if (player.alive && gameState.gameStarted && player.brainsPlaced < player.brainCount) {
             placeBrain(player);
         }
