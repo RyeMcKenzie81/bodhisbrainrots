@@ -30,10 +30,12 @@ bodhisbrainrots/
 
 ## Game Scenes (in order)
 1. **menu** - Title screen, press SPACE to start
-2. **playerCount** - Select 2-4 players with A/D keys
-3. **characterSelect** - SF2-style fighter selection (per player)
-4. **game** - Main gameplay
-5. **gameover** - Winner announcement
+2. **modeSelect** - Choose Single Player or Multiplayer
+3. **difficultySelect** - (Single Player only) Choose difficulty + number of AI opponents
+4. **playerCount** - (Multiplayer only) Select 2-4 players with A/D keys
+5. **characterSelect** - SF2-style fighter selection (per player)
+6. **game** - Main gameplay
+7. **gameover** - Winner announcement
 
 ## Characters (index order matters!)
 | Index | Name | Controls (as Player N) |
@@ -54,6 +56,8 @@ EXPLOSION_DURATION = 0.6 seconds
 
 ## Current Features
 - [x] 2-4 player local multiplayer
+- [x] **1-Player mode with AI opponents (1-3 CPUs)**
+- [x] **3 difficulty levels: Easy, Medium, Hard**
 - [x] Character selection screen (SF2 style)
 - [x] Player count selection
 - [x] Custom character sprites with front/back views
@@ -61,12 +65,19 @@ EXPLOSION_DURATION = 0.6 seconds
 - [x] Explosion effects with custom sprite
 - [x] Destructible wood blocks / indestructible diamond blocks
 - [x] Power-ups: +Bomb, +Fire range, +Speed (with sprites & animations)
+- [x] **Kick powerup** - Lets you kick bombs across the arena!
+- [x] **Skull curse powerup** - Random debuffs (slow, no bombs, short fuse, reversed controls)
 - [x] Lane-locked movement (classic Bomberman style)
 - [x] Bombs block movement (with escape grace period)
 - [x] Background music (game + character select)
 - [x] Sound effects (explosions, death, powerups, character callouts)
 - [x] Player glow effect when collecting powerups
 - [x] Dead players removed from map
+- [x] **Countdown timer (3, 2, 1, GO!)** at game start
+- [x] **2-minute match timer** with speedup music in final 30 seconds
+- [x] **Screen shake** on explosions
+- [x] **Player name tags** above characters (P1, P2, CPU, etc.)
+- [x] **Stats HUD** showing each player's bomb/fire/speed stats
 
 ## Key Implementation Details
 
@@ -88,10 +99,51 @@ Players spawn at corners based on `START_POSITIONS` array. The `spawnPlayer(play
 ### Game Configuration
 ```javascript
 gameConfig = {
+  mode: "singleplayer" | "multiplayer",
   playerCount: 2-4,
-  playerCharacters: [charIndex, charIndex, ...] // in player order
+  playerCharacters: [charIndex, charIndex, ...], // in player order
+  difficulty: "easy" | "medium" | "hard" // only for singleplayer
 }
 ```
+
+### AI System (Single Player Mode)
+- **Easy**: 400ms reaction time, 30% random movement, 90% flee chance, 25% bomb chance
+- **Medium**: 200ms reaction time, 15% random movement, 95% flee chance, 40% bomb chance
+- **Hard**: 100ms reaction time, 5% random movement, 99% flee chance, 60% bomb chance
+
+AI Decision Priority:
+1. **Escape danger** - Flee from bomb explosion paths (forced for 2s after placing bomb)
+2. **Get powerups** - Collect nearby powerups (within 4 tiles)
+3. **Hunt player** - Chase human player (Medium/Hard only)
+4. **Destroy blocks** - Place bombs near destructible blocks
+5. **Wander** - Random safe movement
+
+Key AI functions in main.js:
+- `spawnAIPlayer(playerIndex, characterIndex, difficulty)` - Creates AI player
+- `makeAIDecision(ai)` - Returns action/target/direction
+- `findPath(startX, startY, targetX, targetY)` - BFS pathfinding
+- `getExplosionDangerZones()` - Returns all tiles that will explode
+- `canEscapeAfterBomb(ai, gridX, gridY)` - Checks escape route before bombing
+
+### Match Timer System
+- 2-minute matches (120 seconds)
+- Timer display at top center of screen
+- At 30 seconds: Timer turns orange, music starts speeding up
+- At 10 seconds: Timer turns red and enlarges
+- Music speed: 1.0x at 30s → 1.5x at 0s (gradual increase)
+- Time's up: Game ends, most surviving players = draw
+
+### Powerup System
+| Powerup | Spawn Weight | Effect |
+|---------|--------------|--------|
+| Bomb (+1) | 30% | Increase max bombs |
+| Fire (+1) | 30% | Increase explosion range |
+| Speed (+40) | 25% | Increase movement speed |
+| **Kick** | 10% | Can kick bombs by walking into them |
+| **Skull** | 5% | Random curse (slow, -bomb, -fire, reversed controls) |
+
+Kick bombs slide until hitting a wall, block, or another bomb.
+Skull curses last 3 seconds with purple flashing effect.
 
 ## Running the Game
 ```bash
@@ -107,5 +159,13 @@ New images from `/Users/ryemckenzie/Downloads/brainrots/`:
 2. Convert with ImageMagick: `magick input.jpeg -fuzz 10% -transparent white output.png`
 3. Load in main.js: `loadSprite("name", "/sprites/output.png")`
 
-## Next Feature: AI Players (1-Player Mode)
-See PROMPT_AI_PLAYERS.md for implementation prompt.
+## Completed: AI Players (1-Player Mode)
+The AI opponent system has been implemented. See PROMPT_AI_PLAYERS.md for the original spec.
+
+## Planned Future Features
+- [ ] **Walking animations** - Needs animated sprite sheets for each character
+- [ ] **Player registration** - Name input, localStorage or backend storage
+- [ ] **Networked multiplayer** - Play on different devices (requires backend + WebSockets)
+- [ ] **More maps** - Different arena layouts
+- [ ] **Character abilities** - Unique skills per character
+- [ ] **Sudden death** - Shrinking arena when time runs low
