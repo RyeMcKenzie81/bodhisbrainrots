@@ -198,11 +198,23 @@ function startGameLoop(room) {
     broadcastToRoom(room, { type: 'game_start' });
 
     room.interval = setInterval(() => {
-        // Run Physics Tick
-        // Interval is in ms, we need seconds for dt
-        tick(room.state, TICK_INTERVAL / 1000);
+        const dt = TICK_RATE / 1000;
+        tick(room.state, dt);
 
-        // Broadcast Snapshot
+        // Stop loop if game is over
+        if (room.state.gameOver) {
+            console.log(`Game Over in room ${room.id}. Stopping game loop.`);
+            clearInterval(room.interval);
+            room.interval = null; // Indicate that the loop is no longer active
+            // Optionally, broadcast a game over message
+            broadcastToRoom(room, {
+                type: 'game_over',
+                winner: room.state.winner // Assuming state has a winner property
+            });
+            return; // Exit the interval callback
+        }
+
+        // Broadcast state to all clients
         broadcastToRoom(room, {
             type: 'snapshot',
             state: room.state,

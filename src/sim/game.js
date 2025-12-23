@@ -53,10 +53,9 @@ function applyPowerup(player, type) {
             player.fireRange++;
             break;
         case "speed":
-            // Speed is handled client-side based on player.speed
-            // For now, just track that they have it
-            if (!player.powerups) player.powerups = [];
-            player.powerups.push("speed");
+            // Increase speed level (each level = 20% faster)
+            if (!player.speedLevel) player.speedLevel = 0;
+            player.speedLevel++;
             break;
         case "kick":
             // TODO: Implement kicking mechanics
@@ -80,7 +79,9 @@ export function tick(state, dt) {
         if (!player.alive) return;
 
         if (player.intent && (player.intent.dx !== 0 || player.intent.dy !== 0)) {
-            const moveAmt = SIM_CONSTANTS.PLAYER_SPEED * dt;
+            // Apply speed multiplier (20% per speed powerup)
+            const speedMultiplier = 1 + (player.speedLevel || 0) * 0.2;
+            const moveAmt = SIM_CONSTANTS.PLAYER_SPEED * speedMultiplier * dt;
             let newX = player.pos.x + player.intent.dx * moveAmt;
             let newY = player.pos.y + player.intent.dy * moveAmt;
 
@@ -152,7 +153,18 @@ export function tick(state, dt) {
     // Remove collected powerups
     state.powerups = state.powerups.filter(p => !p.collected);
 
-    // 5. Tick Explosions
+    // 5. Check Game Over Condition
+    if (!state.gameOver) {
+        const alivePlayers = state.players.filter(p => p.alive);
+
+        if (alivePlayers.length <= 1) {
+            state.gameOver = true;
+            state.winner = alivePlayers.length === 1 ? alivePlayers[0].id : null;
+            console.log(`[SERVER] Game Over! Winner: ${state.winner || 'No one (tie)'}`);
+        }
+    }
+
+    // 6. Tick Explosions
     // (TODO: Implement explosion duration and removal)
 }
 

@@ -97,211 +97,242 @@ export function initOnlineGameScene() {
 
         // Initial Grid Render (empty initially, wait for snapshot)
 
-        socket.on("snapshot", (data) => {
-            const state = data.state;
+        ws.addEventListener("message", (event) => {
+            const msg = JSON.parse(event.data);
 
-            console.log("[DEBUG] Snapshot received - Grid:", state.grid?.length, "Players:", state.players?.length, "Brains:", state.brains?.length);
+            if (msg.type === "snapshot") {
+                const state = msg.state;
 
-            // A. Render Grid - Only when it changes
-            const gridHash = JSON.stringify(state.grid);
-            if (!window.lastGridHash || window.lastGridHash !== gridHash) {
-                console.log("[DEBUG] Grid changed - re-rendering");
-                window.lastGridHash = gridHash;
-                renderGrid(state.grid);
-            }
+                // Play background music on first snapshot
+                if (!window.musicStarted) {
+                    play("music", { loop: true, volume: 0.5 });
+                    window.musicStarted = true;
+                }
 
-            // B. Sync Players
-            state.players.forEach(pState => {
-                if (!pState.alive) {
-                    if (playerMap.has(pState.id)) {
-                        destroy(playerMap.get(pState.id));
-                        playerMap.delete(pState.id);
-                        play("die");
-                    }
+                console.log("[DEBUG] Snapshot received - Grid:", state.grid?.length, "Players:", state.players?.length, "Brains:", state.brains?.length);
+
+                // Check for game over
+                if (state.gameOver) {
+                    console.log("[CLIENT] Game Over detected - Winner:", state.winner);
+                    const winnerPlayer = state.players.find(p => p.id === state.winner);
+                    go("gameover", {
+                        winner: winnerPlayer ? winnerPlayer.id : "No one",
+                        isMultiplayer: true
+                    });
                     return;
                 }
 
-                let pObj = playerMap.get(pState.id);
-                if (!pObj) {
-                    // Create new player sprite with animation
-                    const lobbyPlayer = players.find(lp => lp.id === pState.id);
-                    const charIdx = 0; // TODO: Pass char index in spawn info
-
-                    pObj = add([
-                        sprite(PLAYERS[charIdx].spriteAnim, { anim: "idle_down" }),
-                        pos(pState.pos.x, pState.pos.y),
-                        anchor("center"),
-                        scale(0.25), // Match local game scale exactly
-                        z(10),
-                        { characterIndex: charIdx, prevFacing: "down", prevMoving: false }
-                    ]);
-                    playerMap.set(pState.id, pObj);
+                // A. Render Grid - Only when it changes
+                const gridHash = JSON.stringify(state.grid);
+                if (!window.lastGridHash || window.lastGridHash !== gridHash) {
+                    console.log("[DEBUG] Grid changed - re-rendering");
+                    window.lastGridHash = gridHash;
+                    renderGrid(state.grid);
                 }
 
-                // Update Position
-                pObj.pos.x = pState.pos.x;
-                pObj.pos.y = pState.pos.y;
-
-                // Update z-order based on y position (so player renders correctly behind/in front of blocks)
-                pObj.z = Math.floor(pState.pos.y / SIM_CONSTANTS.TILE_SIZE);
-
-                // Update Animation based on movement state
-                const isMoving = pState.isMoving || false;
-                const facing = pState.facing || "down";
-
-                // Only change animation if state changed
-                if (isMoving !== pObj.prevMoving || facing !== pObj.prevFacing) {
-                    const animName = isMoving ? `walk_${facing}` : `idle_${facing}`;
-                    try {
-                        pObj.play(animName);
-                    } catch (e) {
-                        // Animation might not exist, ignore
+                // B. Sync Players
+                state.players.forEach(pState => {
+                    // Handle dead players - destroy sprite and play death sound
+                    if (!pState.alive) {
+                        if (playerMap.has(pState.id)) {
+                            destroy(playerMap.get(pState.id));
+                            playerMap.delete(pState.id);
+                            play("die");
+                        }
+                        return;
                     }
-                    pObj.prevMoving = isMoving;
-                    pObj.prevFacing = facing;
-                }
-            });
 
-            // C. Sync Brains
-            // Remove missing
-            brainMap.forEach((obj, id) => {
-                if (!state.brains.find(b => b.id === id)) {
-                    destroy(obj);
-                    brainMap.delete(id);
-                }
-            });
-
-            // Add/Update
-            state.brains.forEach(b => {
-                if (!brainMap.has(b.id)) {
-                    const obj = add([
-                        sprite("brainbomb"),
-                        pos(b.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, b.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
-                        anchor("center"),
-                        scale(0.05),
-                        { timer: 0 } // Visual timer
-                    ]);
-
-                    // Pulse animation
-                    obj.onUpdate(() => {
-                        obj.timer += dt();
-                        const scaleMod = 0.05 + Math.sin(obj.timer * 10) * 0.005;
-                        obj.scale = vec2(scaleMod);
-                    });
-
-                    brainMap.set(b.id, obj);
-                    play("bomb1");
-                }
-            });
-
-            // D. Render Powerups
-            if (!window.powerupMap) window.powerupMap = new Map();
-            const powerupMap = window.powerupMap;
-
-            // Remove collected powerups
-            powerupMap.forEach((pObj, pid) => {
-                const pState = state.powerups?.find(p => p.id === pid);
-                if (!pState) {
-                    destroy(pObj);
-                    powerupMap.delete(pid);
-                }
-            });
-
-            // Add new powerups
-            state.powerups?.forEach(pState => {
-                let pObj = powerupMap.get(pState.id);
-                if (!pObj) {
-                    const powerupSprites = {
-                        brain: "powerup_bomb",
-                        fire: "powerup_fire",
-                        speed: "powerup_speed"
-                    };
-
-                    const sprName = powerupSprites[pState.type];
-                    if (sprName) {
-                        const baseScale = (SIM_CONSTANTS.TILE_SIZE * 0.63) / 500;
-                        const baseY = pState.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
+                    let pObj = playerMap.get(pState.id);
+                    if (!pObj) {
+                        // Create new player sprite with animation
+                        const lobbyPlayer = players.find(lp => lp.id === pState.id);
+                        const charIdx = 0; // TODO: Pass char index in spawn info
 
                         pObj = add([
-                            sprite(sprName),
-                            pos(pState.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, baseY),
+                            sprite(PLAYERS[charIdx].spriteAnim, { anim: "idle_down" }),
+                            pos(pState.pos.x, pState.pos.y),
                             anchor("center"),
-                            scale(baseScale),
-                            opacity(1),
-                            z(pState.gridY),
-                            { baseY, jiggleOffset: Math.random() * Math.PI * 2 }
+                            scale(0.25), // Match local game scale exactly
+                            z(10),
+                            { characterIndex: charIdx, prevFacing: "down", prevMoving: false }
+                        ]);
+                        playerMap.set(pState.id, pObj);
+                    }
+
+                    // Update Position
+                    pObj.pos.x = pState.pos.x;
+                    pObj.pos.y = pState.pos.y;
+
+                    // Update z-order based on y position (so player renders correctly behind/in front of blocks)
+                    pObj.z = Math.floor(pState.pos.y / SIM_CONSTANTS.TILE_SIZE);
+
+                    // Update Animation based on movement state
+                    const isMoving = pState.isMoving || false;
+                    const facing = pState.facing || "down";
+
+                    // Only change animation if state changed
+                    if (isMoving !== pObj.prevMoving || facing !== pObj.prevFacing) {
+                        const animName = isMoving ? `walk_${facing}` : `idle_${facing}`;
+                        try {
+                            pObj.play(animName);
+                        } catch (e) {
+                            // Animation might not exist, ignore
+                        }
+                        pObj.prevMoving = isMoving;
+                        pObj.prevFacing = facing;
+                    }
+                });
+
+                // C. Sync Brains
+                // Remove missing
+                brainMap.forEach((obj, id) => {
+                    if (!state.brains.find(b => b.id === id)) {
+                        destroy(obj);
+                        brainMap.delete(id);
+                    }
+                });
+
+                // Add/Update
+                state.brains.forEach(b => {
+                    if (!brainMap.has(b.id)) {
+                        const obj = add([
+                            sprite("brainbomb"),
+                            pos(b.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, b.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
+                            anchor("center"),
+                            scale(0.05),
+                            { timer: 0 } // Visual timer
                         ]);
 
-                        // Bounce animation
-                        pObj.onUpdate(() => {
-                            const t = time() * 5 + pObj.jiggleOffset;
-                            pObj.pos.y = pObj.baseY + Math.sin(t) * 3;
+                        // Pulse animation
+                        obj.onUpdate(() => {
+                            obj.timer += dt();
+                            const scaleMod = 0.05 + Math.sin(obj.timer * 10) * 0.005;
+                            obj.scale = vec2(scaleMod);
                         });
 
-                        powerupMap.set(pState.id, pObj);
+                        brainMap.set(b.id, obj);
+                        play("bomb1");
                     }
+                });
+
+                // D. Render Powerups
+                if (!window.powerupMap) window.powerupMap = new Map();
+                const powerupMap = window.powerupMap;
+
+                // Remove collected powerups
+                powerupMap.forEach((pObj, pid) => {
+                    const pState = state.powerups?.find(p => p.id === pid);
+                    if (!pState) {
+                        destroy(pObj);
+                        powerupMap.delete(pid);
+                    }
+                });
+
+                // Add new powerups
+                state.powerups?.forEach(pState => {
+                    let pObj = powerupMap.get(pState.id);
+                    if (!pObj) {
+                        const powerupSprites = {
+                            brain: "powerup_bomb",
+                            fire: "powerup_fire",
+                            speed: "powerup_speed"
+                        };
+
+                        const sprName = powerupSprites[pState.type];
+                        if (sprName) {
+                            const baseScale = (SIM_CONSTANTS.TILE_SIZE * 0.63) / 500;
+                            const baseY = pState.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
+
+                            pObj = add([
+                                sprite(sprName),
+                                pos(pState.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, baseY),
+                                anchor("center"),
+                                scale(baseScale),
+                                opacity(1),
+                                z(pState.gridY),
+                                { baseY, jiggleOffset: Math.random() * Math.PI * 2 }
+                            ]);
+
+                            // Bounce animation
+                            pObj.onUpdate(() => {
+                                const t = time() * 5 + pObj.jiggleOffset;
+                                pObj.pos.y = pObj.baseY + Math.sin(t) * 3;
+                            });
+
+                            powerupMap.set(pState.id, pObj);
+                        }
+                    }
+                });
+
+                // Detect powerup collection by checking for removed powerups
+                if (window.lastPowerupCount && state.powerups.length < window.lastPowerupCount) {
+                    play("powerup");
                 }
-            });
+                window.lastPowerupCount = state.powerups?.length || 0;
 
-            // E. Explosions (Transient)
-            // Track which explosions we've already rendered to prevent duplicates
-            if (!window.renderedExplosions) {
-                window.renderedExplosions = new Set();
-            }
+                // E. Explosions (Transient)
+                // Track which explosions we've already rendered to prevent duplicates
+                if (!window.renderedExplosions) {
+                    window.renderedExplosions = new Set();
+                }
 
-            state.explosions.forEach(exp => {
-                // Create unique ID for this explosion
-                const expId = `${exp.x}_${exp.y}_${Math.floor(exp.timestamp * 1000)}`;
+                state.explosions.forEach(exp => {
+                    // Create unique ID for this explosion
+                    const expId = `${exp.x}_${exp.y}_${Math.floor(exp.timestamp * 1000)}`;
 
-                if (!window.renderedExplosions.has(expId)) {
-                    window.renderedExplosions.add(expId);
+                    if (!window.renderedExplosions.has(expId)) {
+                        window.renderedExplosions.add(expId);
 
-                    console.log("[DEBUG] Explosion cells:", exp.cells?.length || 0, "cells");
+                        console.log("[DEBUG] Explosion cells:", exp.cells?.length || 0, "cells");
 
-                    // Render flame sprite at each affected cell
-                    if (exp.cells && exp.cells.length > 0) {
-                        exp.cells.forEach(cell => {
+                        // Play explosion sound and shake
+                        play("bomb2");
+                        shake(4);
+
+                        // Render flame sprite at each affected cell
+                        if (exp.cells && exp.cells.length > 0) {
+                            exp.cells.forEach(cell => {
+                                const flame = add([
+                                    sprite("brainboom"),
+                                    pos(cell.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
+                                        cell.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
+                                    anchor("center"),
+                                    scale(0.07), // Match local game
+                                    opacity(1),
+                                    z(15) // High z-index like local game
+                                ]);
+
+                                // Fade out animation
+                                flame.onUpdate(() => {
+                                    flame.opacity -= dt() * 1.5;
+                                    if (flame.opacity <= 0) destroy(flame);
+                                });
+                            });
+                        } else {
+                            // Fallback for old explosion format (just center)
                             const flame = add([
                                 sprite("brainboom"),
-                                pos(cell.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
-                                    cell.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
+                                pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
+                                    exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
                                 anchor("center"),
                                 scale(0.07), // Match local game
                                 opacity(1),
-                                z(15) // High z-index like local game
+                                z(15)
                             ]);
 
-                            // Fade out animation
                             flame.onUpdate(() => {
                                 flame.opacity -= dt() * 1.5;
                                 if (flame.opacity <= 0) destroy(flame);
                             });
-                        });
-                    } else {
-                        // Fallback for old explosion format (just center)
-                        const flame = add([
-                            sprite("brainboom"),
-                            pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
-                                exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
-                            anchor("center"),
-                            scale(0.07), // Match local game
-                            opacity(1),
-                            z(15)
-                        ]);
+                        }
 
-                        flame.onUpdate(() => {
-                            flame.opacity -= dt() * 1.5;
-                            if (flame.opacity <= 0) destroy(flame);
-                        });
+                        play("bomb2");
+                        shake(8);
+
+                        // Don't clean up - explosion should only render once EVER
                     }
-
-                    play("bomb2");
-                    shake(8);
-
-                    // Don't clean up - explosion should only render once EVER
-                }
+                });
             });
-        });
 
         // 3. Input Loop
         onUpdate(() => {
