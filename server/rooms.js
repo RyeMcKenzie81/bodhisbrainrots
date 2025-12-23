@@ -121,7 +121,7 @@ export function handleConnection(ws) {
                     const room = rooms.get(currentRoomId);
                     const player = room.players.find(p => p.id === playerId);
                     if (player) {
-                        player.characterIndex = msg.characterIndex;
+                        player.characterIndex = data.characterIndex;
                         broadcastToRoom(room, {
                             type: 'player_updated',
                             player: player
