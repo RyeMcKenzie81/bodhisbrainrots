@@ -71,7 +71,7 @@ export function initOnlineGameScene() {
                                 sprite(decoration),
                                 pos(posX, posY),
                                 anchor("center"),
-                                scale(0.12),
+                                color(80, 80, 100),
                                 z(y),
                             ]));
                         } else {
