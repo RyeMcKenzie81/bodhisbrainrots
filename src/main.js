@@ -17,7 +17,7 @@ const k = kaboom({
     background: [30, 30, 50],
     // scale: 1,
     debug: true,
-    letterbox: true,
+    letterbox: false, // Disable built-in scaler, using manual fitCanvas below
     touchToMouse: true,
     pixelDensity: 1,
 });
