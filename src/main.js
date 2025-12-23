@@ -39,11 +39,32 @@ const k = kaboom({
     width: 960,
     height: 744,
     background: [30, 30, 50],
-    // scale: 1, // REMOVE scale completely to let letterbox handle it
+    scale: 1,
     debug: true,
-    letterbox: true, // Maintain aspect ratio with black bars
-    touchToMouse: true, // Maps touch events to mouse events
+    letterbox: true,
+    touchToMouse: true,
+    pixelDensity: 1, // Disable retina scaling to simplify mobile mobile dims
 });
+
+// RESIZE HANDLER
+// Force canvas buffer to match window size exactly so letterboxing works
+function syncCanvasSize() {
+    const canvas = document.querySelector("canvas");
+    if (canvas) {
+        // Force buffer to match the reported window size (handling toolbar shifts)
+        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+    }
+}
+
+// Sync on specific events
+window.addEventListener("resize", syncCanvasSize);
+window.addEventListener("orientationchange", () => setTimeout(syncCanvasSize, 500));
+// Also sync periodically to catch browser UI shifting (address bar showing/hiding)
+setInterval(syncCanvasSize, 1000); // Check every second
+syncCanvasSize();
 
 // Load all assets
 loadAssets();
