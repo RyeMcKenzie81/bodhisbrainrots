@@ -205,15 +205,33 @@ export function initOnlineGameScene() {
                 if (!window.renderedExplosions.has(expId)) {
                     window.renderedExplosions.add(expId);
 
-                    // Spawn visual explosion
-                    add([
-                        sprite("brainboom"),
-                        pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
-                        anchor("center"),
-                        scale(0.25),
-                        lifespan(0.5)
-                    ]);
+                    // Render flame sprite at each affected cell
+                    if (exp.cells && exp.cells.length > 0) {
+                        exp.cells.forEach(cell => {
+                            add([
+                                sprite("brainboom"),
+                                pos(cell.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
+                                    cell.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
+                                anchor("center"),
+                                scale(0.25),
+                                lifespan(0.5),
+                                z(cell.y)
+                            ]);
+                        });
+                    } else {
+                        // Fallback for old explosion format (just center)
+                        add([
+                            sprite("brainboom"),
+                            pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
+                                exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
+                            anchor("center"),
+                            scale(0.25),
+                            lifespan(0.5)
+                        ]);
+                    }
+
                     play("bomb2");
+                    shake(8);
 
                     // Don't clean up - explosion should only render once EVER
                 }
