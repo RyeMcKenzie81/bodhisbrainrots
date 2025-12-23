@@ -31,36 +31,11 @@ const k = kaboom({
     width: 960,
     height: 744,
     background: [30, 30, 50],
-    scale: 1, // Standard scale, let browser resize the canvas element
+    // scale: 1, // REMOVE scale completely to let letterbox handle it
     debug: true,
     letterbox: true, // Maintain aspect ratio with black bars
     touchToMouse: true, // Maps touch events to mouse events
 });
-
-// FORCE CANVAS SCALING FOR MOBILE
-// Kaboom sometimes sets explicit pixel width/height on the canvas styled
-// We want to override this to ensure it fits the window.
-function resizeCanvas() {
-    const canvas = document.querySelector("canvas");
-    if (canvas) {
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.maxWidth = "100vw";
-        canvas.style.maxHeight = "100vh";
-        canvas.style.objectFit = "contain";
-        canvas.style.position = "absolute";
-        canvas.style.top = "50%";
-        canvas.style.left = "50%";
-        canvas.style.transform = "translate(-50%, -50%)";
-    }
-}
-
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("load", resizeCanvas);
-// Call repeatedly for safety during load
-setTimeout(resizeCanvas, 100);
-setTimeout(resizeCanvas, 500);
-setTimeout(resizeCanvas, 2000);
 
 // Load all assets
 loadAssets();
