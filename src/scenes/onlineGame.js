@@ -224,7 +224,7 @@ export function initOnlineGameScene() {
                             pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
                                 exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
                             anchor("center"),
-                            scale(0.25),
+                            scale(0.12), // Smaller so flames don't overlap
                             lifespan(0.5)
                         ]);
                     }
