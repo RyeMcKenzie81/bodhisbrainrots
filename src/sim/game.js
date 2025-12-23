@@ -156,8 +156,12 @@ export function tick(state, dt) {
     // 5. Check Game Over Condition
     if (!state.gameOver) {
         const alivePlayers = state.players.filter(p => p.alive);
+        const totalPlayers = state.players.length;
 
-        if (alivePlayers.length <= 1) {
+        // Only trigger game over if:
+        // - Multiple players started AND only 1 or 0 left alive
+        // - OR all players are dead (solo player died)
+        if ((totalPlayers > 1 && alivePlayers.length <= 1) || alivePlayers.length === 0) {
             state.gameOver = true;
             state.winner = alivePlayers.length === 1 ? alivePlayers[0].id : null;
             console.log(`[SERVER] Game Over! Winner: ${state.winner || 'No one (tie)'}`);
