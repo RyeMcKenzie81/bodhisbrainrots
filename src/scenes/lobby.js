@@ -126,11 +126,13 @@ export function initLobbyScene() {
         };
 
         const handleRoomJoined = (data) => {
+            console.log("[DEBUG] room_joined event received:", data);
             roomCodeText.text = `ROOM CODE: ${data.roomId}`;
             roomId = data.roomId;
             myPlayerId = data.playerId;
             isHost = false;
             players = data.players;
+            console.log("[DEBUG] Setting players array to:", players);
             renderPlayers();
         };
 
