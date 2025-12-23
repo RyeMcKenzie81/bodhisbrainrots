@@ -637,8 +637,13 @@ export function initMenuScenes() {
     // Scene: Character Select
     scene("characterSelect", ({ currentPlayer }) => {
         if (currentPlayer === 0) {
-            if (selectMusicHandle) selectMusicHandle.stop();
-            selectMusicHandle = play("selectmusic", { loop: true, volume: 0.5 });
+            if (selectMusicHandle && selectMusicHandle.stop) selectMusicHandle.stop();
+            const music = play("selectmusic", { loop: true, volume: 0.5 });
+            if (music && music.stop) {
+                selectMusicHandle = music;
+            } else {
+                selectMusicHandle = null;
+            }
         }
 
         let selectedChar = 0;
@@ -929,7 +934,7 @@ export function initMenuScenes() {
                         const randomIndex = Math.floor(Math.random() * availableChars.length);
                         gameConfig.playerCharacters.push(availableChars.splice(randomIndex, 1)[0]);
                     }
-                    if (selectMusicHandle) {
+                    if (selectMusicHandle && selectMusicHandle.stop) {
                         selectMusicHandle.stop();
                         selectMusicHandle = null;
                     }
@@ -937,7 +942,7 @@ export function initMenuScenes() {
                 } else if (currentPlayer + 1 < gameConfig.playerCount) {
                     go("characterSelect", { currentPlayer: currentPlayer + 1 });
                 } else {
-                    if (selectMusicHandle) {
+                    if (selectMusicHandle && selectMusicHandle.stop) {
                         selectMusicHandle.stop();
                         selectMusicHandle = null;
                     }
@@ -947,7 +952,7 @@ export function initMenuScenes() {
         }
 
         onKeyPress("escape", () => {
-            if (selectMusicHandle) {
+            if (selectMusicHandle && selectMusicHandle.stop) {
                 selectMusicHandle.stop();
                 selectMusicHandle = null;
             }
