@@ -321,65 +321,17 @@ export function initGameScene() {
 
         // ============ MOBILE CONTROLS ============
         // Add D-pad and Action button if on touch device (or always for now)
+        // Create native touch overlay for robust multi-touch
         function createTouchControls() {
-            const dpadRadius = 25;
+            const canvas = document.querySelector("canvas");
+            if (!canvas) return;
+
+            // Define button zones in GAME coordinates (960x744)
             const dpadBaseX = 80;
             const dpadBaseY = height() - 80;
-            const btnColor = rgb(255, 255, 255);
-            const btnOpacity = 0.3;
+            const btnRadius = 25;
 
-            // Helper to create button
-            function createBtn(x, y, txt, onPress, onRelease) {
-                const btn = add([
-                    circle(dpadRadius),
-                    pos(x, y),
-                    anchor("center"),
-                    color(btnColor),
-                    opacity(btnOpacity),
-                    fixed(),
-                    z(200),
-                    area(),
-                ]);
-
-                add([
-                    text(txt, { size: 24 }),
-                    pos(x, y),
-                    anchor("center"),
-                    color(0, 0, 0),
-                    opacity(0.5),
-                    fixed(),
-                    z(201),
-                ]);
-
-                // Touch events
-                btn.onUpdate(() => {
-                    if (btn.isHovering() && isMouseDown()) {
-                        btn.opacity = 0.6;
-                        onPress(); // Repeatedly call press (good for movement)
-                    } else {
-                        btn.opacity = btnOpacity;
-                        // Release is harder to track perfectly in loop without state, 
-                        // relying on player logic to stop when not pressed.
-                        // Actually, our player logic requires a "release" call to stop animation.
-                    }
-                });
-
-                // Better way: defined press/release events if kaboom supports them well for touch
-                // Using generic mouse/touch events
-                btn.onClick(() => { }); // Just to capture click
-
-                // Hacky continuous press:
-                // We really need 'touch start' and 'touch end'. 
-                // Kaboom's `onHover` + `isMouseDown` is close for mouse.
-                // For multitouch, pure Kaboom might be tricky without a plugin.
-                // But let's try basic pointer logic.
-            }
-
-            // Since Kaboom native multitouch UI is tricky, let's use a simpler "Click" approach 
-            // where holding down buttons works.
-            // We need to inject logic into the update loop for the local player.
-
-            // Re-implementing D-Pad logic:
+            // Visual Buttons (just for rendering)
             const dPad = add([
                 pos(dpadBaseX, dpadBaseY),
                 fixed(),
@@ -393,70 +345,144 @@ export function initGameScene() {
                 { dir: "right", x: 40, y: 0, txt: "D" },
             ];
 
+            // Render D-Pad
             buttons.forEach(b => {
-                const btn = dPad.add([
+                b.vis = dPad.add([
                     circle(22),
                     pos(b.x, b.y),
                     anchor("center"),
                     color(255, 255, 255),
                     opacity(0.2),
-                    area(),
-                    { dir: b.dir }
+                    fixed(),
                 ]);
-
-                // Logic: check every frame if this button is being touched
-                btn.onUpdate(() => {
-                    // With 'touchToMouse', only one touch is tracked as mouse.
-                    // This is bad for D-Pad + Bomb.
-                    // BUT for MVP, user can tap bomb or tap move.
-                    // If 'touchToMouse: true' is on, isHovering() works for single touch.
-                    // If localPlayer exists...
-                    if (!localPlayer) return;
-
-                    if (btn.isHovering() && isMouseDown()) {
-                        btn.opacity = 0.5;
-                        // Trigger press
-                        const method = "press" + b.dir.charAt(0).toUpperCase() + b.dir.slice(1);
-                        if (localPlayer[method]) localPlayer[method]();
-                    } else {
-                        btn.opacity = 0.2;
-                        // Trigger release - verify if we need to release explicitly
-                        // Our player logic stops moving if we stop calling press? 
-                        // No, player logic has "isMoving = true" on press, and "isMoving = false" on RELEASE.
-                        // So we MUST call release when not touching.
-                        const method = "release" + b.dir.charAt(0).toUpperCase() + b.dir.slice(1);
-                        // Only release if we were previously moving in this dir? 
-                        // Simplest: Always call release if not pressed? Might spam.
-                        // Better: Helper in player.js could start/stop.
-                        if (localPlayer[method]) localPlayer[method]();
-                    }
-                });
+                dPad.add([
+                    text(b.txt, { size: 24 }),
+                    pos(b.x, b.y),
+                    anchor("center"),
+                    opacity(0.5),
+                    fixed(),
+                ]);
             });
 
-            // Action Button (Bomb)
+            // Render Action Button
+            const actionBtnX = width() - 80;
+            const actionBtnY = height() - 80;
+            const actionBtnRadius = 35;
             const actionBtn = add([
-                circle(35),
-                pos(width() - 80, height() - 80),
+                circle(actionBtnRadius),
+                pos(actionBtnX, actionBtnY),
                 anchor("center"),
                 color(255, 50, 50),
                 opacity(0.4),
                 fixed(),
                 z(200),
-                area(),
-                "actionBtn"
             ]);
 
-            actionBtn.onClick(() => {
-                if (localPlayer && localPlayer.dropBomb) localPlayer.dropBomb();
-            });
-            // Also allow hold for spamming?
-            actionBtn.onUpdate(() => {
-                if (actionBtn.isHovering() && isMouseDown()) {
-                    actionBtn.opacity = 0.7;
-                } else {
-                    actionBtn.opacity = 0.4;
+            // Track active touches
+            const activeTouches = new Map(); // identifier -> buttonId
+
+            // Helper to get game coordinates from touch event
+            function getGamePos(touch) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = 960 / rect.width;
+                const scaleY = 744 / rect.height;
+                return {
+                    x: (touch.clientX - rect.left) * scaleX,
+                    y: (touch.clientY - rect.top) * scaleY
+                };
+            }
+
+            // Handler logic
+            function handleTouch(touch, isEnd = false) {
+                if (!localPlayer) return;
+
+                const pos = getGamePos(touch);
+                let hitButton = null;
+
+                // Check D-Pad
+                buttons.forEach(b => {
+                    const bx = dpadBaseX + b.x;
+                    const by = dpadBaseY + b.y;
+                    const dist = Math.sqrt((pos.x - bx) ** 2 + (pos.y - by) ** 2);
+                    if (dist < 40) { // Generous hit area
+                        hitButton = b.dir;
+                    }
+                });
+
+                // Check Action Button
+                const distAction = Math.sqrt((pos.x - actionBtnX) ** 2 + (pos.y - actionBtnY) ** 2);
+                if (distAction < 50) {
+                    hitButton = "action";
                 }
-            });
+
+                // If this touch was previously holding a button, release it if it moved off
+                const prevButton = activeTouches.get(touch.identifier);
+
+                if (isEnd || (hitButton !== prevButton)) {
+                    if (prevButton) {
+                        // Release previous
+                        if (prevButton === "action") {
+                            actionBtn.opacity = 0.4;
+                        } else {
+                            const btnObj = buttons.find(b => b.dir === prevButton);
+                            if (btnObj) {
+                                btnObj.vis.opacity = 0.2;
+                                const method = "release" + prevButton.charAt(0).toUpperCase() + prevButton.slice(1);
+                                if (localPlayer[method]) localPlayer[method]();
+                            }
+                        }
+                    }
+                }
+
+                // Press new button
+                if (!isEnd && hitButton) {
+                    activeTouches.set(touch.identifier, hitButton);
+
+                    if (hitButton === "action") {
+                        actionBtn.opacity = 0.7;
+                        // Single trigger on press? Or continuous?
+                        // For bomb, usually one drop per press.
+                        if (hitButton !== prevButton) {
+                            if (localPlayer.dropBomb) localPlayer.dropBomb();
+                        }
+                    } else {
+                        const btnObj = buttons.find(b => b.dir === hitButton);
+                        if (btnObj) {
+                            btnObj.vis.opacity = 0.6;
+                            const method = "press" + hitButton.charAt(0).toUpperCase() + hitButton.slice(1);
+                            if (localPlayer[method]) localPlayer[method]();
+                        }
+                    }
+                } else if (isEnd) {
+                    activeTouches.delete(touch.identifier);
+                } else {
+                    // Touch remains but not on any button
+                    activeTouches.set(touch.identifier, null);
+                }
+            }
+
+            // Attach listeners to Canvas
+            // Note: We use passive: false to prevent scrolling/zooming gestures
+            canvas.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    handleTouch(e.changedTouches[i]);
+                }
+            }, { passive: false });
+
+            canvas.addEventListener("touchmove", (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    handleTouch(e.changedTouches[i]);
+                }
+            }, { passive: false });
+
+            canvas.addEventListener("touchend", (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    handleTouch(e.changedTouches[i], true);
+                }
+            }, { passive: false });
         }
 
         // Countdown Timer
