@@ -41,6 +41,7 @@ export function applyInput(gameState, playerId, input) {
     player.lastInputSeq = input.seq;
 }
 
+
 /**
  * Main simulation tick.
  * @param {object} state 
