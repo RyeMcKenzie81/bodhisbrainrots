@@ -300,6 +300,41 @@ export function initMenuScenes() {
             anchor("center"),
             color(120, 120, 120),
         ]);
+
+        // NATIVE TOUCH HANDLERS for mobile (added outside the import callback)
+        const touchButtons = [
+            // CREATE ROOM button
+            {
+                x: width() / 2,
+                y: 250,
+                w: 300,
+                h: 60,
+                action: () => {
+                    import("../net/socket.js").then(({ socket }) => {
+                        socket.send("create_room", { name: `Player_${Math.floor(Math.random() * 1000)}` });
+                        go("lobby");
+                    });
+                }
+            },
+            // JOIN ROOM button
+            {
+                x: width() / 2,
+                y: 350,
+                w: 300,
+                h: 60,
+                action: () => {
+                    const code = window.prompt("Enter Room Code:");
+                    if (code) {
+                        import("../net/socket.js").then(({ socket }) => {
+                            socket.send("join_room", { roomId: code.toUpperCase(), name: `Player_${Math.floor(Math.random() * 1000)}` });
+                            go("lobby");
+                        });
+                    }
+                }
+            }
+        ];
+        const cleanupTouch = setupMenuTouch(touchButtons);
+        onSceneLeave(cleanupTouch);
     });
 
     // Scene: Difficulty Selection
