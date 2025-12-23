@@ -61,6 +61,63 @@ window.addEventListener("load", fitCanvas);
 // Throttle resize
 setInterval(fitCanvas, 500);
 
+// GLOBAL TOUCH COORDINATE FIX
+// Since we manually scale the canvas, Kaboom's built-in touch/mouse handling
+// gets the wrong coordinates. We intercept touches, calculate correct game
+// coords, and dispatch synthetic mouse events that Kaboom understands.
+function setupTouchFix() {
+    const canvas = document.querySelector("canvas");
+    if (!canvas) {
+        setTimeout(setupTouchFix, 100);
+        return;
+    }
+
+    function translateTouch(touch) {
+        const rect = canvas.getBoundingClientRect();
+        // Convert screen coords to game coords (960x744)
+        const gameX = ((touch.clientX - rect.left) / rect.width) * 960;
+        const gameY = ((touch.clientY - rect.top) / rect.height) * 744;
+        return { x: gameX, y: gameY };
+    }
+
+    // Override Kaboom's internal mouse position on touch
+    canvas.addEventListener("touchstart", (e) => {
+        if (e.touches.length > 0) {
+            const pos = translateTouch(e.touches[0]);
+            // Kaboom uses mousePos() internally - we need to update it
+            // The simplest way is to dispatch a mousemove + mousedown
+            canvas.dispatchEvent(new MouseEvent("mousemove", {
+                clientX: e.touches[0].clientX,
+                clientY: e.touches[0].clientY,
+                bubbles: true
+            }));
+            canvas.dispatchEvent(new MouseEvent("mousedown", {
+                clientX: e.touches[0].clientX,
+                clientY: e.touches[0].clientY,
+                bubbles: true
+            }));
+        }
+    }, { passive: true });
+
+    canvas.addEventListener("touchend", (e) => {
+        // Dispatch click at last touch position for onClick handlers
+        if (e.changedTouches.length > 0) {
+            const touch = e.changedTouches[0];
+            canvas.dispatchEvent(new MouseEvent("mouseup", {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                bubbles: true
+            }));
+            canvas.dispatchEvent(new MouseEvent("click", {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                bubbles: true
+            }));
+        }
+    }, { passive: true });
+}
+setupTouchFix();
+
 // Load all assets
 loadAssets();
 
