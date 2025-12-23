@@ -1,5 +1,6 @@
 import { PLAYERS } from "../constants.js";
 import { gameConfig } from "../state.js";
+import { setupMenuTouch } from "../utils/touchUtils.js";
 
 export function initMenuScenes() {
     // Scene: Main Menu
@@ -190,6 +191,22 @@ export function initMenuScenes() {
 
         onKeyPress("space", confirmMode);
         onKeyPress("enter", confirmMode);
+
+        // NATIVE TOUCH HANDLER for mobile (bypasses Kaboom's broken coordinates)
+        const spacing = 280;
+        const touchButtons = modes.map((_, i) => ({
+            x: width() / 2 - spacing + i * spacing,
+            y: buttonY,
+            w: 240,
+            h: 120,
+            action: () => {
+                selectedMode = i;
+                updateSelection();
+                confirmMode();
+            }
+        }));
+        const cleanupTouch = setupMenuTouch(touchButtons);
+        onSceneLeave(cleanupTouch);
     });
 
     // Scene: Online Menu
@@ -500,6 +517,55 @@ export function initMenuScenes() {
             anchor("center"),
             color(120, 120, 120),
         ]);
+
+        // NATIVE TOUCH HANDLERS for mobile
+        const touchButtons = [
+            // Difficulty buttons
+            ...difficulties.map((_, i) => ({
+                x: startX + i * spacing,
+                y: buttonY,
+                w: buttonWidth,
+                h: 100,
+                action: () => {
+                    selectedDifficulty = i;
+                    updateDiffSelection();
+                }
+            })),
+            // Opponent decrease arrow
+            {
+                x: width() / 2 - 100,
+                y: 380,
+                w: 80,
+                h: 80,
+                action: () => {
+                    selectedOpponents = Math.max(1, selectedOpponents - 1);
+                    countDisplay.text = selectedOpponents.toString();
+                    updateOpponentPreview();
+                }
+            },
+            // Opponent increase arrow
+            {
+                x: width() / 2 + 100,
+                y: 380,
+                w: 80,
+                h: 80,
+                action: () => {
+                    selectedOpponents = Math.min(3, selectedOpponents + 1);
+                    countDisplay.text = selectedOpponents.toString();
+                    updateOpponentPreview();
+                }
+            },
+            // Confirm button
+            {
+                x: width() / 2,
+                y: 650,
+                w: 200,
+                h: 60,
+                action: confirmDifficulty
+            }
+        ];
+        const cleanupTouch = setupMenuTouch(touchButtons);
+        onSceneLeave(cleanupTouch);
     });
 
     // Scene: Player Count Selection
@@ -631,6 +697,50 @@ export function initMenuScenes() {
         });
 
         onKeyPress("escape", () => go("menu"));
+
+        // NATIVE TOUCH HANDLERS for mobile
+        function confirmPlayerCount() {
+            gameConfig.playerCount = selectedCount;
+            gameConfig.playerCharacters = [];
+            go("characterSelect", { currentPlayer: 0 });
+        }
+
+        const touchButtons = [
+            // Decrease count arrow
+            {
+                x: width() / 2 - 150,
+                y: 250,
+                w: 100,
+                h: 100,
+                action: () => {
+                    selectedCount = Math.max(2, selectedCount - 1);
+                    countDisplay.text = selectedCount.toString();
+                    updatePlayerIcons();
+                }
+            },
+            // Increase count arrow
+            {
+                x: width() / 2 + 150,
+                y: 250,
+                w: 100,
+                h: 100,
+                action: () => {
+                    selectedCount = Math.min(4, selectedCount + 1);
+                    countDisplay.text = selectedCount.toString();
+                    updatePlayerIcons();
+                }
+            },
+            // Confirm button
+            {
+                x: width() / 2,
+                y: 450,
+                w: 240,
+                h: 70,
+                action: confirmPlayerCount
+            }
+        ];
+        const cleanupTouch = setupMenuTouch(touchButtons);
+        onSceneLeave(cleanupTouch);
     });
 
     // Global select music handle
@@ -971,5 +1081,25 @@ export function initMenuScenes() {
             anchor("center"),
             color(120, 120, 120),
         ]);
+
+        // NATIVE TOUCH HANDLERS for mobile
+        const touchButtons = PLAYERS.map((_, i) => ({
+            x: rosterStartX + i * spacing,
+            y: rosterY,
+            w: boxSize,
+            h: boxSize,
+            action: () => {
+                if (takenCharacters.includes(i)) return;
+                if (selectedChar === i) {
+                    // Double tap = confirm
+                    confirmSelection();
+                } else {
+                    selectedChar = i;
+                    updateSelection();
+                }
+            }
+        }));
+        const cleanupTouch = setupMenuTouch(touchButtons);
+        onSceneLeave(cleanupTouch);
     });
 }
