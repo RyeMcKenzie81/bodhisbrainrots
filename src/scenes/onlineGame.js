@@ -31,6 +31,8 @@ export function initOnlineGameScene() {
             gridObjs.forEach(o => destroy(o));
             gridObjs = [];
 
+            console.log("[DEBUG] Rendering grid:", gridState.length, "rows");
+
             gridState.forEach((row, y) => {
                 row.forEach((cell, x) => {
                     const posX = x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
@@ -74,6 +76,8 @@ export function initOnlineGameScene() {
                     }
                 });
             });
+
+            console.log("[DEBUG] Rendered", gridObjs.length, "grid objects");
         }
 
         // Initial Grid Render (empty initially, wait for snapshot)
@@ -81,8 +85,11 @@ export function initOnlineGameScene() {
         socket.on("snapshot", (data) => {
             const state = data.state;
 
+            console.log("[DEBUG] Snapshot received - Grid:", state.grid?.length, "Players:", state.players?.length, "Brains:", state.brains?.length);
+
             // A. Render Grid (Lazy init)
             if (gridObjs.length === 0) {
+                console.log("[DEBUG] First snapshot - initializing grid");
                 renderGrid(state.grid);
             }
 
