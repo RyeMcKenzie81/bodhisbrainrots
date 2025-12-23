@@ -102,8 +102,13 @@ export function initOnlineGameScene() {
 
             console.log("[DEBUG] Snapshot received - Grid:", state.grid?.length, "Players:", state.players?.length, "Brains:", state.brains?.length);
 
-            // A. Render Grid - Always re-render to show destroyed blocks
-            renderGrid(state.grid);
+            // A. Render Grid - Only when it changes
+            const gridHash = JSON.stringify(state.grid);
+            if (!window.lastGridHash || window.lastGridHash !== gridHash) {
+                console.log("[DEBUG] Grid changed - re-rendering");
+                window.lastGridHash = gridHash;
+                renderGrid(state.grid);
+            }
 
             // B. Sync Players
             state.players.forEach(pState => {
