@@ -82,7 +82,7 @@ export function loadAssets() {
         },
     });
 
-    loadSprite("cappucino_anim", "sprites/cappucino_spritesheet.png", {
+    loadSprite("cappucino_anim", "sprites/cappuccino_spritesheet.png", {
         sliceX: 4,
         sliceY: 4,
         anims: {
