@@ -6,7 +6,6 @@ import { spawnPowerup, createLevel } from "../entities/environment.js";
 
 export function initGameScene() {
     scene("game", () => {
-        // Play    scene("game", () => {
         let bgMusic = play("music", { loop: true, volume: 0.4 });
         if (!bgMusic || !bgMusic.stop) {
             bgMusic = null;
@@ -62,7 +61,7 @@ export function initGameScene() {
                 if (gameState.matchTime <= 30 && gameState.matchTime > 0) {
                     // Speed from 1.0 at 30s to 1.5 at 0s
                     const speedMultiplier = 1 + (30 - gameState.matchTime) / 60;
-                    bgMusic.speed = speedMultiplier;
+                    if (bgMusic && bgMusic.speed) bgMusic.speed = speedMultiplier;
                 }
             }
 
@@ -300,6 +299,7 @@ export function initGameScene() {
             const alivePlayers = gameState.players.filter((p) => p.alive);
             if (alivePlayers.length <= 1) {
                 wait(1, () => {
+                    if (bgMusic && bgMusic.stop) bgMusic.stop();
                     go("gameover", alivePlayers[0]?.name || "Nobody");
                 });
             }
