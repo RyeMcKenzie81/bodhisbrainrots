@@ -13,7 +13,7 @@ export function initGameScene() {
 
         // Stop music when leaving scene
         onSceneLeave(() => {
-            bgMusic.stop();
+            if (bgMusic && bgMusic.stop) bgMusic.stop();
         });
 
         // Reset Game State
