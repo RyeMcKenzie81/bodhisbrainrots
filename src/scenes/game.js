@@ -483,6 +483,37 @@ export function initGameScene() {
                     handleTouch(e.changedTouches[i], true);
                 }
             }, { passive: false });
+
+            // CONTINUOUS MOVEMENT LOOP
+            // We must call the press method EVERY frame while held, 
+            // just like onKeyDown() does.
+            onUpdate(() => {
+                if (!localPlayer || !gameState.gameStarted) return;
+
+                // inputState tracks which logical buttons are currently held down
+                // derived from activeTouches map
+                const heldButtons = new Set(activeTouches.values());
+
+                heldButtons.forEach(dir => {
+                    if (!dir) return;
+
+                    if (dir === "action") {
+                        // Action (Bomb) is usually "press once", but player.dropBomb check handles cooldowns/limits.
+                        // However, repeated calls might be okay or ignored.
+                        // Ideally we only trigger action on state change (which handleTouch does).
+                        // BUT, if we want "Auto-Fire" later, we'd put it here.
+                        // For now, let's leave Action as "trigger on press" in handleTouch 
+                        // and NOT call it every frame, to avoid spamming the drop logic if it doesn't have checks.
+                        // ... Checking player.js ... dropBomb checks timer/count. Safe to spam? 
+                        // Actually better to keep it "semi-automatic" or tap-to-drop.
+                        // Let's NOT continuous fire action for now.
+                    } else {
+                        // MOVEMENT
+                        const method = "press" + dir.charAt(0).toUpperCase() + dir.slice(1);
+                        if (localPlayer[method]) localPlayer[method]();
+                    }
+                });
+            });
         }
 
         // Countdown Timer
