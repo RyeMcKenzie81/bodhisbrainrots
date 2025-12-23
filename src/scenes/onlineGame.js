@@ -223,6 +223,7 @@ export function initOnlineGameScene() {
                                 if (flame.opacity <= 0) destroy(flame);
                             });
                         });
+                    } else {
                         // Fallback for old explosion format (just center)
                         const flame = add([
                             sprite("brainboom"),
