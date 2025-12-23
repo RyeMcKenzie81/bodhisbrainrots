@@ -83,27 +83,88 @@ export function initLobbyScene() {
             playerListContainer.get("*").forEach(child => destroy(child));
 
             players.forEach((p, i) => {
-                const y = i * 70;
+                const y = i * 85; // Increased spacing
 
                 // Player box
                 playerListContainer.add([
-                    rect(400, 60, { radius: 6 }),
+                    rect(400, 75, { radius: 6 }),
                     pos(0, y),
                     anchor("center"),
                     color(p.id === myPlayerId ? rgb(60, 60, 100) : rgb(40, 40, 60)),
                     outline(3, p.ready ? rgb(100, 255, 100) : rgb(80, 80, 80)),
                 ]);
 
+                // Character Sprite Preview
+                const charIndex = p.characterIndex || 0;
+                const charInfo = PLAYERS[charIndex];
+
+                if (charInfo) {
+                    playerListContainer.add([
+                        sprite(charInfo.spriteFront),
+                        pos(-150, y),
+                        anchor("center"),
+                        scale(0.12)
+                    ]);
+                }
+
                 // Player name + status
                 const statusIcon = p.ready ? "✓" : "○";
                 const hostTag = i === 0 ? " [HOST]" : "";
                 const youTag = p.id === myPlayerId ? " (YOU)" : "";
+
                 playerListContainer.add([
-                    text(`${statusIcon} ${p.name}${hostTag}${youTag}`, { size: 20 }),
-                    pos(0, y),
-                    anchor("center"),
+                    text(`${statusIcon} ${p.name || "Player"}${hostTag}${youTag}`, { size: 18 }),
+                    pos(-100, y - 10), // Offset slightly up
+                    anchor("left"),
                     color(255, 255, 255),
                 ]);
+
+                // Character Name Label
+                playerListContainer.add([
+                    text(`${charInfo ? charInfo.name : "Unknown"}`, { size: 14 }),
+                    pos(-100, y + 15),
+                    anchor("left"),
+                    color(200, 200, 255),
+                ]);
+
+                // My Player Controls (Arrows)
+                if (p.id === myPlayerId && !p.ready) {
+                    // Left Arrow
+                    const leftBtn = playerListContainer.add([
+                        rect(30, 30, { radius: 4 }),
+                        pos(140, y),
+                        anchor("center"),
+                        color(100, 100, 100),
+                        area()
+                    ]);
+                    playerListContainer.add([
+                        text("<", { size: 20 }),
+                        pos(140, y),
+                        anchor("center")
+                    ]);
+                    leftBtn.onClick(() => {
+                        let newIdx = (charIndex - 1 + PLAYERS.length) % PLAYERS.length;
+                        socket.send("update_character", { characterIndex: newIdx });
+                    });
+
+                    // Right Arrow
+                    const rightBtn = playerListContainer.add([
+                        rect(30, 30, { radius: 4 }),
+                        pos(180, y),
+                        anchor("center"),
+                        color(100, 100, 100),
+                        area()
+                    ]);
+                    playerListContainer.add([
+                        text(">", { size: 20 }),
+                        pos(180, y),
+                        anchor("center")
+                    ]);
+                    rightBtn.onClick(() => {
+                        let newIdx = (charIndex + 1) % PLAYERS.length;
+                        socket.send("update_character", { characterIndex: newIdx });
+                    });
+                }
             });
 
             playerCountText.text = `Players: ${players.length}/4`;
@@ -165,6 +226,17 @@ export function initLobbyScene() {
             }
         };
 
+        const handlePlayerUpdated = (data) => {
+            const p = players.find(player => player.id === data.player.id);
+            if (p) {
+                // Update properties
+                p.characterIndex = data.player.characterIndex;
+                p.name = data.player.name;
+                p.ready = data.player.ready;
+                renderPlayers();
+            }
+        };
+
         const handleGameStart = () => {
             go("onlineGame", { roomId, myPlayerId, players });
         };
@@ -174,6 +246,7 @@ export function initLobbyScene() {
         socket.on("room_joined", handleRoomJoined);
         socket.on("player_joined", handlePlayerJoined);
         socket.on("player_ready", handlePlayerReady);
+        socket.on("player_updated", handlePlayerUpdated);
         socket.on("game_start", handleGameStart);
 
         // Start game function (host only, allow solo for testing)

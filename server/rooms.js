@@ -25,7 +25,8 @@ export function handleConnection(ws) {
                     ws: ws,
                     name: data.name || `Player 1`,
                     ready: false,
-                    connected: true
+                    connected: true,
+                    characterIndex: 0
                 };
 
                 room.players.push(player);
@@ -67,7 +68,8 @@ export function handleConnection(ws) {
                     ws: ws,
                     name: data.name || `Player ${room.players.length + 1}`,
                     ready: false,
-                    connected: true
+                    connected: true,
+                    characterIndex: 0
                 };
 
                 room.players.push(player);
