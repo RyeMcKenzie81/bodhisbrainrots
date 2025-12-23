@@ -126,12 +126,7 @@ export function createLevel() {
 
             // Walls on edges and grid pattern
             if (x === 0 || x === GRID_WIDTH - 1 || y === 0 || y === GRID_HEIGHT - 1) {
-                // Perimeter walls use festive Christmas decorations! 🎄
-                const decorations = ["christmas_tree", "christmas_elf"];
-                const decoration = decorations[Math.floor(Math.random() * decorations.length)];
-
-                add([
-                    rect(TILE_SIZE - 2, TILE_SIZE - 2, { radius: 4 }),
+                rect(TILE_SIZE - 2, TILE_SIZE - 2, { radius: 4 }),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
                     color(80, 80, 100),
