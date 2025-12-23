@@ -201,10 +201,177 @@ export function initOnlineGameScene() {
                 }
             };
 
-            // Only send if input changed or heartbeat?
-            // MVP: Send every frame (15-60hz)
+            // Send input to server
             socket.send("input", payload);
         });
+
+        // ============ MOBILE CONTROLS ============
+        function createTouchControls() {
+            const canvas = document.querySelector("canvas");
+            if (!canvas) return;
+
+            const dpadBaseX = 140;
+            const dpadBaseY = height() - 250;
+
+            const dPad = add([
+                pos(dpadBaseX, dpadBaseY),
+                fixed(),
+                z(200),
+            ]);
+
+            const buttons = [
+                { dir: "up", x: 0, y: -90, txt: "▲" },
+                { dir: "down", x: 0, y: 90, txt: "▼" },
+                { dir: "left", x: -90, y: 0, txt: "◀" },
+                { dir: "right", x: 90, y: 0, txt: "▶" },
+            ];
+
+            buttons.forEach(b => {
+                b.vis = dPad.add([
+                    circle(50),
+                    pos(b.x, b.y),
+                    anchor("center"),
+                    color(255, 255, 255),
+                    opacity(0.2),
+                    fixed(),
+                ]);
+                dPad.add([
+                    text(b.txt, { size: 40 }),
+                    pos(b.x, b.y),
+                    anchor("center"),
+                    opacity(0.5),
+                    fixed(),
+                ]);
+            });
+
+            const actionBtnX = width() - 140;
+            const actionBtnY = height() - 250;
+            const actionBtnRadius = 70;
+            const actionBtn = add([
+                circle(actionBtnRadius),
+                pos(actionBtnX, actionBtnY),
+                anchor("center"),
+                color(255, 50, 50),
+                opacity(0.4),
+                fixed(),
+                z(200),
+            ]);
+
+            const activeTouches = new Map();
+            let currentDir = null;
+
+            function getGamePos(touch) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = 960 / rect.width;
+                const scaleY = 744 / rect.height;
+                return {
+                    x: (touch.clientX - rect.left) * scaleX,
+                    y: (touch.clientY - rect.top) * scaleY
+                };
+            }
+
+            function handleTouch(touch, isEnd = false) {
+                const pos = getGamePos(touch);
+                let hitButton = null;
+
+                buttons.forEach(b => {
+                    const bx = dpadBaseX + b.x;
+                    const by = dpadBaseY + b.y;
+                    const dist = Math.sqrt((pos.x - bx) ** 2 + (pos.y - by) ** 2);
+                    if (dist < 80) {
+                        hitButton = b.dir;
+                    }
+                });
+
+                const distAction = Math.sqrt((pos.x - actionBtnX) ** 2 + (pos.y - actionBtnY) ** 2);
+                if (distAction < 100) {
+                    hitButton = "action";
+                }
+
+                const prevButton = activeTouches.get(touch.identifier);
+
+                if (isEnd || (hitButton !== prevButton)) {
+                    if (prevButton) {
+                        if (prevButton === "action") {
+                            actionBtn.opacity = 0.4;
+                        } else {
+                            const btnObj = buttons.find(b => b.dir === prevButton);
+                            if (btnObj) {
+                                btnObj.vis.opacity = 0.2;
+                                if (currentDir === prevButton) {
+                                    currentDir = null;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!isEnd && hitButton) {
+                    activeTouches.set(touch.identifier, hitButton);
+
+                    if (hitButton === "action") {
+                        actionBtn.opacity = 0.7;
+                        if (hitButton !== prevButton) {
+                            // Send drop brain input
+                            socket.send("input", {
+                                seq: seq++,
+                                input: {
+                                    seq: seq,
+                                    dir: currentDir,
+                                    dropBrain: true
+                                }
+                            });
+                        }
+                    } else {
+                        const btnObj = buttons.find(b => b.dir === hitButton);
+                        if (btnObj) {
+                            btnObj.vis.opacity = 0.6;
+                            currentDir = hitButton;
+                        }
+                    }
+                } else if (isEnd) {
+                    activeTouches.delete(touch.identifier);
+                } else {
+                    activeTouches.set(touch.identifier, null);
+                }
+            }
+
+            canvas.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    handleTouch(e.changedTouches[i]);
+                }
+            }, { passive: false });
+
+            canvas.addEventListener("touchmove", (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    handleTouch(e.changedTouches[i]);
+                }
+            }, { passive: false });
+
+            canvas.addEventListener("touchend", (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    handleTouch(e.changedTouches[i], true);
+                }
+            }, { passive: false });
+
+            // Continuous input update
+            onUpdate(() => {
+                if (currentDir) {
+                    socket.send("input", {
+                        seq: seq++,
+                        input: {
+                            seq: seq,
+                            dir: currentDir,
+                            dropBrain: false
+                        }
+                    });
+                }
+            });
+        }
+        createTouchControls();
 
         // Cleanup
         onSceneLeave(() => {
