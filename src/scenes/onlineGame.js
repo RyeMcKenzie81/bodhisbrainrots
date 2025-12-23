@@ -97,8 +97,48 @@ export function initOnlineGameScene() {
 
         // Initial Grid Render (empty initially, wait for snapshot)
 
+        // UI Layer - Timer
+        const timerBg = add([
+            rect(120, 40, { radius: 4 }),
+            pos(width() / 2, 30),
+            anchor("center"),
+            color(0, 0, 0),
+            opacity(0.5),
+            fixed(),
+            z(100)
+        ]);
+
+        const timerText = add([
+            text("WAIT", { size: 24 }),
+            pos(width() / 2, 30),
+            anchor("center"),
+            color(255, 255, 255),
+            fixed(),
+            z(101)
+        ]);
+
         socket.on("snapshot", (data) => {
             const state = data.state;
+
+            // Update Timer UI
+            if (state.gameTime !== undefined) {
+                const minutes = Math.floor(state.gameTime / 60);
+                const seconds = Math.floor(state.gameTime % 60);
+                timerText.text = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (state.suddenDeath) {
+                    timerText.text = "SUDDEN DEATH";
+                    timerText.color = rgb(255, 50, 50);
+                    // Pulse effect?
+                    if (time() % 0.5 < 0.25) timerText.color = rgb(255, 255, 255);
+                } else if (state.gameTime < 30) {
+                    timerText.color = rgb(255, 100, 100);
+                } else {
+                    timerText.color = rgb(255, 255, 255);
+                }
+            } else {
+                timerText.text = "WAIT";
+            }
 
             // Play background music on first snapshot
             if (!window.musicStarted) {

@@ -7,6 +7,8 @@ export const SIM_CONSTANTS = {
     EXPLOSION_DURATION: 0.8, // Seconds (Slightly longer for network sync)
     MAX_BRAINS: 1, // Default starting
     FIRE_RANGE: 1,  // Default starting
+    MAX_TIME: 120, // 2 minutes
+    SUDDEN_DEATH_RATE: 0.3, // Seconds between blocks filling in
 };
 
 /**
@@ -24,6 +26,10 @@ export function createGameState(seed) {
         brains: [],  // Array of active Brain objects
         explosions: [], // Array of active Explosion objects
         powerups: [], // Array of Powerup objects
+        gameTime: SIM_CONSTANTS.MAX_TIME,
+        suddenDeath: false,
+        suddenDeathTimer: 0,
+        deathSpiralIndex: 0,
         gameStarted: false,
         gameOver: false,
         winner: null,

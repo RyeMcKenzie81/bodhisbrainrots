@@ -169,8 +169,116 @@ export function tick(state, dt) {
     }
 
     // 6. Tick Explosions
-    // (TODO: Implement explosion duration and removal)
+    // (Explosions are static data for now, cleaned up by client/state sync implicitly if efficient?)
+    // Actually we should prune old explosions to keep packet size small
+    state.explosions = state.explosions.filter(e => state.time - e.timestamp < SIM_CONSTANTS.EXPLOSION_DURATION);
+
+    // 7. Timer & Sudden Death
+    if (!state.gameOver) {
+        state.gameTime -= dt;
+        if (state.gameTime <= 0) {
+            state.gameTime = 0;
+            state.suddenDeath = true;
+        }
+
+        if (state.suddenDeath) {
+            state.suddenDeathTimer -= dt;
+            if (state.suddenDeathTimer <= 0) {
+                state.suddenDeathTimer = SIM_CONSTANTS.SUDDEN_DEATH_RATE;
+                processSuddenDeath(state);
+            }
+        }
+    }
 }
+
+function processSuddenDeath(state) {
+    // Generate spiral path if not cached (lazy load?)
+    // For now, let's just use a simple coordinate mapper based on index if possible,
+    // or just iterate? 
+    // Let's use a function that computes it or uses a pre-calc list.
+    const pos = getSpiralPosition(state.deathSpiralIndex, SIM_CONSTANTS.GRID_WIDTH, SIM_CONSTANTS.GRID_HEIGHT);
+
+    if (pos) {
+        const idx = pos.y * SIM_CONSTANTS.GRID_WIDTH + pos.x;
+        // Turn into indestructible wall
+        if (state.grid[idx]) {
+            state.grid[idx].type = "wall";
+            state.grid[idx].isSuddenDeath = true; // Mark for visual usage
+        }
+
+        // Kill players on this tile
+        state.players.forEach(p => {
+            const pGrid = toGrid(p.pos.x, p.pos.y);
+            if (pGrid.x === pos.x && pGrid.y === pos.y) {
+                p.alive = false;
+                // Trigger death logic immediately?
+                // Or wait for next tick damage check?
+                // Let's force it here.
+            }
+        });
+
+        state.deathSpiralIndex++;
+    }
+}
+
+// Helper to get spiral position from index
+const SPIRAL_CACHE = [];
+function getSpiralPosition(n, w, h) {
+    if (SPIRAL_CACHE.length === 0) {
+        let x = 0, y = 0, dx = 1, dy = 0;
+        let xMin = 0, yMin = 0, xMax = w - 1, yMax = h - 1;
+        const total = w * h;
+
+        for (let i = 0; i < total; i++) {
+            SPIRAL_CACHE.push({ x, y });
+
+            if (x + dx > xMax || x + dx < xMin || y + dy > yMax || y + dy < yMin) {
+                // Change direction
+                if (dx === 1) { dx = 0; dy = 1; }      // Right -> Down
+                else if (dy === 1) { dx = -1; dy = 0; } // Down -> Left
+                else if (dx === -1) { dx = 0; dy = -1; } // Left -> Up
+                else if (dy === -1) { dx = 1; dy = 0; }  // Up -> Right
+
+                // Shrink bounds (?)
+                // Actually, standard spiral matrix traversal:
+                // After changing direction:
+                // Right -> Down: yMin++? No, yMin is 0 initially.
+                // We need to adjust bounds after completing a simplified side run?
+                // Re-calculating properly:
+            }
+            x += dx;
+            y += dy;
+        }
+
+        // Let's use a more robust generator outside loop to populate cache correctly
+        populateSpiralCache(w, h);
+    }
+    return SPIRAL_CACHE[n];
+}
+
+function populateSpiralCache(w, h) {
+    SPIRAL_CACHE.length = 0;
+    let top = 0, bottom = h - 1, left = 0, right = w - 1;
+    let dir = 0; // 0:right, 1:down, 2:left, 3:up
+
+    while (top <= bottom && left <= right) {
+        if (dir === 0) { // Right
+            for (let i = left; i <= right; i++) SPIRAL_CACHE.push({ x: i, y: top });
+            top++;
+        } else if (dir === 1) { // Down
+            for (let i = top; i <= bottom; i++) SPIRAL_CACHE.push({ x: right, y: i });
+            right--;
+        } else if (dir === 2) { // Left
+            for (let i = right; i >= left; i--) SPIRAL_CACHE.push({ x: i, y: bottom });
+            bottom--;
+        } else if (dir === 3) { // Up
+            for (let i = bottom; i >= top; i--) SPIRAL_CACHE.push({ x: left, y: i });
+            left++;
+        }
+        dir = (dir + 1) % 4;
+    }
+}
+
 
 function attemptDropBrain(state, player) {
     if (player.brainsPlaced < player.brainCount) {
