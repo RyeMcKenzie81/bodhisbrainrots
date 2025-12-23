@@ -27,7 +27,7 @@ export function initOnlineGameScene() {
         let gridObjs = [];
 
         function renderGrid(gridState) {
-            // Clear old grid if needed (optimization: only update changed cells)
+            // Clear old grid if needed
             gridObjs.forEach(o => destroy(o));
             gridObjs = [];
 
@@ -36,6 +36,16 @@ export function initOnlineGameScene() {
                     const posX = x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
                     const posY = y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
 
+                    // Always render floor tile first
+                    gridObjs.push(add([
+                        rect(SIM_CONSTANTS.TILE_SIZE - 2, SIM_CONSTANTS.TILE_SIZE - 2, { radius: 2 }),
+                        pos(posX, posY),
+                        anchor("center"),
+                        color(40, 40, 60),
+                        z(-1),
+                    ]));
+
+                    // Then render blocks/walls on top
                     if (cell.type === "wall") {
                         // Indestructible walls
                         if (x % 2 === 0 && y % 2 === 0 && x !== 0 && x !== 14 && y !== 0 && y !== 12) {
@@ -169,10 +179,7 @@ export function initOnlineGameScene() {
                     ]);
                     play("bomb2");
 
-                    // Clean up tracking after lifespan
-                    wait(0.6, () => {
-                        window.renderedExplosions.delete(expId);
-                    });
+                    // Don't clean up - explosion should only render once EVER
                 }
             });
         });
