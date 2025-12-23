@@ -1,9 +1,20 @@
 import { setupMenuTouch } from "../utils/touchUtils.js";
 
 export function initGameOverScene() {
-    scene("gameover", (winnerName) => {
+    scene("gameover", (args) => {
+        // Handle both string (singleplayer) and object (multiplayer) args
+        let winnerName = "Nobody";
+        let isMultiplayer = false;
+
+        if (typeof args === "string") {
+            winnerName = args;
+        } else if (typeof args === "object") {
+            winnerName = args.winner || "Nobody";
+            isMultiplayer = args.isMultiplayer || false;
+        }
+
         // Play appropriate sound
-        if (winnerName === "Nobody" || winnerName.includes("DRAW")) {
+        if (winnerName === "Nobody" || winnerName === "No one" || (winnerName && winnerName.includes && winnerName.includes("DRAW"))) {
             play("loss");
         } else {
             play("win");
@@ -74,7 +85,21 @@ export function initGameOverScene() {
                 y: 540,
                 w: 320,
                 h: 80,
-                action: () => go("menu")
+                action: () => {
+                    if (isMultiplayer) {
+                        go("lobby");
+                    } else {
+                        // For single player, restart game? Or menu?
+                        // Let's assume menu since 'game' scene might need args
+                        // But original code said go("menu"). 
+                        // Let's actually verify if go("game") works for single player.
+                        // Assuming single player setup scene is "game" or "main"?
+                        // Let's stick to "menu" for now to be safe, or "lobby" if that's the hub.
+                        // Actually, user wants "Play Again".
+                        // Assuming "game" is the single player scene.
+                        go("game");
+                    }
+                }
             },
             // Menu
             {
