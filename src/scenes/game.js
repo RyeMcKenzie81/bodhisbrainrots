@@ -459,6 +459,42 @@ export function initGameScene() {
             });
         }
 
+        // Countdown Timer
+        function startCountdown() {
+            let count = 3;
+            const countText = add([
+                text(count, { size: 72 }),
+                pos(width() / 2, height() / 2),
+                anchor("center"),
+                color(255, 255, 255),
+                z(200),
+                fixed(),
+            ]);
+
+            // Countdown Sound
+            play("callout_" + Math.floor(Math.random() * 4)); // Random character shout? Or a beep?
+
+            const tick = loop(1, () => {
+                count--;
+                if (count > 0) {
+                    countText.text = count;
+                    // Pulse effect
+                    countText.scale = vec2(1.5);
+                    tween(vec2(1.5), vec2(1), 0.5, (val) => countText.scale = val, easings.easeOutBounce);
+                } else if (count === 0) {
+                    countText.text = "GO!";
+                    countText.color = rgb(255, 255, 50);
+                    countText.scale = vec2(2);
+                    tween(vec2(2), vec2(1), 0.5, (val) => countText.scale = val, easings.easeOutBounce);
+
+                    gameState.gameStarted = true;
+                } else {
+                    destroy(countText);
+                    tick.cancel();
+                }
+            });
+        }
+
         // Spawn UI
         createTouchControls();
 
