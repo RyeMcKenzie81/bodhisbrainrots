@@ -106,29 +106,38 @@ export function initOnlineGameScene() {
 
                 let pObj = playerMap.get(pState.id);
                 if (!pObj) {
-                    // Create new player sprite
-                    // Find character index from Lobby data
+                    // Create new player sprite with animation
                     const lobbyPlayer = players.find(lp => lp.id === pState.id);
-                    // Default to char 0 if simple setup
                     const charIdx = 0; // TODO: Pass char index in spawn info
 
                     pObj = add([
-                        sprite(PLAYERS[charIdx].spriteFront),
+                        sprite(PLAYERS[charIdx].spriteAnim, { anim: "idle_down" }),
                         pos(pState.pos.x, pState.pos.y),
                         anchor("center"),
                         scale(0.06),
                         z(10),
+                        { characterIndex: charIdx, prevFacing: "down", prevMoving: false }
                     ]);
                     playerMap.set(pState.id, pObj);
                 }
 
-                // Interpolate / Update Position
-                // For MVP: Snap directly
+                // Update Position
                 pObj.pos.x = pState.pos.x;
                 pObj.pos.y = pState.pos.y;
 
-                // Animation State
-                // (Can simply infer from movement or use state.facing)
+                // Update Animation based on movement state
+                const isMoving = pState.isMoving || false;
+                const facing = pState.facing || "down";
+
+                // Only change animation if state changed
+                if (isMoving !== pObj.prevMoving || facing !== pObj.prevFacing) {
+                    const animName = isMoving ? `walk_${facing}` : `idle_${facing}`;
+                    if (pObj.getCurAnim()?.name !== animName) {
+                        pObj.play(animName);
+                    }
+                    pObj.prevMoving = isMoving;
+                    pObj.prevFacing = facing;
+                }
             });
 
             // C. Sync Brains
