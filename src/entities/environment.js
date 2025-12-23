@@ -131,10 +131,10 @@ export function createLevel() {
                 const decoration = decorations[Math.floor(Math.random() * decorations.length)];
 
                 add([
-                    sprite(decoration),
+                    rect(TILE_SIZE - 2, TILE_SIZE - 2, { radius: 4 }),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    scale(0.12),
+                    color(80, 80, 100),
                     area(),
                     body({ isStatic: true }),
                     z(y),
