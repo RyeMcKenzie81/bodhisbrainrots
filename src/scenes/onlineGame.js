@@ -142,8 +142,16 @@ export function initOnlineGameScene() {
 
             // Play background music on first snapshot
             if (!window.musicStarted) {
-                play("music", { loop: true, volume: 0.5 });
+                window.bgMusic = play("music", { loop: true, volume: 0.5 });
                 window.musicStarted = true;
+                window.overtimeStarted = false;
+            }
+
+            // Switch to Overtime music
+            if (state.suddenDeath && !window.overtimeStarted) {
+                if (window.bgMusic) window.bgMusic.paused = true;
+                window.overtimeMusic = play("overtime", { loop: true, volume: 0.6 });
+                window.overtimeStarted = true;
             }
 
             console.log("[DEBUG] Snapshot received - Grid:", state.grid?.length, "Players:", state.players?.length, "Brains:", state.brains?.length);
@@ -151,6 +159,13 @@ export function initOnlineGameScene() {
             // Check for game over
             if (state.gameOver) {
                 console.log("[CLIENT] Game Over detected - Winner:", state.winner);
+
+                // Stop music
+                if (window.bgMusic) window.bgMusic.paused = true;
+                if (window.overtimeMusic) window.overtimeMusic.paused = true;
+                window.musicStarted = false;
+                window.overtimeStarted = false;
+
                 const winnerPlayer = state.players.find(p => p.id === state.winner);
                 go("gameover", {
                     winner: winnerPlayer ? winnerPlayer.id : "No one",

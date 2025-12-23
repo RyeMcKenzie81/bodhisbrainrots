@@ -37,6 +37,7 @@ export function loadAssets() {
     loadSound("footsteps", "sprites/footsteps.mp3");
     loadSound("win", "sprites/win.mp3");
     loadSound("loss", "sprites/loss.mp3");
+    loadSound("overtime", "sprites/overtime.mp3");
 
     // Load animated sprite sheets (4x4 grid: down, up, left, right rows)
     loadSprite("tungtung_anim", "sprites/tungtung_spritesheet.png", {
