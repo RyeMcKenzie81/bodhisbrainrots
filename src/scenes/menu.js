@@ -958,4 +958,3 @@ scene("characterSelect", ({ currentPlayer }) => {
         color(120, 120, 120),
     ]);
 });
-}
