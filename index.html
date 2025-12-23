@@ -19,9 +19,15 @@
     }
 
     canvas {
-      /* Remove all sizing CSS - Let Kaboom allow defaults */
       display: block;
       touch-action: none;
+      /* Pin to viewport to ignore scroll/address bar shifts */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
     }
 
     #rotate-message {
