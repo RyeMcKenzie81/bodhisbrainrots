@@ -138,13 +138,134 @@ function explodeBrain(state, brain) {
     const owner = state.players.find(p => p.id === brain.ownerId);
     if (owner) owner.brainsPlaced--;
 
-    // Add explosion event/object to state for rendering
-    // TODO: Calculate blast radius and destroy blocks
+    // Calculate explosion cells in 4 directions (cross pattern)
+    const explosionCells = calculateExplosionCells(state, brain.gridX, brain.gridY, brain.range);
+
+    // Destroy destructible blocks
+    destroyBlocksInExplosion(state, explosionCells);
+
+    // Damage players in explosion radius
+    damagePlayersInExplosion(state, explosionCells);
+
+    // Trigger chain reactions (other brains in radius)
+    triggerChainReactions(state, explosionCells);
+
+    // Add explosion visualization data with cells for flame rendering
     state.explosions.push({
         x: brain.gridX,
         y: brain.gridY,
         range: brain.range,
-        timestamp: state.time
+        timestamp: state.time,
+        cells: explosionCells
+    });
+}
+
+/**
+ * Calculate which grid cells are affected by explosion
+ * Expands in 4 directions until hitting a wall or reaching range limit
+ */
+function calculateExplosionCells(state, centerX, centerY, range) {
+    const cells = [{ x: centerX, y: centerY }]; // Always include center
+
+    // Direction vectors: up, down, left, right
+    const directions = [
+        { dx: 0, dy: -1 }, // up
+        { dx: 0, dy: 1 },  // down
+        { dx: -1, dy: 0 }, // left
+        { dx: 1, dy: 0 }   // right
+    ];
+
+    directions.forEach(dir => {
+        for (let i = 1; i <= range; i++) {
+            const x = centerX + dir.dx * i;
+            const y = centerY + dir.dy * i;
+
+            // Stop at grid boundaries
+            if (x < 0 || x >= SIM_CONSTANTS.GRID_WIDTH || y < 0 || y >= SIM_CONSTANTS.GRID_HEIGHT) {
+                break;
+            }
+
+            const cell = state.grid[y][x];
+
+            // Add this cell to explosion
+            cells.push({ x, y });
+
+            // Stop if we hit a solid wall (not destructible blocks)
+            if (cell.type === "wall" && !cell.destructible) {
+                break;
+            }
+
+            // Stop if we hit a destructible block (but include it in explosion)
+            if (cell.type === "block" && cell.destructible) {
+                break;
+            }
+        }
+    });
+
+    return cells;
+}
+
+/**
+ * Destroy destructible blocks in explosion cells
+ */
+function destroyBlocksInExplosion(state, cells) {
+    cells.forEach(({ x, y }) => {
+        const cell = state.grid[y][x];
+        if (cell.type === "block" && cell.destructible) {
+            // Destroy the block
+            state.grid[y][x] = { type: "empty", solid: false };
+
+            // TODO: Spawn powerup (20% chance)
+            // if (Math.random() < 0.2) {
+            //     spawnPowerup(state, x, y);
+            // }
+        }
+    });
+}
+
+/**
+ * Damage/kill players in explosion cells
+ */
+function damagePlayersInExplosion(state, cells) {
+    state.players.forEach(player => {
+        if (!player.alive) return;
+
+        // Get player's grid position
+        const playerGridPos = toGrid(player.pos.x, player.pos.y);
+
+        // Check if player is in any explosion cell
+        const inExplosion = cells.some(cell =>
+            cell.x === playerGridPos.x && cell.y === playerGridPos.y
+        );
+
+        if (inExplosion) {
+            player.alive = false;
+        }
+    });
+}
+
+/**
+ * Trigger chain reactions - explode other brains in explosion radius
+ */
+function triggerChainReactions(state, cells) {
+    const brainsToExplode = [];
+
+    // Find brains in explosion cells
+    state.brains.forEach(brain => {
+        if (brain.exploded) return; // Skip already exploded brains
+
+        const inExplosion = cells.some(cell =>
+            cell.x === brain.gridX && cell.y === brain.gridY
+        );
+
+        if (inExplosion) {
+            brainsToExplode.push(brain);
+        }
+    });
+
+    // Explode them (recursive chain reactions!)
+    brainsToExplode.forEach(brain => {
+        explodeBrain(state, brain);
     });
 }
 
