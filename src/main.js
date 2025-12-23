@@ -7,32 +7,8 @@ import { initMenuScenes } from "./scenes/menu.js";
 import { initLobbyScene } from "./scenes/lobby.js";
 import { initOnlineGameScene } from "./scenes/onlineGame.js";
 
-// Debug Logger for Mobile
-const debugEl = document.getElementById("debug-overlay");
-if (debugEl) {
-    window.onerror = (msg, url, line, col, error) => {
-        debugEl.innerText += `\n[ERROR] ${msg} (${line}:${col})\n`;
-        return false;
-    };
-    const originalLog = console.log;
-    const originalError = console.error;
-    console.log = (...args) => {
-        // originalLog(...args); // Keep console working
-        // debugEl.innerText += `[LOG] ${args.join(" ")}\n`; // Optional: spammy
-    };
-    console.error = (...args) => {
-        originalError(...args);
-        debugEl.innerText += `[CONSOLE_ERROR] ${args.join(" ")}\n`;
-    };
-
-    // Log screen size on resize
-    const logSize = () => {
-        const c = document.querySelector("canvas");
-        debugEl.innerText = `[v2] Screen: ${window.innerWidth}x${window.innerHeight}\nCanvas: ${c ? c.width : '?'}x${c ? c.height : '?'}\nStyle: ${c ? c.style.width : '?'}x${c ? c.style.height : '?'}\n` + debugEl.innerText.split('\n').slice(0, 5).join('\n');
-    };
-    window.addEventListener("resize", logSize);
-    setTimeout(logSize, 1000);
-}
+// Debug Logger for Mobile - Removed after verification
+// Initialize Kaboom
 
 // Initialize Kaboom
 const k = kaboom({
