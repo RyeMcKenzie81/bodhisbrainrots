@@ -58,7 +58,7 @@ function applyPowerup(player, type) {
             player.speedLevel++;
             break;
         case "kick":
-            // TODO: Implement kicking mechanics
+            player.canKick = true;
             break;
         case "skull":
             // TODO: Implement skull curse (reduce stats)
@@ -79,6 +79,25 @@ export function tick(state, dt) {
         if (!player.alive) return;
 
         if (player.intent && (player.intent.dx !== 0 || player.intent.dy !== 0)) {
+
+            // Kick Check
+            if (player.canKick) {
+                // Look ahead 0.7 tiles roughly to see if we are walking into a brain
+                // Or just check if our movement WOULD hit a brain?
+                const kickDist = SIM_CONSTANTS.TILE_SIZE * 0.6;
+                const checkX = player.pos.x + player.intent.dx * kickDist;
+                const checkY = player.pos.y + player.intent.dy * kickDist;
+                const gridPos = toGrid(checkX, checkY);
+
+                // Find brain at this grid pos
+                const brain = state.brains.find(b => b.gridX === gridPos.x && b.gridY === gridPos.y);
+                if (brain && !brain.vx && !brain.vy) { // Only kick static brains
+                    brain.vx = player.intent.dx;
+                    brain.vy = player.intent.dy;
+                    console.log(`[SERVER] Player ${player.id} kicked brain ${brain.id}`);
+                }
+            }
+
             // Apply speed multiplier (20% per speed powerup)
             const speedMultiplier = 1 + (player.speedLevel || 0) * 0.2;
             const moveAmt = SIM_CONSTANTS.PLAYER_SPEED * speedMultiplier * dt;
@@ -169,11 +188,48 @@ export function tick(state, dt) {
     }
 
     // 6. Tick Explosions
-    // (Explosions are static data for now, cleaned up by client/state sync implicitly if efficient?)
-    // Actually we should prune old explosions to keep packet size small
     state.explosions = state.explosions.filter(e => state.time - e.timestamp < SIM_CONSTANTS.EXPLOSION_DURATION);
 
-    // 7. Timer & Sudden Death
+    // 7. Tick Sliding Brains
+    state.brains.forEach(brain => {
+        if (brain.vx || brain.vy) {
+            const speed = 300; // Slide speed
+            const newX = (brain.worldX || ((brain.gridX + 0.5) * SIM_CONSTANTS.TILE_SIZE)) + brain.vx * speed * dt;
+            const newY = (brain.worldY || ((brain.gridY + 0.5) * SIM_CONSTANTS.TILE_SIZE)) + brain.vy * speed * dt;
+
+            // Initial world pos sync if needed
+            if (brain.worldX === undefined) { brain.worldX = (brain.gridX + 0.5) * SIM_CONSTANTS.TILE_SIZE; }
+            if (brain.worldY === undefined) { brain.worldY = (brain.gridY + 0.5) * SIM_CONSTANTS.TILE_SIZE; }
+
+            // Check collision ahead
+            // Brain radius ~ 40% of tile
+            const r = SIM_CONSTANTS.TILE_SIZE * 0.4;
+            if (checkAABBWalkable(state, newX, newY, r, [brain.id])) {
+                brain.worldX = newX;
+                brain.worldY = newY;
+
+                // Update grid coords
+                const newGrid = toGrid(newX, newY);
+                if (newGrid.x !== brain.gridX || newGrid.y !== brain.gridY) {
+                    brain.gridX = newGrid.x;
+                    brain.gridY = newGrid.y;
+                }
+            } else {
+                // Hitting something - STOP and snap to nearest grid
+                brain.vx = 0;
+                brain.vy = 0;
+
+                // Snap to center of current grid cell
+                const snapGrid = toGrid(brain.worldX, brain.worldY);
+                brain.gridX = snapGrid.x;
+                brain.gridY = snapGrid.y;
+                brain.worldX = (snapGrid.x + 0.5) * SIM_CONSTANTS.TILE_SIZE;
+                brain.worldY = (snapGrid.y + 0.5) * SIM_CONSTANTS.TILE_SIZE;
+            }
+        }
+    });
+
+    // 8. Timer & Sudden Death
     if (!state.gameOver) {
         state.gameTime -= dt;
         if (state.gameTime <= 0) {

@@ -275,25 +275,44 @@ export function initOnlineGameScene() {
             });
 
             // Add/Update
+            // Add/Update
             state.brains.forEach(b => {
-                if (!brainMap.has(b.id)) {
-                    const obj = add([
+                let obj = brainMap.get(b.id);
+
+                // Calculate target position (prioritize world coords if sliding)
+                const targetX = (b.worldX !== undefined) ? b.worldX : (b.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2);
+                const targetY = (b.worldY !== undefined) ? b.worldY : (b.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2);
+
+                if (!obj) {
+                    obj = add([
                         sprite("brainbomb"),
-                        pos(b.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, b.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
+                        pos(targetX, targetY),
                         anchor("center"),
                         scale(0.05),
-                        { timer: 0 } // Visual timer
+                        z(5), // Below players (z=10) but above floor (z=-1)
+                        {
+                            timer: 0,
+                            targetPos: vec2(targetX, targetY)
+                        }
                     ]);
 
-                    // Pulse animation
+                    // Pulse animation & Interpolation
                     obj.onUpdate(() => {
                         obj.timer += dt();
                         const scaleMod = 0.05 + Math.sin(obj.timer * 10) * 0.005;
                         obj.scale = vec2(scaleMod);
+
+                        // Interpolate position
+                        if (obj.targetPos) {
+                            obj.pos = obj.pos.lerp(obj.targetPos, dt() * 15);
+                        }
                     });
 
                     brainMap.set(b.id, obj);
                     play("bomb1");
+                } else {
+                    // Update target for existing brain
+                    obj.targetPos = vec2(targetX, targetY);
                 }
             });
 
@@ -317,7 +336,9 @@ export function initOnlineGameScene() {
                     const powerupSprites = {
                         brain: "powerup_bomb",
                         fire: "powerup_fire",
-                        speed: "powerup_speed"
+                        speed: "powerup_speed",
+                        kick: "powerup_speed", // Use speed sprite for kick (boot?)
+                        skull: "powerup_bomb"  // Use bomb sprite for skull
                     };
 
                     const sprName = powerupSprites[pState.type];
@@ -325,11 +346,17 @@ export function initOnlineGameScene() {
                         const baseScale = (SIM_CONSTANTS.TILE_SIZE * 0.63) / 500;
                         const baseY = pState.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
 
+                        // Tint colors
+                        let tintColor = rgb(255, 255, 255);
+                        if (pState.type === "kick") tintColor = rgb(255, 255, 100); // Yellow-ish
+                        if (pState.type === "skull") tintColor = rgb(100, 100, 100); // Dark
+
                         pObj = add([
                             sprite(sprName),
                             pos(pState.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, baseY),
                             anchor("center"),
                             scale(baseScale),
+                            color(tintColor),
                             opacity(1),
                             z(pState.gridY),
                             { baseY, jiggleOffset: Math.random() * Math.PI * 2 }
