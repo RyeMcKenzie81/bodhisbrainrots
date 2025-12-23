@@ -201,6 +201,13 @@ function startGameLoop(room) {
         const dt = TICK_INTERVAL / 1000;
         tick(room.state, dt);
 
+        // Broadcast state to all clients
+        broadcastToRoom(room, {
+            type: 'snapshot',
+            state: room.state,
+            time: Date.now()
+        });
+
         // Stop loop if game is over
         if (room.state.gameOver) {
             console.log(`Game Over in room ${room.id}. Stopping game loop.`);
@@ -213,13 +220,6 @@ function startGameLoop(room) {
             });
             return; // Exit the interval callback
         }
-
-        // Broadcast state to all clients
-        broadcastToRoom(room, {
-            type: 'snapshot',
-            state: room.state,
-            time: Date.now()
-        });
 
     }, TICK_INTERVAL);
 }

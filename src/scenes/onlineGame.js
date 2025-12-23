@@ -151,14 +151,43 @@ export function initOnlineGameScene() {
                         anchor("center"),
                         scale(0.25), // Match local game scale exactly
                         z(10),
-                        { characterIndex: charIdx, prevFacing: "down", prevMoving: false }
+                        {
+                            characterIndex: charIdx,
+                            prevFacing: "down",
+                            prevMoving: false,
+                            targetPos: vec2(pState.pos.x, pState.pos.y),
+                            hasReceivedState: true
+                        }
                     ]);
+
+                    // Smooth movement interpolation
+                    pObj.onUpdate(() => {
+                        if (pObj.targetPos) {
+                            // Lerp factor: 15Hz = 66ms. At 60fps, we want to close gap in ~4 frames.
+                            // dt() * 15 is a good baseline for 15Hz updates.
+                            pObj.pos = pObj.pos.lerp(pObj.targetPos, dt() * 15);
+                        }
+                    });
+
                     playerMap.set(pState.id, pObj);
                 }
 
-                // Update Position
-                pObj.pos.x = pState.pos.x;
-                pObj.pos.y = pState.pos.y;
+                // Update Position (Interpolation Target)
+                if (pObj.isMyPlayer) {
+                    // For my player, we might want to reconcile, but for now simple interpolation is safer
+                    // to prevent jitter between prediction and server state.
+                    // Or keep prediction and snap if too far? 
+                    // Let's stick to server authority for now to be safe, but smooth it.
+                }
+
+                // Store target for interpolation in main loop
+                pObj.targetPos = vec2(pState.pos.x, pState.pos.y);
+
+                // If this is the FIRST update or distance is huge (teleport), snap immediately
+                if (!pObj.hasReceivedState || pObj.pos.dist(pObj.targetPos) > SIM_CONSTANTS.TILE_SIZE * 2) {
+                    pObj.pos = pObj.targetPos.clone();
+                    pObj.hasReceivedState = true;
+                }
 
                 // Update z-order based on y position (so player renders correctly behind/in front of blocks)
                 pObj.z = Math.floor(pState.pos.y / SIM_CONSTANTS.TILE_SIZE);
