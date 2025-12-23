@@ -49,8 +49,13 @@ export function initOnlineGameScene() {
 
                     // Then render blocks/walls on top
                     if (cell.type === "wall") {
-                        // Indestructible walls
-                        if (x % 2 === 0 && y % 2 === 0 && x !== 0 && x !== 14 && y !== 0 && y !== 12) {
+                        // Check if this is a perimeter wall (edge of grid)
+                        const isPerimeter = (x === 0 || x === SIM_CONSTANTS.GRID_WIDTH - 1 || y === 0 || y === SIM_CONSTANTS.GRID_HEIGHT - 1);
+
+                        // Check if this is an interior diamond block position (even x and y, not on perimeter)
+                        const isDiamondBlock = !isPerimeter && (x % 2 === 0 && y % 2 === 0);
+
+                        if (isDiamondBlock) {
                             gridObjs.push(add([
                                 sprite("diamondblock"),
                                 pos(posX, posY),
@@ -58,6 +63,7 @@ export function initOnlineGameScene() {
                                 scale(0.12),
                             ]));
                         } else {
+                            // Perimeter walls or regular walls use woodblock
                             gridObjs.push(add([
                                 sprite("woodblock"),
                                 pos(posX, posY),
