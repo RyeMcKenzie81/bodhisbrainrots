@@ -146,10 +146,15 @@ export function initLobbyScene() {
             renderPlayers();
         };
 
+
         const handlePlayerJoined = (data) => {
-            players.push(data.player);
-            renderPlayers();
-            try { play("powerup", { volume: 0.5 }); } catch (e) { }
+            // Only add if player doesn't already exist in the array
+            const existingPlayer = players.find(p => p.id === data.player.id);
+            if (!existingPlayer) {
+                players.push(data.player);
+                renderPlayers();
+                try { play("powerup", { volume: 0.5 }); } catch (e) { }
+            }
         };
 
         const handlePlayerReady = (data) => {
