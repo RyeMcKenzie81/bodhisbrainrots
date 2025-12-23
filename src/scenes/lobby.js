@@ -147,10 +147,7 @@ export function initLobbyScene() {
 
                     leftBtn.onHover(() => leftBtn.color = rgb(150, 150, 150));
                     leftBtn.onHoverEnd(() => leftBtn.color = rgb(100, 100, 100));
-                    leftBtn.onClick(() => {
-                        let newIdx = (charIndex - 1 + PLAYERS.length) % PLAYERS.length;
-                        socket.send("update_character", { characterIndex: newIdx });
-                    });
+                    leftBtn.onClick(() => cycleMyCharacter(-1));
 
                     // Right Arrow
                     const rightBtn = playerListContainer.add([
@@ -170,10 +167,7 @@ export function initLobbyScene() {
 
                     rightBtn.onHover(() => rightBtn.color = rgb(150, 150, 150));
                     rightBtn.onHoverEnd(() => rightBtn.color = rgb(100, 100, 100));
-                    rightBtn.onClick(() => {
-                        let newIdx = (charIndex + 1) % PLAYERS.length;
-                        socket.send("update_character", { characterIndex: newIdx });
-                    });
+                    rightBtn.onClick(() => cycleMyCharacter(1));
                 }
             });
 
@@ -266,6 +260,16 @@ export function initLobbyScene() {
             }
         }
 
+        // Helper to cycle character
+        function cycleMyCharacter(delta) {
+            const p = players.find(player => player.id === myPlayerId);
+            if (p && !p.ready) {
+                const charIndex = p.characterIndex || 0;
+                let newIdx = (charIndex + delta + PLAYERS.length) % PLAYERS.length;
+                socket.send("update_character", { characterIndex: newIdx });
+            }
+        }
+
         // Input
         onKeyPress("space", () => {
             if (isHost) {
@@ -286,6 +290,12 @@ export function initLobbyScene() {
         onKeyPress("escape", () => {
             go("menu");
         });
+
+        // Character Selection Keys
+        onKeyPress("left", () => cycleMyCharacter(-1));
+        onKeyPress("a", () => cycleMyCharacter(-1));
+        onKeyPress("right", () => cycleMyCharacter(1));
+        onKeyPress("d", () => cycleMyCharacter(1));
 
         // NATIVE TOUCH HANDLERS
         const touchButtons = [
