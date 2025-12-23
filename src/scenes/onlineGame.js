@@ -660,7 +660,7 @@ export function initOnlineGameScene() {
 
         // Cleanup
         onSceneLeave(() => {
-            // socket.off("snapshot");
+            socket.removeAllListeners("snapshot"); socket.removeAllListeners("game_over");
         });
     });
 }
