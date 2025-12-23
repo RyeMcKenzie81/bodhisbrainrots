@@ -323,6 +323,12 @@ export function initGameScene() {
         // Add D-pad and Action button if on touch device (or always for now)
         // Create native touch overlay for robust multi-touch
         function createTouchControls() {
+            // Only create touch controls on touch-capable devices
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            if (!isTouchDevice) {
+                return; // Skip on desktop
+            }
+
             const canvas = document.querySelector("canvas");
             if (!canvas) return;
 

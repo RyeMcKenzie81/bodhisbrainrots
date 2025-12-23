@@ -125,6 +125,9 @@ export function initOnlineGameScene() {
                 pObj.pos.x = pState.pos.x;
                 pObj.pos.y = pState.pos.y;
 
+                // Update z-order based on y position (so player renders correctly behind/in front of blocks)
+                pObj.z = Math.floor(pState.pos.y / SIM_CONSTANTS.TILE_SIZE);
+
                 // Update Animation based on movement state
                 const isMoving = pState.isMoving || false;
                 const facing = pState.facing || "down";
