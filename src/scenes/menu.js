@@ -83,7 +83,9 @@ export function initMenuScenes() {
         const buttonY = 280;
 
         modes.forEach((mode, i) => {
-            const x = width() / 2 - 150 + i * 300;
+            const spacing = 280;
+            const x = width() / 2 - spacing + i * spacing;
+            // Original incorrect: const x = width() / 2 - 150 + i * 300;
 
             const btn = add([
                 rect(240, 120, { radius: 8 }),
