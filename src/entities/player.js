@@ -105,54 +105,104 @@ export function spawnPlayer(playerIndex, characterIndex) {
         }
     }
 
-    onKeyDown(keys.up, () => {
-        if (player.alive && gameState.gameStarted) {
-            player.move(0, -player.speed);
-            snapToLane("x"); // Lock to vertical lane
-            if (player.facing !== "up" || !player.isMoving) {
-                player.facing = "up";
-                player.isMoving = true;
-                player.flipX = false;
-                player.play("walk_up");
+    // Helper to bind a primary key and an optional secondary key (for P1 arrow keys)
+    function bindInput(primaryKey, secondaryKey, onPress, onRelease) {
+        onKeyDown(primaryKey, onPress);
+        onKeyRelease(primaryKey, onRelease);
+
+        if (playerIndex === 0 && secondaryKey) {
+            onKeyDown(secondaryKey, onPress);
+            onKeyRelease(secondaryKey, onRelease);
+        }
+    }
+
+    // Up
+    bindInput(keys.up, "up",
+        () => { // On Press
+            if (player.alive && gameState.gameStarted) {
+                player.move(0, -player.speed);
+                snapToLane("x");
+                if (player.facing !== "up" || !player.isMoving) {
+                    player.facing = "up";
+                    player.isMoving = true;
+                    player.flipX = false;
+                    player.play("walk_up");
+                }
+            }
+        },
+        () => { // On Release
+            if (player.alive && player.facing === "up") {
+                player.isMoving = false;
+                player.play("idle_up");
             }
         }
-    });
-    onKeyDown(keys.down, () => {
-        if (player.alive && gameState.gameStarted) {
-            player.move(0, player.speed);
-            snapToLane("x"); // Lock to vertical lane
-            if (player.facing !== "down" || !player.isMoving) {
-                player.facing = "down";
-                player.isMoving = true;
-                player.flipX = false;
-                player.play("walk_down");
+    );
+
+    // Down
+    bindInput(keys.down, "down",
+        () => {
+            if (player.alive && gameState.gameStarted) {
+                player.move(0, player.speed);
+                snapToLane("x");
+                if (player.facing !== "down" || !player.isMoving) {
+                    player.facing = "down";
+                    player.isMoving = true;
+                    player.flipX = false;
+                    player.play("walk_down");
+                }
+            }
+        },
+        () => {
+            if (player.alive && player.facing === "down") {
+                player.isMoving = false;
+                player.play("idle_down");
             }
         }
-    });
-    onKeyDown(keys.left, () => {
-        if (player.alive && gameState.gameStarted) {
-            player.move(-player.speed, 0);
-            snapToLane("y"); // Lock to horizontal lane
-            if (player.facing !== "left" || !player.isMoving) {
-                player.facing = "left";
-                player.isMoving = true;
-                player.flipX = false;  // Don't flip - use left animation
-                player.play("walk_left");
+    );
+
+    // Left
+    bindInput(keys.left, "left",
+        () => {
+            if (player.alive && gameState.gameStarted) {
+                player.move(-player.speed, 0);
+                snapToLane("y");
+                if (player.facing !== "left" || !player.isMoving) {
+                    player.facing = "left";
+                    player.isMoving = true;
+                    player.flipX = false;
+                    player.play("walk_left");
+                }
+            }
+        },
+        () => {
+            if (player.alive && player.facing === "left") {
+                player.isMoving = false;
+                player.play("idle_left");
             }
         }
-    });
-    onKeyDown(keys.right, () => {
-        if (player.alive && gameState.gameStarted) {
-            player.move(player.speed, 0);
-            snapToLane("y"); // Lock to horizontal lane
-            if (player.facing !== "right" || !player.isMoving) {
-                player.facing = "right";
-                player.isMoving = true;
-                player.flipX = false;  // Don't flip - use right animation
-                player.play("walk_right");
+    );
+
+    // Right
+    bindInput(keys.right, "right",
+        () => {
+            if (player.alive && gameState.gameStarted) {
+                player.move(player.speed, 0);
+                snapToLane("y");
+                if (player.facing !== "right" || !player.isMoving) {
+                    player.facing = "right";
+                    player.isMoving = true;
+                    player.flipX = false;
+                    player.play("walk_right");
+                }
+            }
+        },
+        () => {
+            if (player.alive && player.facing === "right") {
+                player.isMoving = false;
+                player.play("idle_right");
             }
         }
-    });
+    );
 
     // Footstep Sound Logic
     let stepTimer = 0;
