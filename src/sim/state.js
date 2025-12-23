@@ -31,8 +31,7 @@ export function createGameState(seed) {
 }
 
 /**
- * Initializes a grid with soft/hard blocks.
- * This will be populated by the level generator logic later.
+ * Initializes a grid with walls and destructible blocks.
  */
 function createGrid(width, height) {
     const grid = [];
@@ -43,10 +42,23 @@ function createGrid(width, height) {
             if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
                 row.push({ type: "wall", solid: true, destructible: false });
             } else if (x % 2 === 0 && y % 2 === 0) {
-                // Hard blocks pattern
+                // Hard blocks pattern (indestructible)
                 row.push({ type: "wall", solid: true, destructible: false });
             } else {
-                row.push({ type: "empty", solid: false });
+                // Potentially add destructible blocks
+                // Leave corners clear for player spawns (top-left, top-right, bottom-left, bottom-right)
+                const isCornerSpawn =
+                    (x <= 2 && y <= 2) ||           // Top-left
+                    (x >= width - 3 && y <= 2) ||   // Top-right
+                    (x <= 2 && y >= height - 3) ||  // Bottom-left
+                    (x >= width - 3 && y >= height - 3); // Bottom-right
+
+                if (!isCornerSpawn && Math.random() < 0.6) {
+                    // 60% chance of destructible block
+                    row.push({ type: "block", solid: true, destructible: true });
+                } else {
+                    row.push({ type: "empty", solid: false });
+                }
             }
         }
         grid.push(row);

@@ -37,6 +37,7 @@ export function initOnlineGameScene() {
                     const posY = y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
 
                     if (cell.type === "wall") {
+                        // Indestructible walls
                         if (x % 2 === 0 && y % 2 === 0 && x !== 0 && x !== 14 && y !== 0 && y !== 12) {
                             gridObjs.push(add([
                                 sprite("diamondblock"),
@@ -52,6 +53,14 @@ export function initOnlineGameScene() {
                                 scale(0.12),
                             ]));
                         }
+                    } else if (cell.type === "block") {
+                        // Destructible blocks
+                        gridObjs.push(add([
+                            sprite("box"),
+                            pos(posX, posY),
+                            anchor("center"),
+                            scale(0.12),
+                        ]));
                     }
                 });
             });
@@ -138,27 +147,34 @@ export function initOnlineGameScene() {
             });
 
             // D. Explosions (Transient)
-            state.explosions.forEach(exp => {
-                // Check if we already showed this explosion? 
-                // MVP: Just spawn it and let it die. Server only sends 'active' explosions.
-                // Ideally server sends "EXPLOSION_EVENT". 
-                // For now, if state has explosions, render them if not rendered.
-                // Simplification: Server removes them quickly. 
+            // Track which explosions we've already rendered to prevent duplicates
+            if (!window.renderedExplosions) {
+                window.renderedExplosions = new Set();
+            }
 
-                // Better MVP: Just spawn a visual explosion at coords
-                // Kaboom:
-                const kExp = add([
-                    sprite("brainboom"),
-                    pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
-                    anchor("center"),
-                    scale(0.25),
-                    lifespan(0.5)
-                ]);
-                play("bomb2");
+            state.explosions.forEach(exp => {
+                // Create unique ID for this explosion
+                const expId = `${exp.x}_${exp.y}_${Math.floor(exp.timestamp * 1000)}`;
+
+                if (!window.renderedExplosions.has(expId)) {
+                    window.renderedExplosions.add(expId);
+
+                    // Spawn visual explosion
+                    add([
+                        sprite("brainboom"),
+                        pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
+                        anchor("center"),
+                        scale(0.25),
+                        lifespan(0.5)
+                    ]);
+                    play("bomb2");
+
+                    // Clean up tracking after lifespan
+                    wait(0.6, () => {
+                        window.renderedExplosions.delete(expId);
+                    });
+                }
             });
-            // Clear explosions from state so we don't re-render?
-            // Wait, state is authoritative. We shouldn't modify it.
-            // Server should clear them.
         });
 
         // 3. Input Loop
