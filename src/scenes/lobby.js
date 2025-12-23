@@ -69,6 +69,15 @@ export function initLobbyScene() {
             color(150, 150, 150),
         ]);
 
+        // Debug display for mobile
+        const debugText = add([
+            text("", { size: 14 }),
+            pos(10, height() - 30),
+            anchor("left"),
+            color(255, 255, 0),
+            z(999),
+        ]);
+
         function renderPlayers() {
             // Destroy all children manually (Kaboom doesn't have removeAllChildren)
             playerListContainer.get("*").forEach(child => destroy(child));
@@ -127,6 +136,7 @@ export function initLobbyScene() {
 
         const handleRoomJoined = (data) => {
             console.log("[DEBUG] room_joined event received:", data);
+            debugText.text = `Joined! Players: ${data.players?.length || 0} | MyID: ${data.playerId}`;
             roomCodeText.text = `ROOM CODE: ${data.roomId}`;
             roomId = data.roomId;
             myPlayerId = data.playerId;
