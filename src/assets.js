@@ -12,6 +12,8 @@ export function loadAssets() {
     loadSprite("brainboom", "sprites/brainbombexplode.png");
     loadSprite("woodblock", "sprites/woodblock.png");
     loadSprite("diamondblock", "sprites/diamondblock.png");
+    loadSprite("christmas_tree", "sprites/christmas_tree.png");
+    loadSprite("christmas_elf", "sprites/christmas_elf.png");
     loadSprite("powerup_bomb", "sprites/powerupbomb.png");
     loadSprite("powerup_fire", "sprites/powerupfire.png");
     loadSprite("powerup_speed", "sprites/powerupspeed.png");

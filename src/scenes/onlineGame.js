@@ -63,12 +63,15 @@ export function initOnlineGameScene() {
                                 scale(0.12),
                             ]));
                         } else if (isPerimeter) {
-                            // Perimeter walls use gray rect (like local game)
+                            // Perimeter walls use festive Christmas decorations! 🎄
+                            const decorations = ["christmas_tree", "christmas_elf"];
+                            const decoration = decorations[Math.floor(Math.random() * decorations.length)];
+
                             gridObjs.push(add([
-                                rect(SIM_CONSTANTS.TILE_SIZE - 2, SIM_CONSTANTS.TILE_SIZE - 2, { radius: 4 }),
+                                sprite(decoration),
                                 pos(posX, posY),
                                 anchor("center"),
-                                color(80, 80, 100),
+                                scale(0.12),
                                 z(y),
                             ]));
                         } else {
