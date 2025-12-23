@@ -327,9 +327,9 @@ export function initGameScene() {
             if (!canvas) return;
 
             // Define button zones in GAME coordinates (960x744)
-            const dpadBaseX = 80;
-            const dpadBaseY = height() - 80;
-            const btnRadius = 25;
+            // User requested: 1/3 up the screen and double size
+            const dpadBaseX = 140;
+            const dpadBaseY = height() - 250;
 
             // Visual Buttons (just for rendering)
             const dPad = add([
@@ -339,16 +339,16 @@ export function initGameScene() {
             ]);
 
             const buttons = [
-                { dir: "up", x: 0, y: -40, txt: "W" },
-                { dir: "down", x: 0, y: 40, txt: "S" },
-                { dir: "left", x: -40, y: 0, txt: "A" },
-                { dir: "right", x: 40, y: 0, txt: "D" },
+                { dir: "up", x: 0, y: -90, txt: "▲" },
+                { dir: "down", x: 0, y: 90, txt: "▼" },
+                { dir: "left", x: -90, y: 0, txt: "◀" },
+                { dir: "right", x: 90, y: 0, txt: "▶" },
             ];
 
             // Render D-Pad
             buttons.forEach(b => {
                 b.vis = dPad.add([
-                    circle(22),
+                    circle(50),
                     pos(b.x, b.y),
                     anchor("center"),
                     color(255, 255, 255),
@@ -356,7 +356,7 @@ export function initGameScene() {
                     fixed(),
                 ]);
                 dPad.add([
-                    text(b.txt, { size: 24 }),
+                    text(b.txt, { size: 40 }),
                     pos(b.x, b.y),
                     anchor("center"),
                     opacity(0.5),
@@ -365,9 +365,9 @@ export function initGameScene() {
             });
 
             // Render Action Button
-            const actionBtnX = width() - 80;
-            const actionBtnY = height() - 80;
-            const actionBtnRadius = 35;
+            const actionBtnX = width() - 140;
+            const actionBtnY = height() - 250;
+            const actionBtnRadius = 70;
             const actionBtn = add([
                 circle(actionBtnRadius),
                 pos(actionBtnX, actionBtnY),
@@ -404,14 +404,14 @@ export function initGameScene() {
                     const bx = dpadBaseX + b.x;
                     const by = dpadBaseY + b.y;
                     const dist = Math.sqrt((pos.x - bx) ** 2 + (pos.y - by) ** 2);
-                    if (dist < 40) { // Generous hit area
+                    if (dist < 80) { // Large hit area for big buttons
                         hitButton = b.dir;
                     }
                 });
 
                 // Check Action Button
                 const distAction = Math.sqrt((pos.x - actionBtnX) ** 2 + (pos.y - actionBtnY) ** 2);
-                if (distAction < 50) {
+                if (distAction < 100) {
                     hitButton = "action";
                 }
 
