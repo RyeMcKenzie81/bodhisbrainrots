@@ -167,6 +167,10 @@ function addPlayerToSim(state, id) {
     if (idx === 1) { startX = SIM_CONSTANTS.TILE_SIZE * (SIM_CONSTANTS.GRID_WIDTH - 1.5); startY = SIM_CONSTANTS.TILE_SIZE * (SIM_CONSTANTS.GRID_HEIGHT - 1.5); } // Bottom-Right
     if (idx === 2) { startX = SIM_CONSTANTS.TILE_SIZE * (SIM_CONSTANTS.GRID_WIDTH - 1.5); startY = SIM_CONSTANTS.TILE_SIZE * 1.5; } // Top-Right
     if (idx === 3) { startX = SIM_CONSTANTS.TILE_SIZE * 1.5; startY = SIM_CONSTANTS.TILE_SIZE * (SIM_CONSTANTS.GRID_HEIGHT - 1.5); } // Bottom-Left
+    if (idx === 4) {
+        startX = SIM_CONSTANTS.TILE_SIZE * (SIM_CONSTANTS.GRID_WIDTH / 2);
+        startY = SIM_CONSTANTS.TILE_SIZE * (SIM_CONSTANTS.GRID_HEIGHT / 2);
+    } // Center (5th Player)
 
     state.players.push({
         id: id,
@@ -209,16 +213,35 @@ function startGameLoop(room) {
         });
 
         // Stop loop if game is over
+        // Stop loop if game is over
         if (room.state.gameOver) {
-            console.log(`Game Over in room ${room.id}. Stopping game loop.`);
+            console.log(`Game Over in room ${room.id}. Restarting in 10s.`);
             clearInterval(room.interval);
-            room.interval = null; // Indicate that the loop is no longer active
-            // Optionally, broadcast a game over message
+            room.interval = null;
+
+            // Broadcast Game Over with next round info
             broadcastToRoom(room, {
                 type: 'game_over',
-                winner: room.state.winner // Assuming state has a winner property
+                winner: room.state.winner,
+                restartDelay: 10
             });
-            return; // Exit the interval callback
+
+            // Schedule Restart
+            setTimeout(() => {
+                console.log(`Restarting room ${room.id}`);
+
+                // Preserve players list but reset state
+                const players = room.players.filter(p => p.connected); // Keep only connected
+                room.state = createGameState(room.id);
+                room.players = players; // Keep references
+
+                // Re-add players to simulation
+                players.forEach(p => {
+                    addPlayerToSim(room.state, p.id);
+                });
+
+                startGameLoop(room);
+            }, 10000);
         }
 
     }, TICK_INTERVAL);

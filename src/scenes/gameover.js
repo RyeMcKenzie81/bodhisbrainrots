@@ -11,6 +11,8 @@ export function initGameOverScene() {
         } else if (typeof args === "object") {
             winnerName = args.winner || "Nobody";
             isMultiplayer = args.isMultiplayer || false;
+            roomId = args.roomId;
+            restartDelay = args.restartDelay || 0;
         }
 
         // Play appropriate sound
@@ -41,12 +43,34 @@ export function initGameOverScene() {
             color(255, 255, 100),
         ]);
 
-        // Play Again button (large, touch-friendly)
+        if (isMultiplayer && restartDelay > 0) {
+            const timerText = add([
+                text(`Next Game: ${restartDelay}s`, { size: 24 }),
+                pos(width() / 2, 450),
+                anchor("center"),
+                color(200, 200, 255),
+                { timer: restartDelay }
+            ]);
+
+            // Countdown Logic
+            timerText.onUpdate(() => {
+                if (timerText.timer > 0) {
+                    timerText.timer -= dt();
+                    timerText.text = `Next Game: ${Math.ceil(timerText.timer)}s`;
+                    if (timerText.timer <= 0) {
+                        // Auto-rejoin?
+                        go("onlineGame", { roomId: roomId });
+                    }
+                }
+            });
+        }
+
+        // Play Again Button (Update action)
         add([
             rect(320, 80, { radius: 8 }),
             pos(width() / 2, 540),
             anchor("center"),
-            color(rgb(40, 80, 40)),
+            color(0, 150, 0),
             outline(4, rgb(100, 255, 100)),
         ]);
 
@@ -87,16 +111,8 @@ export function initGameOverScene() {
                 h: 80,
                 action: () => {
                     if (isMultiplayer) {
-                        go("lobby");
+                        go("onlineGame", { roomId: roomId });
                     } else {
-                        // For single player, restart game? Or menu?
-                        // Let's assume menu since 'game' scene might need args
-                        // But original code said go("menu"). 
-                        // Let's actually verify if go("game") works for single player.
-                        // Assuming single player setup scene is "game" or "main"?
-                        // Let's stick to "menu" for now to be safe, or "lobby" if that's the hub.
-                        // Actually, user wants "Play Again".
-                        // Assuming "game" is the single player scene.
                         go("game");
                     }
                 }
