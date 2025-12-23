@@ -61,9 +61,13 @@ export function tick(state, dt) {
             // Player hitbox radius (25% of tile size, matching local game area)
             const playerRadius = SIM_CONSTANTS.TILE_SIZE * 0.25;
 
-            // AABB Collision Check - test all four corners
-            const canMoveX = checkAABBWalkable(state, newX, player.pos.y, playerRadius);
-            const canMoveY = checkAABBWalkable(state, player.pos.x, newY, playerRadius);
+            // Offset collision center downward (like local game's area offset)
+            // This allows head to get closer to blocks above, feet further from blocks below
+            const collisionOffsetY = SIM_CONSTANTS.TILE_SIZE * 0.15;
+
+            // AABB Collision Check - test all four corners with offset
+            const canMoveX = checkAABBWalkable(state, newX, player.pos.y + collisionOffsetY, playerRadius);
+            const canMoveY = checkAABBWalkable(state, player.pos.x, newY + collisionOffsetY, playerRadius);
 
             // Apply movement if no collision
             if (canMoveX) {
