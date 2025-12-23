@@ -28,7 +28,7 @@ if (debugEl) {
     // Log screen size on resize
     const logSize = () => {
         const c = document.querySelector("canvas");
-        debugEl.innerText = `Screen: ${window.innerWidth}x${window.innerHeight}\nCanvas: ${c ? c.width : '?'}x${c ? c.height : '?'}\nStyle: ${c ? c.style.width : '?'}x${c ? c.style.height : '?'}\n` + debugEl.innerText.split('\n').slice(0, 5).join('\n');
+        debugEl.innerText = `[v2] Screen: ${window.innerWidth}x${window.innerHeight}\nCanvas: ${c ? c.width : '?'}x${c ? c.height : '?'}\nStyle: ${c ? c.style.width : '?'}x${c ? c.style.height : '?'}\n` + debugEl.innerText.split('\n').slice(0, 5).join('\n');
     };
     window.addEventListener("resize", logSize);
     setTimeout(logSize, 1000);
@@ -39,7 +39,7 @@ const k = kaboom({
     width: 960,
     height: 744,
     background: [30, 30, 50],
-    scale: 1,
+    // scale: 1,
     debug: true,
     letterbox: true,
     touchToMouse: true,
