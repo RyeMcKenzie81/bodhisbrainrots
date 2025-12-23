@@ -118,6 +118,7 @@ export function tick(state, dt) {
                 // Apply powerup effect
                 applyPowerup(player, powerup.type);
                 powerup.collected = true;
+                console.log(`[SERVER] Player ${player.id} collected ${powerup.type} powerup`);
             }
         });
     });
@@ -287,6 +288,7 @@ function spawnPowerup(state, gridX, gridY) {
         state.powerups = [];
     }
     state.powerups.push(powerup);
+    console.log(`[SERVER] Powerup spawned: ${powerupType} at (${gridX}, ${gridY})`);
 }
 
 /**
