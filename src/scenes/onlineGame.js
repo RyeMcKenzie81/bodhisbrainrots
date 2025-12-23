@@ -102,11 +102,8 @@ export function initOnlineGameScene() {
 
             console.log("[DEBUG] Snapshot received - Grid:", state.grid?.length, "Players:", state.players?.length, "Brains:", state.brains?.length);
 
-            // A. Render Grid (Lazy init)
-            if (gridObjs.length === 0) {
-                console.log("[DEBUG] First snapshot - initializing grid");
-                renderGrid(state.grid);
-            }
+            // A. Render Grid - Always re-render to show destroyed blocks
+            renderGrid(state.grid);
 
             // B. Sync Players
             state.players.forEach(pState => {
@@ -204,6 +201,8 @@ export function initOnlineGameScene() {
 
                 if (!window.renderedExplosions.has(expId)) {
                     window.renderedExplosions.add(expId);
+
+                    console.log("[DEBUG] Explosion cells:", exp.cells?.length || 0, "cells");
 
                     // Render flame sprite at each affected cell
                     if (exp.cells && exp.cells.length > 0) {
