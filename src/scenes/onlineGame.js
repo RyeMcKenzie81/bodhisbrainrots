@@ -68,7 +68,7 @@ export function initOnlineGameScene() {
                             const decoration = decorations[Math.floor(Math.random() * decorations.length)];
 
                             gridObjs.push(add([
-                                sprite(decoration),
+                                rect(SIM_CONSTANTS.TILE_SIZE - 2, SIM_CONSTANTS.TILE_SIZE - 2, { radius: 4 }),
                                 pos(posX, posY),
                                 anchor("center"),
                                 color(80, 80, 100),
