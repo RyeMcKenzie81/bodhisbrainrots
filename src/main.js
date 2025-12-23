@@ -24,6 +24,14 @@ if (debugEl) {
         originalError(...args);
         debugEl.innerText += `[CONSOLE_ERROR] ${args.join(" ")}\n`;
     };
+
+    // Log screen size on resize
+    const logSize = () => {
+        const c = document.querySelector("canvas");
+        debugEl.innerText = `Screen: ${window.innerWidth}x${window.innerHeight}\nCanvas: ${c ? c.width : '?'}x${c ? c.height : '?'}\nStyle: ${c ? c.style.width : '?'}x${c ? c.style.height : '?'}\n` + debugEl.innerText.split('\n').slice(0, 5).join('\n');
+    };
+    window.addEventListener("resize", logSize);
+    setTimeout(logSize, 1000);
 }
 
 // Initialize Kaboom

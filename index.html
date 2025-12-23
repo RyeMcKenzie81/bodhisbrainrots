@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui, viewport-fit=cover">
   <title>Bodhi's Brainrots</title>
   <style>
     html,
@@ -19,9 +19,9 @@
     }
 
     canvas {
+      /* Remove all sizing CSS - Let Kaboom allow defaults */
       display: block;
-      width: 100%;
-      height: 100%;
+      touch-action: none;
     }
 
     #rotate-message {
