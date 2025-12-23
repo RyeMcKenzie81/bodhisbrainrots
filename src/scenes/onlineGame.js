@@ -207,34 +207,44 @@ export function initOnlineGameScene() {
                     // Render flame sprite at each affected cell
                     if (exp.cells && exp.cells.length > 0) {
                         exp.cells.forEach(cell => {
-                            add([
+                            const flame = add([
                                 sprite("brainboom"),
                                 pos(cell.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
                                     cell.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
                                 anchor("center"),
-                                scale(0.12), // Smaller so flames don't overlap
-                                lifespan(0.5),
-                                z(cell.y)
+                                scale(0.07), // Match local game
+                                opacity(1),
+                                z(15) // High z-index like local game
                             ]);
+
+                            // Fade out animation
+                            flame.onUpdate(() => {
+                                flame.opacity -= dt() * 1.5;
+                                if (flame.opacity <= 0) destroy(flame);
+                            });
                         });
-                    } else {
                         // Fallback for old explosion format (just center)
-                        add([
+                        const flame = add([
                             sprite("brainboom"),
                             pos(exp.x * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2,
                                 exp.y * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2),
                             anchor("center"),
-                            scale(0.12), // Smaller so flames don't overlap
-                            lifespan(0.5)
+                            scale(0.07), // Match local game
+                            opacity(1),
+                            z(15)
                         ]);
+
+                        flame.onUpdate(() => {
+                            flame.opacity -= dt() * 1.5;
+                            if (flame.opacity <= 0) destroy(flame);
+                        });
+
+                        play("bomb2");
+                        shake(8);
+
+                        // Don't clean up - explosion should only render once EVER
                     }
-
-                    play("bomb2");
-                    shake(8);
-
-                    // Don't clean up - explosion should only render once EVER
-                }
-            });
+                });
         });
 
         // 3. Input Loop
