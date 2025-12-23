@@ -239,13 +239,14 @@ export function initOnlineGameScene() {
                             flame.opacity -= dt() * 1.5;
                             if (flame.opacity <= 0) destroy(flame);
                         });
-
-                        play("bomb2");
-                        shake(8);
-
-                        // Don't clean up - explosion should only render once EVER
                     }
-                });
+
+                    play("bomb2");
+                    shake(8);
+
+                    // Don't clean up - explosion should only render once EVER
+                }
+            });
         });
 
         // 3. Input Loop
