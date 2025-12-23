@@ -199,11 +199,10 @@ function processSuddenDeath(state) {
     const pos = getSpiralPosition(state.deathSpiralIndex, SIM_CONSTANTS.GRID_WIDTH, SIM_CONSTANTS.GRID_HEIGHT);
 
     if (pos) {
-        const idx = pos.y * SIM_CONSTANTS.GRID_WIDTH + pos.x;
-        // Turn into indestructible wall
-        if (state.grid[idx]) {
-            state.grid[idx].type = "wall";
-            state.grid[idx].isSuddenDeath = true; // Mark for visual usage
+        // Grid is 2D array [y][x]
+        if (state.grid[pos.y] && state.grid[pos.y][pos.x]) {
+            state.grid[pos.y][pos.x].type = "wall";
+            state.grid[pos.y][pos.x].isSuddenDeath = true; // Mark for visual usage
         }
 
         // Kill players on this tile

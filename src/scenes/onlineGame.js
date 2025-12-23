@@ -150,7 +150,8 @@ export function initOnlineGameScene() {
             // Switch to Overtime music
             if (state.suddenDeath && !window.overtimeStarted) {
                 if (window.bgMusic) window.bgMusic.paused = true;
-                window.overtimeMusic = play("overtime", { loop: true, volume: 0.6 });
+                // Don't loop if it's a voice clip or short sound
+                window.overtimeMusic = play("overtime", { loop: false, volume: 1.0 });
                 window.overtimeStarted = true;
             }
 
