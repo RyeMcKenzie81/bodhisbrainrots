@@ -16,9 +16,15 @@ const k = kaboom({
 loadAssets();
 
 // Initialize Scenes
+import { initLobbyScene } from "./scenes/lobby.js";
+import { initOnlineGameScene } from "./scenes/onlineGame.js";
+
+// Initialize Scenes
 initMenuScenes();
 initGameScene();
 initGameOverScene();
+initLobbyScene();
+initOnlineGameScene();
 
 // Start the game
 go("menu");

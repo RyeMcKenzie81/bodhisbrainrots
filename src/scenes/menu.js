@@ -56,11 +56,12 @@ export function initMenuScenes() {
 
     // Scene: Mode Selection
     scene("modeSelect", () => {
-        let selectedMode = 0; // 0 = Single Player, 1 = Multiplayer
-        const modes = ["SINGLE PLAYER", "MULTIPLAYER"];
+        let selectedMode = 0; // 0 = Single, 1 = Local MP, 2 = Online
+        const modes = ["SINGLE PLAYER", "LOCAL CO-OP", "ONLINE"];
         const modeDescriptions = [
             "Battle 1-3 AI opponents",
-            "2-4 players on one keyboard"
+            "2-4 players on one device",
+            "Join/Create room on server"
         ];
 
         add([
@@ -155,27 +156,100 @@ export function initMenuScenes() {
 
         onKeyPress("a", () => { selectedMode = 0; updateSelection(); });
         onKeyPress("left", () => { selectedMode = 0; updateSelection(); });
-        onKeyPress("d", () => { selectedMode = 1; updateSelection(); });
-        onKeyPress("right", () => { selectedMode = 1; updateSelection(); });
+        onKeyPress("d", () => { selectedMode = Math.min(2, selectedMode + 1); updateSelection(); });
+        onKeyPress("right", () => { selectedMode = Math.min(2, selectedMode + 1); updateSelection(); });
+        onKeyPress("a", () => { selectedMode = Math.max(0, selectedMode - 1); updateSelection(); });
+        onKeyPress("left", () => { selectedMode = Math.max(0, selectedMode - 1); updateSelection(); });
 
-        onKeyPress("space", () => {
+        function confirmMode() {
             if (selectedMode === 0) {
                 gameConfig.mode = "singleplayer";
                 go("difficultySelect");
-            } else {
+            } else if (selectedMode === 1) {
                 gameConfig.mode = "multiplayer";
                 go("playerCount");
+            } else {
+                gameConfig.mode = "online";
+                go("onlineMenu");
             }
-        });
+        }
 
-        onKeyPress("enter", () => {
-            if (selectedMode === 0) {
-                gameConfig.mode = "singleplayer";
-                go("difficultySelect");
-            } else {
-                gameConfig.mode = "multiplayer";
-                go("playerCount");
+        onKeyPress("space", confirmMode);
+        onKeyPress("enter", confirmMode);
+    });
+
+    // Scene: Online Menu
+    scene("onlineMenu", () => {
+        // connect if not connected
+        import("../net/socket.js").then(({ socket }) => {
+            if (!socket.connected) {
+                const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+                const host = window.location.hostname === "localhost" ? "localhost:3000" : window.location.host;
+                socket.connect(`${protocol}://${host}`);
             }
+
+            let selectedOption = 0;
+            const options = ["CREATE ROOM", "JOIN ROOM"];
+
+            add([
+                text("ONLINE MULTIPLAYER", { size: 36 }),
+                pos(width() / 2, 80),
+                anchor("center"),
+                color(100, 255, 100),
+            ]);
+
+            const buttons = [];
+
+            options.forEach((opt, i) => {
+                const btn = add([
+                    rect(300, 60, { radius: 8 }),
+                    pos(width() / 2, 250 + i * 100),
+                    anchor("center"),
+                    color(rgb(40, 40, 60)),
+                    outline(4, rgb(60, 60, 80)),
+                ]);
+                buttons.push(btn);
+
+                add([
+                    text(opt, { size: 24 }),
+                    pos(width() / 2, 250 + i * 100),
+                    anchor("center"),
+                    color(255, 255, 255),
+                ]);
+            });
+
+            function updateSelection() {
+                buttons.forEach((btn, i) => {
+                    btn.color = i === selectedOption ? rgb(80, 80, 120) : rgb(40, 40, 60);
+                    btn.outline.color = i === selectedOption ? rgb(100, 255, 100) : rgb(60, 60, 80);
+                });
+            }
+            updateSelection();
+
+            onKeyPress("w", () => { selectedOption = 0; updateSelection(); });
+            onKeyPress("up", () => { selectedOption = 0; updateSelection(); });
+            onKeyPress("s", () => { selectedOption = 1; updateSelection(); });
+            onKeyPress("down", () => { selectedOption = 1; updateSelection(); });
+
+            function confirm() {
+                if (selectedOption === 0) {
+                    // Create
+                    socket.send("create_room", { name: `Player_${Math.floor(Math.random() * 1000)}` });
+                    // Listen for room_created (handled in lobby scene or global listener)
+                    go("lobby");
+                } else {
+                    // Join
+                    const code = window.prompt("Enter Room Code:");
+                    if (code) {
+                        socket.send("join_room", { roomId: code.toUpperCase(), name: `Player_${Math.floor(Math.random() * 1000)}` });
+                        go("lobby");
+                    }
+                }
+            }
+
+            onKeyPress("space", confirm);
+            onKeyPress("enter", confirm);
+            onKeyPress("escape", () => go("modeSelect"));
         });
 
         onKeyPress("escape", () => go("menu"));

@@ -2,14 +2,20 @@
   "name": "bodhis-brainrots",
   "version": "1.0.0",
   "description": "Bomberman-style game with Brainrot characters",
+  "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server/index.js",
+    "test:sim": "node src/sim/test.js"
   },
   "devDependencies": {
     "vite": "^5.0.0"
   },
   "dependencies": {
-    "kaboom": "^3000.1.17"
+    "express": "^5.2.1",
+    "kaboom": "^3000.1.17",
+    "ws": "^8.18.3"
   }
 }
