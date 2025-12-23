@@ -966,3 +966,4 @@ export function initMenuScenes() {
             color(120, 120, 120),
         ]);
     });
+}
