@@ -175,24 +175,6 @@ export function initOnlineGameScene() {
                 });
                 return;
             }
-        });
-
-        // Listen for explicit game over message (contains restart delay info)
-        socket.on("game_over", (data) => {
-            console.log("[CLIENT] Received explicit game_over", data);
-
-            if (window.bgMusic) window.bgMusic.paused = true;
-            if (window.overtimeMusic) window.overtimeMusic.paused = true;
-            window.musicStarted = false;
-            window.overtimeStarted = false;
-
-            go("gameover", {
-                winner: data.winner || "No one",
-                isMultiplayer: true,
-                roomId: roomId,
-                restartDelay: data.restartDelay || 10
-            });
-        });
 
         // A. Render Grid - Only when it changes
         const gridHash = JSON.stringify(state.grid);
@@ -657,6 +639,23 @@ export function initOnlineGameScene() {
         });
     }
     createTouchControls();
+
+    // Listen for explicit game over message (contains restart delay info)
+    socket.on("game_over", (data) => {
+        console.log("[CLIENT] Received explicit game_over", data);
+
+        if (window.bgMusic) window.bgMusic.paused = true;
+        if (window.overtimeMusic) window.overtimeMusic.paused = true;
+        window.musicStarted = false;
+        window.overtimeStarted = false;
+
+        go("gameover", {
+            winner: data.winner || "No one",
+            isMultiplayer: true,
+            roomId: roomId,
+            restartDelay: data.restartDelay || 10
+        });
+    });
 
     // Cleanup
     onSceneLeave(() => {

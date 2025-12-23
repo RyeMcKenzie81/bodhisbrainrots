@@ -114,6 +114,20 @@ export function handleConnection(ws) {
                 }
             }
 
+            else if (type === 'update_character') {
+                if (currentRoomId) {
+                    const room = rooms.get(currentRoomId);
+                    const player = room.players.find(p => p.id === playerId);
+                    if (player) {
+                        player.characterIndex = msg.characterIndex;
+                        broadcastToRoom(room, {
+                            type: 'player_updated',
+                            player: player
+                        });
+                    }
+                }
+            }
+
             // Host can explicitly start the game (even solo for testing)
             else if (type === 'start_game') {
                 if (currentRoomId) {
@@ -156,7 +170,7 @@ function createRoom(id) {
     };
 }
 
-function addPlayerToSim(state, id) {
+function addPlayerToSim(state, id, characterIndex = 0) {
     // Determine start position based on player count/index
     const idx = state.players.length;
     let startX = 100;
@@ -175,6 +189,7 @@ function addPlayerToSim(state, id) {
     state.players.push({
         id: id,
         pos: { x: startX, y: startY },
+        characterIndex: characterIndex,
         alive: true,
         brainCount: SIM_CONSTANTS.MAX_BRAINS,
         brainsPlaced: 0,
@@ -237,7 +252,7 @@ function startGameLoop(room) {
 
                 // Re-add players to simulation
                 players.forEach(p => {
-                    addPlayerToSim(room.state, p.id);
+                    addPlayerToSim(room.state, p.id, p.characterIndex || 0);
                 });
 
                 startGameLoop(room);
