@@ -131,17 +131,22 @@ export function initLobbyScene() {
                 if (p.id === myPlayerId && !p.ready) {
                     // Left Arrow
                     const leftBtn = playerListContainer.add([
-                        rect(30, 30, { radius: 4 }),
+                        rect(40, 40, { radius: 6 }),
                         pos(140, y),
                         anchor("center"),
                         color(100, 100, 100),
-                        area()
+                        area(),
+                        z(100) // Ensure on top
                     ]);
                     playerListContainer.add([
-                        text("<", { size: 20 }),
+                        text("<", { size: 24 }),
                         pos(140, y),
-                        anchor("center")
+                        anchor("center"),
+                        z(101)
                     ]);
+
+                    leftBtn.onHover(() => leftBtn.color = rgb(150, 150, 150));
+                    leftBtn.onHoverEnd(() => leftBtn.color = rgb(100, 100, 100));
                     leftBtn.onClick(() => {
                         let newIdx = (charIndex - 1 + PLAYERS.length) % PLAYERS.length;
                         socket.send("update_character", { characterIndex: newIdx });
@@ -149,17 +154,22 @@ export function initLobbyScene() {
 
                     // Right Arrow
                     const rightBtn = playerListContainer.add([
-                        rect(30, 30, { radius: 4 }),
-                        pos(180, y),
+                        rect(40, 40, { radius: 6 }),
+                        pos(190, y), // Shifted slightly right due to larger size
                         anchor("center"),
                         color(100, 100, 100),
-                        area()
+                        area(),
+                        z(100)
                     ]);
                     playerListContainer.add([
-                        text(">", { size: 20 }),
-                        pos(180, y),
-                        anchor("center")
+                        text(">", { size: 24 }),
+                        pos(190, y),
+                        anchor("center"),
+                        z(101)
                     ]);
+
+                    rightBtn.onHover(() => rightBtn.color = rgb(150, 150, 150));
+                    rightBtn.onHoverEnd(() => rightBtn.color = rgb(100, 100, 100));
                     rightBtn.onClick(() => {
                         let newIdx = (charIndex + 1) % PLAYERS.length;
                         socket.send("update_character", { characterIndex: newIdx });
