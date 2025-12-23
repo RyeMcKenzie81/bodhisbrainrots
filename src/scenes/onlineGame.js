@@ -214,6 +214,13 @@ export function initOnlineGameScene() {
 
         // ============ MOBILE CONTROLS ============
         function createTouchControls() {
+            // Only create touch controls on touch-capable devices
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            if (!isTouchDevice) {
+                console.log("[DEBUG] Desktop device detected - skipping touch controls");
+                return;
+            }
+
             const canvas = document.querySelector("canvas");
             if (!canvas) return;
 
