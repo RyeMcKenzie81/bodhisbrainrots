@@ -41,6 +41,31 @@ export function applyInput(gameState, playerId, input) {
     player.lastInputSeq = input.seq;
 }
 
+/**
+ * Apply powerup effect to player
+ */
+function applyPowerup(player, type) {
+    switch (type) {
+        case "brain":
+            player.brainCount++;
+            break;
+        case "fire":
+            player.fireRange++;
+            break;
+        case "speed":
+            // Speed is handled client-side based on player.speed
+            // For now, just track that they have it
+            if (!player.powerups) player.powerups = [];
+            player.powerups.push("speed");
+            break;
+        case "kick":
+            // TODO: Implement kicking mechanics
+            break;
+        case "skull":
+            // TODO: Implement skull curse (reduce stats)
+            break;
+    }
+}
 
 /**
  * Main simulation tick.
