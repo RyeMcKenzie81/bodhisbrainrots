@@ -114,7 +114,7 @@ export function initOnlineGameScene() {
                         sprite(PLAYERS[charIdx].spriteAnim, { anim: "idle_down" }),
                         pos(pState.pos.x, pState.pos.y),
                         anchor("center"),
-                        scale(0.06),
+                        scale(0.16), // Match local game scale
                         z(10),
                         { characterIndex: charIdx, prevFacing: "down", prevMoving: false }
                     ]);
@@ -132,8 +132,10 @@ export function initOnlineGameScene() {
                 // Only change animation if state changed
                 if (isMoving !== pObj.prevMoving || facing !== pObj.prevFacing) {
                     const animName = isMoving ? `walk_${facing}` : `idle_${facing}`;
-                    if (pObj.getCurAnim()?.name !== animName) {
+                    try {
                         pObj.play(animName);
+                    } catch (e) {
+                        // Animation might not exist, ignore
                     }
                     pObj.prevMoving = isMoving;
                     pObj.prevFacing = facing;
