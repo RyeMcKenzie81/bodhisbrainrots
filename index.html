@@ -21,13 +21,10 @@
     canvas {
       display: block;
       touch-action: none;
-      /* Pin to viewport to ignore scroll/address bar shifts */
+      /* Fixed position for reliable mobile input */
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       z-index: 1;
+      /* Width/Height/Top/Left handled by JS to preserve ratio */
     }
 
     #rotate-message {

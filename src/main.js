@@ -19,8 +19,47 @@ const k = kaboom({
     debug: true,
     letterbox: true,
     touchToMouse: true,
-    pixelDensity: 1, // Disable retina scaling to simplify mobile mobile dims
+    pixelDensity: 1,
 });
+
+// MANUAL RESIZE HANDLER FOR MOBILE
+// Correctly fits the game's 960x744 resolution into the window 
+// without distorting aspect ratio or breaking input coordinates.
+function fitCanvas() {
+    const canvas = document.querySelector("canvas");
+    if (!canvas) return;
+
+    const gameWidth = 960;
+    const gameHeight = 744;
+    const gameRatio = gameWidth / gameHeight;
+
+    const winWidth = window.innerWidth;
+    const winHeight = window.innerHeight;
+    const winRatio = winWidth / winHeight;
+
+    if (winRatio > gameRatio) {
+        // Window is wider than game -> limit by HEIGHT
+        const newHeight = winHeight;
+        const newWidth = newHeight * gameRatio;
+        canvas.style.height = `${newHeight}px`;
+        canvas.style.width = `${newWidth}px`;
+    } else {
+        // Window is taller than game -> limit by WIDTH
+        const newWidth = winWidth;
+        const newHeight = newWidth / gameRatio;
+        canvas.style.width = `${newWidth}px`;
+        canvas.style.height = `${newHeight}px`;
+    }
+
+    // Explicitly center manually since we are using position: fixed
+    canvas.style.top = `${(winHeight - parseFloat(canvas.style.height)) / 2}px`;
+    canvas.style.left = `${(winWidth - parseFloat(canvas.style.width)) / 2}px`;
+}
+
+window.addEventListener("resize", fitCanvas);
+window.addEventListener("load", fitCanvas);
+// Throttle resize
+setInterval(fitCanvas, 500);
 
 // Load all assets
 loadAssets();
