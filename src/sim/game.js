@@ -147,7 +147,12 @@ function attemptDropBrain(state, player) {
             };
             state.brains.push(brain);
             player.brainsPlaced++;
+            console.log(`[SERVER] Brain placed at (${gridPos.x}, ${gridPos.y}), timer: ${brain.timer}s, range: ${brain.range}`);
+        } else {
+            console.log(`[SERVER] Brain already exists at (${gridPos.x}, ${gridPos.y})`);
         }
+    } else {
+        console.log(`[SERVER] Player maxed out brains: ${player.brainsPlaced}/${player.brainCount}`);
     }
 }
 
