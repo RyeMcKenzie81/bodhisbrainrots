@@ -6,8 +6,11 @@ import { spawnPowerup, createLevel } from "../entities/environment.js";
 
 export function initGameScene() {
     scene("game", () => {
-        // Play background music
-        const bgMusic = play("music", { loop: true, volume: 0.45 });
+        // Play    scene("game", () => {
+        let bgMusic = play("music", { loop: true, volume: 0.4 });
+        if (!bgMusic || !bgMusic.stop) {
+            bgMusic = null;
+        }
 
         // Stop music when leaving scene
         onSceneLeave(() => {
