@@ -114,7 +114,7 @@ export function initOnlineGameScene() {
                         sprite(PLAYERS[charIdx].spriteAnim, { anim: "idle_down" }),
                         pos(pState.pos.x, pState.pos.y),
                         anchor("center"),
-                        scale(0.16), // Match local game scale
+                        scale(0.25), // Match local game scale exactly
                         z(10),
                         { characterIndex: charIdx, prevFacing: "down", prevMoving: false }
                     ]);

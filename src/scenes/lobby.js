@@ -70,7 +70,8 @@ export function initLobbyScene() {
         ]);
 
         function renderPlayers() {
-            playerListContainer.removeAllChildren();
+            // Destroy all children manually (Kaboom doesn't have removeAllChildren)
+            playerListContainer.get("*").forEach(child => destroy(child));
 
             players.forEach((p, i) => {
                 const y = i * 70;
