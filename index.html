@@ -21,7 +21,10 @@
     canvas {
       display: block;
       touch-action: none;
-      /* Let Kaboom handle all sizing and positioning */
+      /* Fixed position for reliable mobile input */
+      position: fixed;
+      z-index: 1;
+      /* Width/Height/Top/Left handled by JS to preserve ratio */
     }
 
     #rotate-message {
