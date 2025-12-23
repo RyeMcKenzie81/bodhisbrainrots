@@ -76,7 +76,7 @@ export function tick(state, dt) {
                 // Snap to lane when moving horizontally
                 if (player.intent.dx !== 0) {
                     const tileCenterY = Math.floor(player.pos.y / SIM_CONSTANTS.TILE_SIZE) * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
-                    if (Math.abs(player.pos.y - tileCenterY) < 10) {
+                    if (Math.abs(player.pos.y - tileCenterY) < 8) { // Match local game SNAP_THRESHOLD
                         player.pos.y = tileCenterY;
                     }
                 }
@@ -88,7 +88,7 @@ export function tick(state, dt) {
                 // Snap to lane when moving vertically
                 if (player.intent.dy !== 0) {
                     const tileCenterX = Math.floor(player.pos.x / SIM_CONSTANTS.TILE_SIZE) * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
-                    if (Math.abs(player.pos.x - tileCenterX) < 10) {
+                    if (Math.abs(player.pos.x - tileCenterX) < 8) { // Match local game SNAP_THRESHOLD
                         player.pos.x = tileCenterX;
                     }
                 }
