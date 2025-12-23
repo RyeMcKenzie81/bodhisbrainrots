@@ -107,7 +107,25 @@ export function tick(state, dt) {
     // 3. Remove Exploded Brains
     state.brains = state.brains.filter(b => !b.exploded);
 
-    // 4. Tick Explosions
+    // 4. Check Powerup Collisions
+    state.powerups.forEach(powerup => {
+        state.players.forEach(player => {
+            if (!player.alive) return;
+
+            const playerGridPos = toGrid(player.pos.x, player.pos.y);
+
+            if (playerGridPos.x === powerup.gridX && playerGridPos.y === powerup.gridY) {
+                // Apply powerup effect
+                applyPowerup(player, powerup.type);
+                powerup.collected = true;
+            }
+        });
+    });
+
+    // Remove collected powerups
+    state.powerups = state.powerups.filter(p => !p.collected);
+
+    // 5. Tick Explosions
     // (TODO: Implement explosion duration and removal)
 }
 
@@ -215,12 +233,53 @@ function destroyBlocksInExplosion(state, cells) {
             // Destroy the block
             state.grid[y][x] = { type: "empty", solid: false };
 
-            // TODO: Spawn powerup (20% chance)
-            // if (Math.random() < 0.2) {
-            //     spawnPowerup(state, x, y);
-            // }
+            // 50% chance to spawn powerup (same as local game)
+            if (Math.random() > 0.5) {
+                spawnPowerup(state, x, y);
+            }
         }
     });
+}
+
+/**
+ * Spawn a powerup at grid position
+ */
+function spawnPowerup(state, gridX, gridY) {
+    // Weighted powerup types (same as local game)
+    const types = [
+        { type: "brain", weight: 30 },
+        { type: "fire", weight: 30 },
+        { type: "speed", weight: 25 },
+        { type: "kick", weight: 10 },
+        { type: "skull", weight: 5 },
+    ];
+
+    // Weighted random selection
+    const totalWeight = types.reduce((sum, t) => sum + t.weight, 0);
+    let random = Math.random() * totalWeight;
+    let powerupType = types[0].type;
+
+    for (const t of types) {
+        random -= t.weight;
+        if (random <= 0) {
+            powerupType = t.type;
+            break;
+        }
+    }
+
+    // Add powerup to state
+    const powerup = {
+        id: `powerup_${Date.now()}_${Math.random()}`,
+        gridX,
+        gridY,
+        type: powerupType,
+        timestamp: state.time
+    };
+
+    if (!state.powerups) {
+        state.powerups = [];
+    }
+    state.powerups.push(powerup);
 }
 
 /**
