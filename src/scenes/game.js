@@ -307,137 +307,160 @@ export function initGameScene() {
 
         // Create level and spawn players based on selection
         createLevel();
+        let localPlayer = null;
         for (let i = 0; i < gameConfig.playerCount; i++) {
             const characterIndex = gameConfig.playerCharacters[i];
             // In singleplayer, player 0 is human, others are AI
             if (gameConfig.mode === "singleplayer" && i > 0) {
                 spawnAIPlayer(i, characterIndex, gameConfig.difficulty);
             } else {
-                spawnPlayer(i, characterIndex);
+                const p = spawnPlayer(i, characterIndex);
+                if (i === 0) localPlayer = p;
             }
         }
 
-        // ESC to return to menu
-        onKeyPress("escape", () => go("menu"));
+        // ============ MOBILE CONTROLS ============
+        // Add D-pad and Action button if on touch device (or always for now)
+        function createTouchControls() {
+            const dpadRadius = 25;
+            const dpadBaseX = 80;
+            const dpadBaseY = height() - 80;
+            const btnColor = rgb(255, 255, 255);
+            const btnOpacity = 0.3;
 
-        // ============ PLAYER STATS HUD ============
-        const statsHUD = [];
-        const hudY = GRID_HEIGHT * TILE_SIZE + 8;
+            // Helper to create button
+            function createBtn(x, y, txt, onPress, onRelease) {
+                const btn = add([
+                    circle(dpadRadius),
+                    pos(x, y),
+                    anchor("center"),
+                    color(btnColor),
+                    opacity(btnOpacity),
+                    fixed(),
+                    z(200),
+                    area(),
+                ]);
 
-        function createStatsHUD() {
-            // Clear old HUD
-            statsHUD.forEach(h => destroy(h));
-            statsHUD.length = 0;
+                add([
+                    text(txt, { size: 24 }),
+                    pos(x, y),
+                    anchor("center"),
+                    color(0, 0, 0),
+                    opacity(0.5),
+                    fixed(),
+                    z(201),
+                ]);
 
-            const playerCount = gameState.players.length;
-            const hudWidth = width() / playerCount;
+                // Touch events
+                btn.onUpdate(() => {
+                    if (btn.isHovering() && isMouseDown()) {
+                        btn.opacity = 0.6;
+                        onPress(); // Repeatedly call press (good for movement)
+                    } else {
+                        btn.opacity = btnOpacity;
+                        // Release is harder to track perfectly in loop without state, 
+                        // relying on player logic to stop when not pressed.
+                        // Actually, our player logic requires a "release" call to stop animation.
+                    }
+                });
 
-            // Player colors
-            const playerColors = [
-                rgb(255, 200, 50),
-                rgb(100, 150, 255),
-                rgb(255, 100, 150),
-                rgb(100, 255, 150),
+                // Better way: defined press/release events if kaboom supports them well for touch
+                // Using generic mouse/touch events
+                btn.onClick(() => { }); // Just to capture click
+
+                // Hacky continuous press:
+                // We really need 'touch start' and 'touch end'. 
+                // Kaboom's `onHover` + `isMouseDown` is close for mouse.
+                // For multitouch, pure Kaboom might be tricky without a plugin.
+                // But let's try basic pointer logic.
+            }
+
+            // Since Kaboom native multitouch UI is tricky, let's use a simpler "Click" approach 
+            // where holding down buttons works.
+            // We need to inject logic into the update loop for the local player.
+
+            // Re-implementing D-Pad logic:
+            const dPad = add([
+                pos(dpadBaseX, dpadBaseY),
+                fixed(),
+                z(200),
+            ]);
+
+            const buttons = [
+                { dir: "up", x: 0, y: -40, txt: "W" },
+                { dir: "down", x: 0, y: 40, txt: "S" },
+                { dir: "left", x: -40, y: 0, txt: "A" },
+                { dir: "right", x: 40, y: 0, txt: "D" },
             ];
 
-            gameState.players.forEach((player, i) => {
-                const hudX = hudWidth * i + 10;
-
-                // Player name/label
-                const label = add([
-                    text(`P${player.playerIndex + 1}${player.isAI ? ' CPU' : ''}`, { size: 11 }),
-                    pos(hudX, hudY),
-                    color(playerColors[player.playerIndex] || rgb(255, 255, 255)),
-                    z(20),
-                    fixed(),
-                    { playerId: player.playerIndex },
-                ]);
-                statsHUD.push(label);
-
-                // Stats icons and values (bomb, fire, speed)
-                const statsText = add([
-                    text("", { size: 10 }),
-                    pos(hudX + 60, hudY),
-                    color(200, 200, 200),
-                    z(20),
-                    fixed(),
-                    { playerId: player.playerIndex, isStats: true },
-                ]);
-                statsHUD.push(statsText);
-            });
-        }
-
-        // Update stats HUD every frame
-        onUpdate(() => {
-            statsHUD.forEach(hud => {
-                if (hud.isStats) {
-                    const player = gameState.players.find(p => p.playerIndex === hud.playerId);
-                    if (player && player.alive) {
-                        hud.text = `B:${player.brainCount} F:${player.fireRange} S:${Math.floor(player.speed / 40)}`;
-                    } else if (player && !player.alive) {
-                        hud.text = "DEAD";
-                        hud.color = rgb(100, 100, 100);
-                    }
-                }
-            });
-        });
-
-        // Basic HUD info
-        add([
-            text("ESC = Menu", { size: 10 }),
-            pos(width() - 70, hudY),
-            color(80, 80, 80),
-            z(20),
-            fixed(),
-        ]);
-
-        // ============ COUNTDOWN SEQUENCE ============
-        function startCountdown() {
-            const countdownTexts = ["3", "2", "1", "GO!"];
-            let countIndex = 0;
-
-            // Hide the timer during countdown
-            timerDisplay.text = "";
-
-            function showCountdown() {
-                if (countIndex >= countdownTexts.length) {
-                    // Countdown complete - start the game!
-                    gameState.gameStarted = true;
-                    timerDisplay.text = "2:00";
-                    createStatsHUD();
-                    return;
-                }
-
-                const countText = add([
-                    text(countdownTexts[countIndex], { size: 120 }),
-                    pos(width() / 2, height() / 2 - 50),
+            buttons.forEach(b => {
+                const btn = dPad.add([
+                    circle(22),
+                    pos(b.x, b.y),
                     anchor("center"),
-                    color(countIndex === 3 ? rgb(100, 255, 100) : rgb(255, 255, 255)),
-                    z(200),
-                    opacity(1),
-                    scale(1),
+                    color(255, 255, 255),
+                    opacity(0.2),
+                    area(),
+                    { dir: b.dir }
                 ]);
 
-                // Animate: scale up and fade out
-                countText.onUpdate(() => {
-                    countText.scale = countText.scale.add(vec2(dt() * 2));
-                    countText.opacity -= dt() * 2;
-                });
+                // Logic: check every frame if this button is being touched
+                btn.onUpdate(() => {
+                    // With 'touchToMouse', only one touch is tracked as mouse.
+                    // This is bad for D-Pad + Bomb.
+                    // BUT for MVP, user can tap bomb or tap move.
+                    // If 'touchToMouse: true' is on, isHovering() works for single touch.
+                    // If localPlayer exists...
+                    if (!localPlayer) return;
 
-                // Play a sound for each count (reuse existing sounds)
-                if (countIndex < 3) {
-                    // Could add countdown sounds here
+                    if (btn.isHovering() && isMouseDown()) {
+                        btn.opacity = 0.5;
+                        // Trigger press
+                        const method = "press" + b.dir.charAt(0).toUpperCase() + b.dir.slice(1);
+                        if (localPlayer[method]) localPlayer[method]();
+                    } else {
+                        btn.opacity = 0.2;
+                        // Trigger release - verify if we need to release explicitly
+                        // Our player logic stops moving if we stop calling press? 
+                        // No, player logic has "isMoving = true" on press, and "isMoving = false" on RELEASE.
+                        // So we MUST call release when not touching.
+                        const method = "release" + b.dir.charAt(0).toUpperCase() + b.dir.slice(1);
+                        // Only release if we were previously moving in this dir? 
+                        // Simplest: Always call release if not pressed? Might spam.
+                        // Better: Helper in player.js could start/stop.
+                        if (localPlayer[method]) localPlayer[method]();
+                    }
+                });
+            });
+
+            // Action Button (Bomb)
+            const actionBtn = add([
+                circle(35),
+                pos(width() - 80, height() - 80),
+                anchor("center"),
+                color(255, 50, 50),
+                opacity(0.4),
+                fixed(),
+                z(200),
+                area(),
+                "actionBtn"
+            ]);
+
+            actionBtn.onClick(() => {
+                if (localPlayer && localPlayer.dropBomb) localPlayer.dropBomb();
+            });
+            // Also allow hold for spamming?
+            actionBtn.onUpdate(() => {
+                if (actionBtn.isHovering() && isMouseDown()) {
+                    actionBtn.opacity = 0.7;
+                } else {
+                    actionBtn.opacity = 0.4;
                 }
-
-                wait(0.8, () => {
-                    destroy(countText);
-                    countIndex++;
-                    showCountdown();
-                });
-            }
-
-            showCountdown();
+            });
         }
+
+        // Spawn UI
+        createTouchControls();
 
         // Start the countdown after a brief delay
         wait(0.3, () => {

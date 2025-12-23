@@ -14,6 +14,8 @@ const k = kaboom({
     background: [30, 30, 50],
     scale: 1,
     debug: true,
+    letterbox: true,
+    touchToMouse: true, // Maps touch events to mouse events (for clicks)
 });
 
 // Load all assets

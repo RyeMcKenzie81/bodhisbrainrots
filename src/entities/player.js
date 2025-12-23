@@ -105,8 +105,16 @@ export function spawnPlayer(playerIndex, characterIndex) {
         }
     }
 
-    // Helper to bind a primary key and an optional secondary key (for P1 arrow keys)
-    function bindInput(primaryKey, secondaryKey, onPress, onRelease) {
+    // Helper: Bind input to accessible methods on player object
+    function setupControl(name, primaryKey, secondaryKey, onPress, onRelease) {
+        // Expose methods for external calls (Touch controls)
+        const pressMethodName = "press" + name.charAt(0).toUpperCase() + name.slice(1);
+        const releaseMethodName = "release" + name.charAt(0).toUpperCase() + name.slice(1);
+
+        player[pressMethodName] = onPress;
+        player[releaseMethodName] = onRelease;
+
+        // Bind Keyboard Inputs
         onKeyDown(primaryKey, onPress);
         onKeyRelease(primaryKey, onRelease);
 
@@ -117,7 +125,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     }
 
     // Up
-    bindInput(keys.up, "up",
+    setupControl("up", keys.up, "up",
         () => { // On Press
             if (player.alive && gameState.gameStarted) {
                 player.move(0, -player.speed);
@@ -139,7 +147,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     );
 
     // Down
-    bindInput(keys.down, "down",
+    setupControl("down", keys.down, "down",
         () => {
             if (player.alive && gameState.gameStarted) {
                 player.move(0, player.speed);
@@ -161,7 +169,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     );
 
     // Left
-    bindInput(keys.left, "left",
+    setupControl("left", keys.left, "left",
         () => {
             if (player.alive && gameState.gameStarted) {
                 player.move(-player.speed, 0);
@@ -183,7 +191,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     );
 
     // Right
-    bindInput(keys.right, "right",
+    setupControl("right", keys.right, "right",
         () => {
             if (player.alive && gameState.gameStarted) {
                 player.move(player.speed, 0);
@@ -247,11 +255,12 @@ export function spawnPlayer(playerIndex, characterIndex) {
     });
 
     // Brain placement
-    onKeyPress(keys.brain, () => {
+    player.dropBomb = () => {
         if (player.alive && gameState.gameStarted && player.brainsPlaced < player.brainCount) {
             placeBrain(player);
         }
-    });
+    };
+    onKeyPress(keys.brain, player.dropBomb);
 
     // Dynamic Z-ordering for Player
     player.onUpdate(() => {
