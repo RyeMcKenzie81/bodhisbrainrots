@@ -114,83 +114,58 @@ export function initLobbyScene() {
             }
         }
 
-        // Socket Events
-        socket.on("room_created", (data) => {
+        // Socket Events - Store handlers for cleanup
+        const handleRoomCreated = (data) => {
             roomCodeText.text = `ROOM CODE: ${data.roomId}`;
             roomId = data.roomId;
             myPlayerId = data.playerId;
             isHost = true;
             players = [{ id: data.playerId, name: "You", ready: false }];
             renderPlayers();
-        });
+        };
 
-        socket.on("room_joined", (data) => {
+        const handleRoomJoined = (data) => {
             roomCodeText.text = `ROOM CODE: ${data.roomId}`;
             roomId = data.roomId;
             myPlayerId = data.playerId;
-            isHost = false; // Joiner is not host
+            isHost = false;
             players = data.players;
             renderPlayers();
-        });
+        };
 
-        socket.on("player_joined", (data) => {
+        const handlePlayerJoined = (data) => {
             players.push(data.player);
             renderPlayers();
-            // Play a sound to notify
             try { play("powerup", { volume: 0.5 }); } catch (e) { }
-        });
+        };
 
-        socket.on("player_ready", (data) => {
+        const handlePlayerReady = (data) => {
             const p = players.find(player => player.id === data.playerId);
             if (p) {
                 p.ready = true;
                 renderPlayers();
             }
-        });
+        };
 
-        socket.on("game_start", () => {
+        const handleGameStart = () => {
             go("onlineGame", { roomId, myPlayerId, players });
+        };
+
+        // Register handlers
+        socket.on("room_created", handleRoomCreated);
+        socket.on("room_joined", handleRoomJoined);
+        socket.on("player_joined", handlePlayerJoined);
+        socket.on("player_ready", handlePlayerReady);
+        socket.on("game_start", handleGameStart);
+
+        // Cleanup on scene leave
+        onSceneLeave(() => {
+            socket.off("room_created", handleRoomCreated);
+            socket.off("room_joined", handleRoomJoined);
+            socket.off("player_joined", handlePlayerJoined);
+            socket.off("player_ready", handlePlayerReady);
+            socket.off("game_start", handleGameStart);
+            cleanupTouch();
         });
-
-        // Start game function (host only)
-        function startGame() {
-            if (isHost && players.length >= 2) {
-                socket.send("start_game");
-            }
-        }
-
-        // Input
-        onKeyPress("space", () => {
-            if (isHost) {
-                startGame();
-            } else {
-                socket.send("ready");
-            }
-        });
-
-        onKeyPress("enter", () => {
-            if (isHost) {
-                startGame();
-            } else {
-                socket.send("ready");
-            }
-        });
-
-        onKeyPress("escape", () => {
-            go("menu");
-        });
-
-        // NATIVE TOUCH HANDLERS
-        const touchButtons = [
-            {
-                x: width() / 2,
-                y: 550,
-                w: 280,
-                h: 70,
-                action: startGame
-            }
-        ];
-        const cleanupTouch = setupMenuTouch(touchButtons);
-        onSceneLeave(cleanupTouch);
     });
 }
