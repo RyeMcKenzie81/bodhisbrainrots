@@ -5,6 +5,8 @@ export function initGameOverScene() {
         // Handle both string (singleplayer) and object (multiplayer) args
         let winnerName = "Nobody";
         let isMultiplayer = false;
+        let roomId = null;
+        let restartDelay = 0;
 
         if (typeof args === "string") {
             winnerName = args;
