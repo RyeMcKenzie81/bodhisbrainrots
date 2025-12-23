@@ -55,32 +55,39 @@ export function tick(state, dt) {
 
         if (player.intent && (player.intent.dx !== 0 || player.intent.dy !== 0)) {
             const moveAmt = SIM_CONSTANTS.PLAYER_SPEED * dt;
-            const newX = player.pos.x + player.intent.dx * moveAmt;
-            const newY = player.pos.y + player.intent.dy * moveAmt;
+            let newX = player.pos.x + player.intent.dx * moveAmt;
+            let newY = player.pos.y + player.intent.dy * moveAmt;
 
-            // Simple Collision Check (Center point only for MVP, improve to AABB later)
-            // Check grid at new position
-            const gridPos = toGrid(newX, newY);
-            if (isWalkable(state, gridPos.x, gridPos.y)) {
+            // Player hitbox radius (30% of tile size)
+            const playerRadius = SIM_CONSTANTS.TILE_SIZE * 0.3;
 
-                // Extra check: Snapping / Sliding
-                // If moving Horizontal, lock Y to center of tile
+            // AABB Collision Check - test all four corners
+            const canMoveX = checkAABBWalkable(state, newX, player.pos.y, playerRadius);
+            const canMoveY = checkAABBWalkable(state, player.pos.x, newY, playerRadius);
+
+            // Apply movement if no collision
+            if (canMoveX) {
+                player.pos.x = newX;
+
+                // Snap to lane when moving horizontally
                 if (player.intent.dx !== 0) {
                     const tileCenterY = Math.floor(player.pos.y / SIM_CONSTANTS.TILE_SIZE) * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
                     if (Math.abs(player.pos.y - tileCenterY) < 10) {
-                        player.pos.y = tileCenterY; // Snap
+                        player.pos.y = tileCenterY;
                     }
                 }
-                // If moving Vertical, lock X to center of tile
+            }
+
+            if (canMoveY) {
+                player.pos.y = newY;
+
+                // Snap to lane when moving vertically
                 if (player.intent.dy !== 0) {
                     const tileCenterX = Math.floor(player.pos.x / SIM_CONSTANTS.TILE_SIZE) * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
                     if (Math.abs(player.pos.x - tileCenterX) < 10) {
-                        player.pos.x = tileCenterX; // Snap
+                        player.pos.x = tileCenterX;
                     }
                 }
-
-                player.pos.x = newX;
-                player.pos.y = newY;
             }
         }
     });
@@ -135,4 +142,25 @@ function explodeBrain(state, brain) {
         range: brain.range,
         timestamp: state.time
     });
+}
+
+/**
+ * Check if player can move to position with AABB collision
+ */
+function checkAABBWalkable(state, x, y, radius) {
+    // Check all four corners of the player's bounding box
+    const corners = [
+        { x: x - radius, y: y - radius }, // Top-left
+        { x: x + radius, y: y - radius }, // Top-right
+        { x: x - radius, y: y + radius }, // Bottom-left
+        { x: x + radius, y: y + radius }, // Bottom-right
+    ];
+
+    for (const corner of corners) {
+        const gridPos = toGrid(corner.x, corner.y);
+        if (!isWalkable(state, gridPos.x, gridPos.y)) {
+            return false; // Collision detected
+        }
+    }
+    return true; // No collision
 }
