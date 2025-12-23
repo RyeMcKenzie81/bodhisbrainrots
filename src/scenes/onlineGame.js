@@ -62,8 +62,17 @@ export function initOnlineGameScene() {
                                 anchor("center"),
                                 scale(0.12),
                             ]));
+                        } else if (isPerimeter) {
+                            // Perimeter walls use gray rect (like local game)
+                            gridObjs.push(add([
+                                rect(SIM_CONSTANTS.TILE_SIZE - 2, SIM_CONSTANTS.TILE_SIZE - 2, { radius: 4 }),
+                                pos(posX, posY),
+                                anchor("center"),
+                                color(80, 80, 100),
+                                z(y),
+                            ]));
                         } else {
-                            // Perimeter walls or regular walls use woodblock
+                            // Interior walls use woodblock
                             gridObjs.push(add([
                                 sprite("woodblock"),
                                 pos(posX, posY),
