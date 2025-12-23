@@ -98,15 +98,15 @@ export function initLobbyScene() {
 
             playerCountText.text = `Players: ${players.length}/4`;
 
-            // Show/hide start button (only host, only when 2+ players)
-            if (isHost && players.length >= 2) {
+            // Show/hide start button (only host, allow solo testing)
+            if (isHost && players.length >= 1) {
                 startBtn.opacity = 1;
                 startBtnText.opacity = 1;
-                waitingText.text = "Press SPACE or tap START to begin!";
-            } else if (isHost && players.length < 2) {
-                startBtn.opacity = 0.3;
-                startBtnText.opacity = 0.3;
-                waitingText.text = "Waiting for at least 1 more player...";
+                if (players.length === 1) {
+                    waitingText.text = "Press SPACE or tap START (solo testing mode)";
+                } else {
+                    waitingText.text = "Press SPACE or tap START to begin!";
+                }
             } else {
                 startBtn.opacity = 0;
                 startBtnText.opacity = 0;
@@ -158,9 +158,9 @@ export function initLobbyScene() {
         socket.on("player_ready", handlePlayerReady);
         socket.on("game_start", handleGameStart);
 
-        // Start game function (host only)
+        // Start game function (host only, allow solo for testing)
         function startGame() {
-            if (isHost && players.length >= 2) {
+            if (isHost && players.length >= 1) {
                 socket.send("start_game");
             }
         }

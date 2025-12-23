@@ -114,13 +114,13 @@ export function handleConnection(ws) {
                 }
             }
 
-            // Host can explicitly start the game with 2+ players
+            // Host can explicitly start the game (even solo for testing)
             else if (type === 'start_game') {
                 if (currentRoomId) {
                     const room = rooms.get(currentRoomId);
                     // Only host (first player) can start
-                    if (playerId === 'p0' && room.players.length >= 2) {
-                        console.log(`Host starting game in room ${currentRoomId}`);
+                    if (playerId === 'p0' && room.players.length >= 1) {
+                        console.log(`Host starting game in room ${currentRoomId} with ${room.players.length} player(s)`);
                         startGameLoop(room);
                     }
                 }
