@@ -66,9 +66,9 @@ export function initOnlineGameScene() {
                             ]));
                         }
                     } else if (cell.type === "block") {
-                        // Destructible blocks
+                        // Destructible blocks - use woodblock sprite like local game
                         gridObjs.push(add([
-                            sprite("box"),
+                            sprite("woodblock"),
                             pos(posX, posY),
                             anchor("center"),
                             scale(0.12),
