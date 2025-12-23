@@ -110,11 +110,18 @@ export function handleConnection(ws) {
                             type: 'player_ready',
                             playerId: playerId
                         });
+                    }
+                }
+            }
 
-                        // Check if all ready to start
-                        if (room.players.every(p => p.ready)) {
-                            startGameLoop(room);
-                        }
+            // Host can explicitly start the game with 2+ players
+            else if (type === 'start_game') {
+                if (currentRoomId) {
+                    const room = rooms.get(currentRoomId);
+                    // Only host (first player) can start
+                    if (playerId === 'p0' && room.players.length >= 2) {
+                        console.log(`Host starting game in room ${currentRoomId}`);
+                        startGameLoop(room);
                     }
                 }
             }

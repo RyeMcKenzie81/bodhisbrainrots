@@ -1,67 +1,125 @@
 import { socket } from "../net/socket.js";
 import { PLAYERS } from "../constants.js";
+import { setupMenuTouch } from "../utils/touchUtils.js";
 
 export function initLobbyScene() {
     scene("lobby", () => {
         let players = [];
         let myPlayerId = null;
         let roomId = null;
+        let isHost = false;
 
         add([
-            text("WAITING FOR PLAYERS...", { size: 28 }),
-            pos(width() / 2, 50),
+            rect(width(), height()),
+            pos(0, 0),
+            color(20, 20, 40),
+            z(-1),
+        ]);
+
+        add([
+            text("ONLINE LOBBY", { size: 36 }),
+            pos(width() / 2, 40),
             anchor("center"),
-            color(255, 255, 100),
+            color(100, 255, 100),
         ]);
 
         const roomCodeText = add([
-            text("ROOM CODE: ???", { size: 32 }),
-            pos(width() / 2, 100),
+            text("ROOM CODE: ???", { size: 28 }),
+            pos(width() / 2, 90),
             anchor("center"),
-            color(100, 255, 255),
+            color(255, 200, 100),
+        ]);
+
+        const playerCountText = add([
+            text("Players: 0/4", { size: 20 }),
+            pos(width() / 2, 130),
+            anchor("center"),
+            color(200, 200, 200),
         ]);
 
         const playerListContainer = add([
-            pos(width() / 2, 200),
+            pos(width() / 2, 180),
             anchor("top"),
+        ]);
+
+        // Start button (visible only to host when 2+ players)
+        const startBtn = add([
+            rect(280, 70, { radius: 8 }),
+            pos(width() / 2, 550),
+            anchor("center"),
+            color(rgb(40, 80, 40)),
+            outline(4, rgb(100, 255, 100)),
+            opacity(0), // Initially hidden
+            z(10),
+        ]);
+
+        const startBtnText = add([
+            text("START GAME", { size: 28 }),
+            pos(width() / 2, 550),
+            anchor("center"),
+            color(255, 255, 255),
+            opacity(0),
+            z(11),
+        ]);
+
+        const waitingText = add([
+            text("Share the room code with friends!", { size: 18 }),
+            pos(width() / 2, 620),
+            anchor("center"),
+            color(150, 150, 150),
         ]);
 
         function renderPlayers() {
             playerListContainer.removeAllChildren();
 
             players.forEach((p, i) => {
-                const y = i * 60;
+                const y = i * 70;
 
-                // Status Icon (Checkmark or cross)
+                // Player box
                 playerListContainer.add([
-                    rect(30, 30, { radius: 4 }),
-                    pos(-150, y),
+                    rect(400, 60, { radius: 6 }),
+                    pos(0, y),
                     anchor("center"),
-                    color(p.ready ? rgb(50, 200, 50) : rgb(100, 100, 100)),
+                    color(p.id === myPlayerId ? rgb(60, 60, 100) : rgb(40, 40, 60)),
+                    outline(3, p.ready ? rgb(100, 255, 100) : rgb(80, 80, 80)),
                 ]);
 
-                // Name
+                // Player name + status
+                const statusIcon = p.ready ? "✓" : "○";
+                const hostTag = i === 0 ? " [HOST]" : "";
+                const youTag = p.id === myPlayerId ? " (YOU)" : "";
                 playerListContainer.add([
-                    text(p.name + (p.id === myPlayerId ? " (YOU)" : ""), { size: 20 }),
-                    pos(-100, y),
-                    anchor("left"),
+                    text(`${statusIcon} ${p.name}${hostTag}${youTag}`, { size: 20 }),
+                    pos(0, y),
+                    anchor("center"),
                     color(255, 255, 255),
                 ]);
             });
-        }
 
-        add([
-            text("PRESS SPACE TO TOGGLE READY", { size: 18 }),
-            pos(width() / 2, height() - 100),
-            anchor("center"),
-            color(150, 150, 150),
-        ]);
+            playerCountText.text = `Players: ${players.length}/4`;
+
+            // Show/hide start button (only host, only when 2+ players)
+            if (isHost && players.length >= 2) {
+                startBtn.opacity = 1;
+                startBtnText.opacity = 1;
+                waitingText.text = "Press SPACE or tap START to begin!";
+            } else if (isHost && players.length < 2) {
+                startBtn.opacity = 0.3;
+                startBtnText.opacity = 0.3;
+                waitingText.text = "Waiting for at least 1 more player...";
+            } else {
+                startBtn.opacity = 0;
+                startBtnText.opacity = 0;
+                waitingText.text = "Waiting for host to start the game...";
+            }
+        }
 
         // Socket Events
         socket.on("room_created", (data) => {
             roomCodeText.text = `ROOM CODE: ${data.roomId}`;
             roomId = data.roomId;
             myPlayerId = data.playerId;
+            isHost = true;
             players = [{ id: data.playerId, name: "You", ready: false }];
             renderPlayers();
         });
@@ -70,6 +128,7 @@ export function initLobbyScene() {
             roomCodeText.text = `ROOM CODE: ${data.roomId}`;
             roomId = data.roomId;
             myPlayerId = data.playerId;
+            isHost = false; // Joiner is not host
             players = data.players;
             renderPlayers();
         });
@@ -77,6 +136,8 @@ export function initLobbyScene() {
         socket.on("player_joined", (data) => {
             players.push(data.player);
             renderPlayers();
+            // Play a sound to notify
+            try { play("powerup", { volume: 0.5 }); } catch (e) { }
         });
 
         socket.on("player_ready", (data) => {
@@ -91,18 +152,45 @@ export function initLobbyScene() {
             go("onlineGame", { roomId, myPlayerId, players });
         });
 
+        // Start game function (host only)
+        function startGame() {
+            if (isHost && players.length >= 2) {
+                socket.send("start_game");
+            }
+        }
+
         // Input
         onKeyPress("space", () => {
-            socket.send("ready");
+            if (isHost) {
+                startGame();
+            } else {
+                socket.send("ready");
+            }
         });
 
         onKeyPress("enter", () => {
-            socket.send("ready");
+            if (isHost) {
+                startGame();
+            } else {
+                socket.send("ready");
+            }
         });
 
         onKeyPress("escape", () => {
-            // socket.disconnect(); // Or leave room
             go("menu");
         });
+
+        // NATIVE TOUCH HANDLERS
+        const touchButtons = [
+            {
+                x: width() / 2,
+                y: 550,
+                w: 280,
+                h: 70,
+                action: startGame
+            }
+        ];
+        const cleanupTouch = setupMenuTouch(touchButtons);
+        onSceneLeave(cleanupTouch);
     });
 }
