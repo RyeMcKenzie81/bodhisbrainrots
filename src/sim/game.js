@@ -161,6 +161,8 @@ function explodeBrain(state, brain) {
     const owner = state.players.find(p => p.id === brain.ownerId);
     if (owner) owner.brainsPlaced--;
 
+    console.log(`[SERVER] Brain exploding at (${brain.gridX}, ${brain.gridY}), range: ${brain.range}`);
+
     // Calculate explosion cells in 4 directions (cross pattern)
     const explosionCells = calculateExplosionCells(state, brain.gridX, brain.gridY, brain.range);
 
