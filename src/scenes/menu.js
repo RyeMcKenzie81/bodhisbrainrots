@@ -434,21 +434,20 @@ export function initMenuScenes() {
             countDisplay.text = selectedOpponents.toString();
             updateOpponentPreview();
         });
-        area(),
 
-            // Touch Arrows for Opponent Count
-            add([
-                text("<", { size: 48 }),
-                pos(width() / 2 - 100, 380),
-                anchor("center"),
-                color(255, 255, 255),
-                area(),
-                "oppDec"
-            ]).onClick(() => {
-                selectedOpponents = Math.max(1, selectedOpponents - 1);
-                countDisplay.text = selectedOpponents.toString();
-                updateOpponentPreview();
-            });
+        // Touch Arrows for Opponent Count
+        add([
+            text("<", { size: 48 }),
+            pos(width() / 2 - 100, 380),
+            anchor("center"),
+            color(255, 255, 255),
+            area(),
+            "oppDec"
+        ]).onClick(() => {
+            selectedOpponents = Math.max(1, selectedOpponents - 1);
+            countDisplay.text = selectedOpponents.toString();
+            updateOpponentPreview();
+        });
 
         add([
             text(">", { size: 48 }),
