@@ -10,13 +10,21 @@ export const socket = {
     connect(url) {
         // If url is provided, use it. 
         // Otherwise try to determine from Env or Window.
+        // If url is provided, use it. 
+        // Otherwise try to determine from Env or Window.
         let targetUrl = url;
         if (!targetUrl) {
-            // Check for Vite Env
-            const envHost = import.meta.env.VITE_WS_HOST;
-            if (envHost) {
-                targetUrl = envHost;
-            } else {
+            try {
+                // Check for Vite Env
+                const envHost = import.meta.env.VITE_WS_HOST;
+                if (envHost) {
+                    targetUrl = envHost;
+                }
+            } catch (e) {
+                // Ignore env error
+            }
+
+            if (!targetUrl) {
                 // Fallback to relative protocol
                 const protocol = window.location.protocol === "https:" ? "wss" : "ws";
                 const host = window.location.hostname === "localhost" ? "localhost:3000" : window.location.host;
