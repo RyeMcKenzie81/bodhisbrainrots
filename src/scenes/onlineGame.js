@@ -332,7 +332,8 @@ export function initOnlineGameScene() {
                         // Don't clean up - explosion should only render once EVER
                     }
                 });
-            });
+            }
+        });
 
         // 3. Input Loop
         onUpdate(() => {
