@@ -189,7 +189,56 @@ export function initOnlineGameScene() {
                 }
             });
 
-            // D. Explosions (Transient)
+            // D. Render Powerups
+            if (!window.powerupMap) window.powerupMap = new Map();
+            const powerupMap = window.powerupMap;
+
+            // Remove collected powerups
+            powerupMap.forEach((pObj, pid) => {
+                const pState = state.powerups?.find(p => p.id === pid);
+                if (!pState) {
+                    destroy(pObj);
+                    powerupMap.delete(pid);
+                }
+            });
+
+            // Add new powerups
+            state.powerups?.forEach(pState => {
+                let pObj = powerupMap.get(pState.id);
+                if (!pObj) {
+                    const powerupSprites = {
+                        brain: "powerup_bomb",
+                        fire: "powerup_fire",
+                        speed: "powerup_speed"
+                    };
+
+                    const sprName = powerupSprites[pState.type];
+                    if (sprName) {
+                        const baseScale = (SIM_CONSTANTS.TILE_SIZE * 0.63) / 500;
+                        const baseY = pState.gridY * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2;
+
+                        pObj = add([
+                            sprite(sprName),
+                            pos(pState.gridX * SIM_CONSTANTS.TILE_SIZE + SIM_CONSTANTS.TILE_SIZE / 2, baseY),
+                            anchor("center"),
+                            scale(baseScale),
+                            opacity(1),
+                            z(pState.gridY),
+                            { baseY, jiggleOffset: Math.random() * Math.PI * 2 }
+                        ]);
+
+                        // Bounce animation
+                        pObj.onUpdate(() => {
+                            const t = time() * 5 + pObj.jiggleOffset;
+                            pObj.pos.y = pObj.baseY + Math.sin(t) * 3;
+                        });
+
+                        powerupMap.set(pState.id, pObj);
+                    }
+                }
+            });
+
+            // E. Explosions (Transient)
             // Track which explosions we've already rendered to prevent duplicates
             if (!window.renderedExplosions) {
                 window.renderedExplosions = new Set();
