@@ -63,9 +63,6 @@ export function initOnlineGameScene() {
                                 scale(0.12),
                             ]));
                         } else if (isPerimeter) {
-                            // Perimeter walls use festive Christmas decorations! 🎄
-                            const decorations = ["christmas_tree", "christmas_elf"];
-                            const decoration = decorations[Math.floor(Math.random() * decorations.length)];
 
                             gridObjs.push(add([
                                 rect(SIM_CONSTANTS.TILE_SIZE - 2, SIM_CONSTANTS.TILE_SIZE - 2, { radius: 4 }),
