@@ -198,7 +198,7 @@ function startGameLoop(room) {
     broadcastToRoom(room, { type: 'game_start' });
 
     room.interval = setInterval(() => {
-        const dt = TICK_RATE / 1000;
+        const dt = TICK_INTERVAL / 1000;
         tick(room.state, dt);
 
         // Stop loop if game is over
