@@ -158,6 +158,46 @@ export function initLobbyScene() {
         socket.on("player_ready", handlePlayerReady);
         socket.on("game_start", handleGameStart);
 
+        // Start game function (host only)
+        function startGame() {
+            if (isHost && players.length >= 2) {
+                socket.send("start_game");
+            }
+        }
+
+        // Input
+        onKeyPress("space", () => {
+            if (isHost) {
+                startGame();
+            } else {
+                socket.send("ready");
+            }
+        });
+
+        onKeyPress("enter", () => {
+            if (isHost) {
+                startGame();
+            } else {
+                socket.send("ready");
+            }
+        });
+
+        onKeyPress("escape", () => {
+            go("menu");
+        });
+
+        // NATIVE TOUCH HANDLERS
+        const touchButtons = [
+            {
+                x: width() / 2,
+                y: 550,
+                w: 280,
+                h: 70,
+                action: startGame
+            }
+        ];
+        const cleanupTouch = setupMenuTouch(touchButtons);
+
         // Cleanup on scene leave
         onSceneLeave(() => {
             socket.off("room_created", handleRoomCreated);
