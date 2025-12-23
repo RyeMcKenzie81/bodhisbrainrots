@@ -1,6 +1,6 @@
 export const SIM_CONSTANTS = {
     GRID_WIDTH: 15,
-    GRID_HEIGHT: 13,
+    GRID_HEIGHT: 11, // Match local game
     TILE_SIZE: 64,
     BRAIN_TIMER: 3, // Seconds
     EXPLOSION_DURATION: 0.5,

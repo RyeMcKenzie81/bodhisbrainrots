@@ -58,8 +58,8 @@ export function tick(state, dt) {
             let newX = player.pos.x + player.intent.dx * moveAmt;
             let newY = player.pos.y + player.intent.dy * moveAmt;
 
-            // Player hitbox radius (30% of tile size)
-            const playerRadius = SIM_CONSTANTS.TILE_SIZE * 0.3;
+            // Player hitbox radius (25% of tile size, matching local game area)
+            const playerRadius = SIM_CONSTANTS.TILE_SIZE * 0.25;
 
             // AABB Collision Check - test all four corners
             const canMoveX = checkAABBWalkable(state, newX, player.pos.y, playerRadius);
