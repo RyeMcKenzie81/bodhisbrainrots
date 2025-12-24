@@ -961,7 +961,7 @@ export function initMenuScenes() {
             sprite(PLAYERS[selectedChar].spriteFront),
             pos(width() / 2, 500),
             anchor("center"),
-            scale(0.22),
+            scale(0.22 * (PLAYERS[selectedChar].scale || 1)),
         ]);
 
         add([
@@ -981,6 +981,9 @@ export function initMenuScenes() {
         function updateSelection() {
             cursor.pos.x = rosterStartX + selectedChar * spacing;
             previewSprite.use(sprite(PLAYERS[selectedChar].spriteFront));
+            previewSprite.scale = vec2(0.22 * (PLAYERS[selectedChar].scale || 1));
+            // Also need to explicitly set scale if using sprite() might reset? No usually scale is separate.
+            // But we can set .scale property.
             previewName.text = PLAYERS[selectedChar].name;
         }
 
