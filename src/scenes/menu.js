@@ -951,8 +951,8 @@ export function initMenuScenes() {
             rect(boxSize + 10, boxSize + 10, { radius: 6 }),
             pos(0, 0), // Will be set by updateSelection
             anchor("center"),
-            color(0, 0, 0),
-            opacity(0),
+            color(0, 0, 0, 0), // Transparent frame
+            opacity(1), // Visible
             outline(5, playerColors[currentPlayer]),
             z(5),
         ]);
@@ -1068,18 +1068,16 @@ export function initMenuScenes() {
         onKeyPress(controls.up, () => moveSelection("up"));
         onKeyPress(controls.down, () => moveSelection("down"));
 
-        if (currentPlayer !== 0) {
-            onKeyPress("a", () => moveSelection("left"));
-            onKeyPress("d", () => moveSelection("right"));
-            onKeyPress("w", () => moveSelection("up"));
-            onKeyPress("s", () => moveSelection("down"));
-        }
-        if (currentPlayer !== 1) {
-            onKeyPress("left", () => moveSelection("left"));
-            onKeyPress("right", () => moveSelection("right"));
-            onKeyPress("up", () => moveSelection("up"));
-            onKeyPress("down", () => moveSelection("down"));
-        }
+        // Universal Controls
+        onKeyPress("a", () => moveSelection("left"));
+        onKeyPress("d", () => moveSelection("right"));
+        onKeyPress("w", () => moveSelection("up"));
+        onKeyPress("s", () => moveSelection("down"));
+
+        onKeyPress("left", () => moveSelection("left"));
+        onKeyPress("right", () => moveSelection("right"));
+        onKeyPress("up", () => moveSelection("up"));
+        onKeyPress("down", () => moveSelection("down"));
 
         onKeyPress(controls.bomb, () => confirmSelection());
         onKeyPress("space", () => confirmSelection());
