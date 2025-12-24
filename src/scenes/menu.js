@@ -1163,8 +1163,9 @@ export function initMenuScenes() {
                         selectedChar = i;
                         updateSelection();
                     }
-                };
-            });
+                }
+            };
+        });
         const cleanupTouch = setupMenuTouch(touchButtons);
         onSceneLeave(cleanupTouch);
     });
