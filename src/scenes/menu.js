@@ -260,39 +260,39 @@ export function initMenuScenes() {
                     .game-btn:hover { background: #45a049; }
                     .game-btn.cancel { background: #d32f2f; }
                     .game-btn.cancel:hover { background: #c62828; }
-                \`;
+                `;
                 document.head.appendChild(style);
             }
 
             function createNameInput(defaultName, callback) {
                 const overlay = document.createElement("div");
                 overlay.className = "game-input-overlay";
-                
+
                 const box = document.createElement("div");
                 box.className = "game-input-box";
-                
+
                 const title = document.createElement("h2");
                 title.textContent = "WHO ARE YOU?";
                 title.style.margin = "0";
-                
+
                 const input = document.createElement("input");
                 input.className = "game-input-field";
                 input.value = defaultName;
                 input.placeholder = "Enter Name";
-                
+
                 const btnParams = document.createElement("div");
 
                 const okBtn = document.createElement("button");
                 okBtn.className = "game-btn";
                 okBtn.textContent = "CONFIRM";
-                
+
                 const cancelBtn = document.createElement("button");
                 cancelBtn.className = "game-btn cancel";
                 cancelBtn.textContent = "CANCEL";
 
                 btnParams.appendChild(cancelBtn);
                 btnParams.appendChild(okBtn);
-                
+
                 box.appendChild(title);
                 box.appendChild(input);
                 box.appendChild(btnParams);
@@ -309,7 +309,7 @@ export function initMenuScenes() {
 
                 okBtn.onclick = () => close(input.value || "Player");
                 cancelBtn.onclick = () => close(null);
-                
+
                 input.onkeydown = (e) => {
                     if (e.key === "Enter") close(input.value || "Player");
                     if (e.key === "Escape") close(null);
@@ -318,20 +318,20 @@ export function initMenuScenes() {
 
             // --- DOM HELPER FOR ROOM CODE ---
             function createCodeInput(callback) {
-                 const overlay = document.createElement("div");
+                const overlay = document.createElement("div");
                 overlay.className = "game-input-overlay";
-                
+
                 const box = document.createElement("div");
                 box.className = "game-input-box";
-                
+
                 const title = document.createElement("h2");
                 title.textContent = "ENTER ROOM CODE";
-                
+
                 const input = document.createElement("input");
                 input.className = "game-input-field";
                 input.placeholder = "CODE";
                 input.style.textTransform = "uppercase";
-                
+
                 const okBtn = document.createElement("button");
                 okBtn.className = "game-btn";
                 okBtn.textContent = "JOIN";
@@ -339,7 +339,7 @@ export function initMenuScenes() {
                 const cancelBtn = document.createElement("button");
                 cancelBtn.className = "game-btn cancel";
                 cancelBtn.textContent = "CANCEL";
-                
+
                 box.appendChild(title);
                 box.appendChild(input);
                 box.appendChild(cancelBtn);
@@ -416,7 +416,7 @@ export function initMenuScenes() {
 
             function confirm() {
                 const defaultName = gameConfig.playerName || "Player";
-                
+
                 createNameInput(defaultName, (name) => {
                     if (!name) return; // Cancelled
                     gameConfig.playerName = name;
@@ -464,7 +464,7 @@ export function initMenuScenes() {
                     createNameInput(defaultName, (name) => {
                         if (!name) return;
                         gameConfig.playerName = name;
-                        
+
                         import("../net/socket.js").then(({ socket }) => {
                             socket.send("create_room", { name: name });
                             go("lobby");
