@@ -294,7 +294,7 @@ export function initLobbyScene() {
                 renderPlayers();
 
                 socket.send("update_character", { characterIndex: newIdx });
-                try { play("kick_sound", { volume: 0.2, speed: 3 }); } catch (e) { } // Click feedback
+                try { play(`callout_${newIdx}`); } catch (e) { }
             }
         }
 
