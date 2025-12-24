@@ -225,19 +225,20 @@ export function initMenuScenes() {
     });
 
     // Scene: Online Menu
-    scene("onlineMenu", () => import("../net/socket.js").then(({ socket }) => {
-        if (!socket.connected) {
-            const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-            const host = window.location.hostname === "localhost" ? "localhost:3000" : window.location.host;
-            socket.connect(`${protocol}://${host}`);
-        }
+    scene("onlineMenu", () => {
+        import("../net/socket.js").then(({ socket }) => {
+            if (!socket.connected) {
+                const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+                const host = window.location.hostname === "localhost" ? "localhost:3000" : window.location.host;
+                socket.connect(`${protocol}://${host}`);
+            }
 
-        // --- DOM HELPER FOR NAME INPUT ---
-        // Inject Styles
-        if (!document.getElementById("game-styles")) {
-            const style = document.createElement("style");
-            style.id = "game-styles";
-            style.textContent = `
+            // --- DOM HELPER FOR NAME INPUT ---
+            // Inject Styles
+            if (!document.getElementById("game-styles")) {
+                const style = document.createElement("style");
+                style.id = "game-styles";
+                style.textContent = `
                     .game-input-overlay {
                         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                         background: rgba(0,0,0,0.85); z-index: 10000;
