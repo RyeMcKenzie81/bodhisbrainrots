@@ -883,7 +883,7 @@ export function initMenuScenes() {
 
             const box = add([
                 rect(boxSize, boxSize, { radius: 4 }),
-                pos(x, rosterY),
+                pos(x, y),
                 anchor("center"),
                 color(isTaken ? rgb(30, 30, 40) : rgb(50, 50, 70)),
                 outline(4, isTaken ? playerColors[takenByPlayer] : rgb(80, 80, 100)),
@@ -895,19 +895,17 @@ export function initMenuScenes() {
             charBoxes.push(box);
 
             box.onClick(() => {
-                // If touching a different char, select it
                 if (selectedChar !== i) {
                     selectedChar = i;
                     updateSelection();
                 } else {
-                    // If touching selected, confirm
                     confirmSelection();
                 }
             });
 
             const charSprite = add([
                 sprite(p.spriteFront),
-                pos(x, rosterY - 10),
+                pos(x, y - 10),
                 anchor("center"),
                 scale(0.12 * (p.scale || 1)),
                 opacity(isTaken ? 0.4 : 1),
@@ -917,7 +915,7 @@ export function initMenuScenes() {
 
             add([
                 rect(boxSize - 10, 22, { radius: 2 }),
-                pos(x, rosterY + 55),
+                pos(x, y + 55),
                 anchor("center"),
                 color(isTaken ? rgb(40, 40, 50) : rgb(20, 20, 30)),
                 z(1),
@@ -925,7 +923,7 @@ export function initMenuScenes() {
 
             add([
                 text(p.name, { size: 11 }),
-                pos(x, rosterY + 55),
+                pos(x, y + 55),
                 anchor("center"),
                 color(isTaken ? rgb(100, 100, 100) : rgb(255, 255, 255)),
                 z(2),
@@ -934,14 +932,14 @@ export function initMenuScenes() {
             if (isTaken) {
                 add([
                     rect(30, 18, { radius: 2 }),
-                    pos(x + boxSize / 2 - 20, rosterY - boxSize / 2 + 15),
+                    pos(x + boxSize / 2 - 20, y - boxSize / 2 + 15),
                     anchor("center"),
                     color(playerColors[takenByPlayer]),
                     z(3),
                 ]);
                 add([
                     text(`P${takenByPlayer + 1}`, { size: 10 }),
-                    pos(x + boxSize / 2 - 20, rosterY - boxSize / 2 + 15),
+                    pos(x + boxSize / 2 - 20, y - boxSize / 2 + 15),
                     anchor("center"),
                     color(0, 0, 0),
                     z(4),
@@ -951,13 +949,16 @@ export function initMenuScenes() {
 
         const cursor = add([
             rect(boxSize + 10, boxSize + 10, { radius: 6 }),
-            pos(rosterStartX + selectedChar * spacing, rosterY),
+            pos(0, 0), // Will be set by updateSelection
             anchor("center"),
             color(0, 0, 0),
             opacity(0),
             outline(5, playerColors[currentPlayer]),
             z(5),
         ]);
+
+        // Initial set
+        wait(0, () => updateSelection());
 
         cursor.onUpdate(() => {
             const pulse = 3 + Math.sin(time() * 6) * 2;
