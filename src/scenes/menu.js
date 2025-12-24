@@ -1135,36 +1135,37 @@ export function initMenuScenes() {
             }
         });
 
-        text("ARROWS: SELECT     SPACE: CONFIRM     ESC: BACK", { size: 14 }),
+        add([
+            text("ARROWS: SELECT     SPACE: CONFIRM     ESC: BACK", { size: 14 }),
             pos(width() / 2, 700),
             anchor("center"),
             color(150, 150, 150),
         ]);
 
-    // NATIVE TOUCH HANDLERS for mobile
-    const touchButtons = PLAYERS.map((_, i) => {
-        const col = i % 3;
-        const row = Math.floor(i / 3);
-        const x = gridStartX + (col - 1) * spacing;
-        const y = gridStartY + (row - 0.5) * spacing;
+        // NATIVE TOUCH HANDLERS for mobile
+        const touchButtons = PLAYERS.map((_, i) => {
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            const x = gridStartX + (col - 1) * spacing;
+            const y = gridStartY + (row - 0.5) * spacing;
 
-        return {
-            x: x,
-            y: y,
-            w: boxSize,
-            h: boxSize,
-            action: () => {
-                if (takenCharacters.includes(i)) return;
-                if (selectedChar === i) {
-                    // Double tap = confirm
-                    confirmSelection();
-                } else {
-                    selectedChar = i;
-                    updateSelection();
-                }
-            }
-        }));
-    const cleanupTouch = setupMenuTouch(touchButtons);
-    onSceneLeave(cleanupTouch);
-});
+            return {
+                x: x,
+                y: y,
+                w: boxSize,
+                h: boxSize,
+                action: () => {
+                    if (takenCharacters.includes(i)) return;
+                    if (selectedChar === i) {
+                        // Double tap = confirm
+                        confirmSelection();
+                    } else {
+                        selectedChar = i;
+                        updateSelection();
+                    }
+                };
+            });
+        const cleanupTouch = setupMenuTouch(touchButtons);
+        onSceneLeave(cleanupTouch);
+    });
 }
