@@ -948,21 +948,22 @@ export function initMenuScenes() {
         });
 
         const cursor = add([
-            rect(boxSize + 10, boxSize + 10, { radius: 6, fill: false }),
             pos(0, 0), // Will be set by updateSelection
             anchor("center"),
-            opacity(1),
-            outline(5, playerColors[currentPlayer]),
             z(5),
+            {
+                draw() {
+                    const pulse = 3 + Math.sin(time() * 6) * 2;
+                    drawRect({
+                        width: boxSize + 10,
+                        height: boxSize + 10,
+                        anchor: "center",
+                        fill: false,
+                        outline: { color: playerColors[currentPlayer], width: 5 + pulse }
+                    });
+                }
+            }
         ]);
-
-        // Initial set
-        wait(0, () => updateSelection());
-
-        cursor.onUpdate(() => {
-            const pulse = 3 + Math.sin(time() * 6) * 2;
-            cursor.outline.width = pulse;
-        });
 
         const previewSprite = add([
             sprite(PLAYERS[selectedChar].spriteFront),

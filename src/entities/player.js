@@ -12,7 +12,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
         sprite(character.spriteAnim),
         pos(startPos.x * TILE_SIZE + TILE_SIZE / 2, startPos.y * TILE_SIZE + TILE_SIZE / 2),
         anchor("center"),
-        scale(0.25),  // Adjusted for 256x256 frames
+        scale(0.25 * (character.scale || 1)),  // Dynamic scaling
         area({ scale: 0.6, offset: vec2(0, 10) }),
         body(),
         z(startPos.y), // Initial Z
@@ -261,6 +261,10 @@ export function spawnPlayer(playerIndex, characterIndex) {
         }
     };
     onKeyPress(keys.brain, player.dropBomb);
+    // Force Space for Player 1 (Single Player convenience)
+    if (playerIndex === 0) {
+        onKeyPress("space", player.dropBomb);
+    }
 
     // Dynamic Z-ordering for Player
     player.onUpdate(() => {

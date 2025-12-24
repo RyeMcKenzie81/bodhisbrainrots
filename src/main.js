@@ -20,6 +20,7 @@ const k = kaboom({
     letterbox: false, // Disable built-in scaler, using manual fitCanvas below
     touchToMouse: true,
     pixelDensity: 1,
+    loadingScreen: false, // Custom loading screen below
 });
 
 // MANUAL RESIZE HANDLER FOR MOBILE
@@ -127,6 +128,59 @@ initGameScene();
 initGameOverScene();
 initLobbyScene();
 initOnlineGameScene();
+
+// Custom Loading Screen
+onDraw(() => {
+    if (numAssets() > 0 && loadProgress() < 1) {
+        // Background
+        drawRect({
+            width: width(),
+            height: height(),
+            pos: vec2(0, 0),
+            color: rgb(20, 20, 30),
+        });
+
+        // Title
+        drawText({
+            text: "BoDawg's Brainrots",
+            pos: vec2(width() / 2, height() / 2 - 60),
+            anchor: "center",
+            size: 48,
+            font: "monospace", // Or default
+            color: rgb(255, 255, 0),
+        });
+
+        // Loading Text
+        drawText({
+            text: "LOADING",
+            pos: vec2(width() / 2, height() / 2 + 10),
+            anchor: "center",
+            size: 24,
+            color: rgb(200, 200, 200),
+        });
+
+        // Bar Background
+        const barW = 400;
+        const barH = 20;
+        drawRect({
+            width: barW,
+            height: barH,
+            pos: vec2(width() / 2, height() / 2 + 50),
+            anchor: "center",
+            color: rgb(50, 50, 50),
+            outline: { color: rgb(255, 255, 255), width: 2 },
+        });
+
+        // Bar Fill
+        drawRect({
+            width: barW * loadProgress(),
+            height: barH,
+            pos: vec2(width() / 2 - barW / 2, height() / 2 + 50 - barH / 2),
+            anchor: "topleft",
+            color: rgb(255, 255, 0),
+        });
+    }
+});
 
 // Start the game
 // Use onLoad to be safe with asset loading
