@@ -867,12 +867,17 @@ export function initMenuScenes() {
         const charSprites = [];
         const charBoxes = [];
         const rosterY = 280;
-        const boxSize = 140;
-        const spacing = 160;
-        const rosterStartX = width() / 2 - (spacing * (PLAYERS.length - 1) / 2);
+        const boxSize = 120;
+        const spacing = 130;
+        const gridStartX = width() * 0.6; // Center of grid roughly on right side
+        const gridStartY = 350;
 
         PLAYERS.forEach((p, i) => {
-            const x = rosterStartX + i * spacing;
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            const x = gridStartX + (col - 1) * spacing;
+            const y = gridStartY + (row - 0.5) * spacing;
+
             const isTaken = takenCharacters.includes(i);
             const takenByPlayer = takenCharacters.indexOf(i);
 
@@ -961,9 +966,9 @@ export function initMenuScenes() {
 
         const previewSprite = add([
             sprite(PLAYERS[selectedChar].spriteFront),
-            pos(width() / 2, 500),
+            pos(width() * 0.25, 450), // Big portrait on LEFT
             anchor("center"),
-            scale(0.22 * (PLAYERS[selectedChar].scale || 1)),
+            scale(0.45 * (PLAYERS[selectedChar].scale || 1)), // Much bigger
         ]);
 
         add([
@@ -974,19 +979,27 @@ export function initMenuScenes() {
         ]);
 
         const previewName = add([
-            text(PLAYERS[selectedChar].name, { size: 18 }),
-            pos(width() / 2, 620),
+            text(PLAYERS[selectedChar].name, { size: 24 }),
+            pos(width() * 0.25, 600),
             anchor("center"),
             color(0, 0, 0),
         ]);
 
         function updateSelection() {
-            cursor.pos.x = rosterStartX + selectedChar * spacing;
+            const col = selectedChar % 3;
+            const row = Math.floor(selectedChar / 3);
+            const x = gridStartX + (col - 1) * spacing;
+            const y = gridStartY + (row - 0.5) * spacing;
+
+            cursor.pos.x = x;
+            cursor.pos.y = y;
+
             previewSprite.use(sprite(PLAYERS[selectedChar].spriteFront));
-            previewSprite.scale = vec2(0.22 * (PLAYERS[selectedChar].scale || 1));
-            // Also need to explicitly set scale if using sprite() might reset? No usually scale is separate.
-            // But we can set .scale property.
+            previewSprite.scale = vec2(0.45 * (PLAYERS[selectedChar].scale || 1));
             previewName.text = PLAYERS[selectedChar].name;
+
+            // Pulse effect reset?
+            cursor.outline.color = playerColors[currentPlayer];
         }
 
         if (takenCharacters.length > 0) {
@@ -1020,19 +1033,24 @@ export function initMenuScenes() {
         }
 
         function moveSelection(dir) {
-            let newChar = selectedChar;
+            let offset = 0;
+            if (dir === "left") offset = -1;
+            if (dir === "right") offset = 1;
+            if (dir === "up") offset = -3;
+            if (dir === "down") offset = 3;
 
-            if (dir === "left") newChar = selectedChar - 1;
-            if (dir === "right") newChar = selectedChar + 1;
+            let newChar = selectedChar + offset;
 
-            if (newChar < 0) newChar = PLAYERS.length - 1;
-            if (newChar > PLAYERS.length - 1) newChar = 0;
+            // Simple wrap
+            if (newChar < 0) newChar += PLAYERS.length;
+            if (newChar >= PLAYERS.length) newChar -= PLAYERS.length;
 
             let attempts = 0;
-            while (takenCharacters.includes(newChar) && attempts < 4) {
-                newChar = dir === "left" ? newChar - 1 : newChar + 1;
-                if (newChar < 0) newChar = PLAYERS.length - 1;
-                if (newChar > PLAYERS.length - 1) newChar = 0;
+            // Try to find available slot in that direction (naive)
+            while (takenCharacters.includes(newChar) && attempts < 6) {
+                newChar += offset;
+                if (newChar < 0) newChar += PLAYERS.length;
+                if (newChar >= PLAYERS.length) newChar -= PLAYERS.length;
                 attempts++;
             }
 
@@ -1046,20 +1064,20 @@ export function initMenuScenes() {
 
         onKeyPress(controls.left, () => moveSelection("left"));
         onKeyPress(controls.right, () => moveSelection("right"));
-        onKeyPress(controls.up, () => moveSelection("left"));
-        onKeyPress(controls.down, () => moveSelection("right"));
+        onKeyPress(controls.up, () => moveSelection("up"));
+        onKeyPress(controls.down, () => moveSelection("down"));
 
         if (currentPlayer !== 0) {
             onKeyPress("a", () => moveSelection("left"));
             onKeyPress("d", () => moveSelection("right"));
-            onKeyPress("w", () => moveSelection("left"));
-            onKeyPress("s", () => moveSelection("right"));
+            onKeyPress("w", () => moveSelection("up"));
+            onKeyPress("s", () => moveSelection("down"));
         }
         if (currentPlayer !== 1) {
             onKeyPress("left", () => moveSelection("left"));
             onKeyPress("right", () => moveSelection("right"));
-            onKeyPress("up", () => moveSelection("left"));
-            onKeyPress("down", () => moveSelection("right"));
+            onKeyPress("up", () => moveSelection("up"));
+            onKeyPress("down", () => moveSelection("down"));
         }
 
         onKeyPress(controls.bomb, () => confirmSelection());
@@ -1117,17 +1135,22 @@ export function initMenuScenes() {
             }
         });
 
-        add([
-            text("← → SELECT     SPACE/BOMB CONFIRM     ESC BACK", { size: 12 }),
-            pos(width() / 2, 680),
+        text("ARROWS: SELECT     SPACE: CONFIRM     ESC: BACK", { size: 14 }),
+            pos(width() / 2, 700),
             anchor("center"),
-            color(120, 120, 120),
+            color(150, 150, 150),
         ]);
 
-        // NATIVE TOUCH HANDLERS for mobile
-        const touchButtons = PLAYERS.map((_, i) => ({
-            x: rosterStartX + i * spacing,
-            y: rosterY,
+    // NATIVE TOUCH HANDLERS for mobile
+    const touchButtons = PLAYERS.map((_, i) => {
+        const col = i % 3;
+        const row = Math.floor(i / 3);
+        const x = gridStartX + (col - 1) * spacing;
+        const y = gridStartY + (row - 0.5) * spacing;
+
+        return {
+            x: x,
+            y: y,
             w: boxSize,
             h: boxSize,
             action: () => {
@@ -1141,7 +1164,7 @@ export function initMenuScenes() {
                 }
             }
         }));
-        const cleanupTouch = setupMenuTouch(touchButtons);
-        onSceneLeave(cleanupTouch);
-    });
+    const cleanupTouch = setupMenuTouch(touchButtons);
+    onSceneLeave(cleanupTouch);
+});
 }
