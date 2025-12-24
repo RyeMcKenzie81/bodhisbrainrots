@@ -135,13 +135,17 @@ export function initMenuScenes() {
 
             // Icon
             if (i === 0) {
-                add([
+                const s = add([
                     sprite(PLAYERS[0].spriteFront),
                     pos(x - 50, buttonY + 110),
                     anchor("center"),
-                    scale(0.06),
+                    scale(1),
                     z(1),
                 ]);
+                if (s.width) {
+                    const fitSize = 50;
+                    s.scale = vec2(Math.min(fitSize / s.width, fitSize / s.height));
+                }
                 add([
                     text("VS", { size: 14 }),
                     pos(x, buttonY + 115),
@@ -158,13 +162,17 @@ export function initMenuScenes() {
                 ]);
             } else {
                 for (let p = 0; p < 2; p++) {
-                    add([
+                    const s = add([
                         sprite(PLAYERS[p].spriteFront),
                         pos(x - 30 + p * 60, buttonY + 110),
                         anchor("center"),
-                        scale(0.05),
+                        scale(1),
                         z(1),
                     ]);
+                    if (s.width) {
+                        const fitSize = 50;
+                        s.scale = vec2(Math.min(fitSize / s.width, fitSize / s.height));
+                    }
                 }
             }
         });
