@@ -233,6 +233,13 @@ export function initLobbyScene() {
         const handlePlayerUpdated = (data) => {
             const p = players.find(player => player.id === data.player.id);
             if (p) {
+                // Play callout if character changed
+                if (p.characterIndex !== data.player.characterIndex) {
+                    try {
+                        play(`callout_${data.player.characterIndex}`);
+                    } catch (e) { console.error(e); }
+                }
+
                 // Update properties
                 p.characterIndex = data.player.characterIndex;
                 p.name = data.player.name;

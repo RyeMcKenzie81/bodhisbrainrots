@@ -39,6 +39,23 @@ export function loadAssets() {
     loadSound("loss", "sprites/loss.mp3");
     loadSound("overtime", "sprites/overtime.mp3");
 
+    // Zippy Zartle
+    loadSprite("zippy_front", "sprites/zippysprite.jpeg");
+    loadSprite("zippy_back", "sprites/zippysprite.jpeg");
+    loadSprite("zippy_anim", "sprites/zippysprite.jpeg", {
+        sliceX: 1, sliceY: 1,
+        anims: {
+            walk_down: { from: 0, to: 0, loop: true },
+            walk_up: { from: 0, to: 0, loop: true },
+            walk_left: { from: 0, to: 0, loop: true },
+            walk_right: { from: 0, to: 0, loop: true },
+            idle_down: { from: 0, to: 0 },
+            idle_up: { from: 0, to: 0 },
+            idle_side: { from: 0, to: 0 },
+        }
+    });
+    loadSound("callout_4", "sprites/zippycallout.mp3");
+
     // Load animated sprite sheets (4x4 grid: down, up, left, right rows)
     loadSprite("tungtung_anim", "sprites/tungtung_spritesheet.png", {
         sliceX: 4,

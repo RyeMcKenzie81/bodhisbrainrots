@@ -36,6 +36,13 @@ export const PLAYERS = [
         spriteAnim: "cappucino_anim",
         keys: { up: "t", down: "g", left: "f", right: "h", brain: "y" }
     },
+    {
+        name: "Zippy Zartle",
+        spriteFront: "zippy_front",
+        spriteBack: "zippy_back",
+        spriteAnim: "zippy_anim",
+        keys: { up: "up", down: "down", left: "left", right: "right", brain: "m" }
+    },
 ];
 
 // Start positions (corners)
