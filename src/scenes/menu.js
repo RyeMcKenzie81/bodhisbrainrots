@@ -948,11 +948,10 @@ export function initMenuScenes() {
         });
 
         const cursor = add([
-            rect(boxSize + 10, boxSize + 10, { radius: 6 }),
+            rect(boxSize + 10, boxSize + 10, { radius: 6, fill: false }),
             pos(0, 0), // Will be set by updateSelection
             anchor("center"),
-            color(0, 0, 0, 0), // Transparent frame
-            opacity(1), // Visible
+            opacity(1),
             outline(5, playerColors[currentPlayer]),
             z(5),
         ]);
