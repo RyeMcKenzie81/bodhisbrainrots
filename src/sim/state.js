@@ -2,7 +2,7 @@ export const SIM_CONSTANTS = {
     GRID_WIDTH: 15,
     GRID_HEIGHT: 11, // Match local game
     TILE_SIZE: 64,
-    PLAYER_SPEED: 180, // Pixels per second
+    PLAYER_SPEED: 175, // Pixels per second
     BRAIN_TIMER: 2.5, // Seconds
     EXPLOSION_DURATION: 0.8, // Seconds (Slightly longer for network sync)
     MAX_BRAINS: 1, // Default starting
