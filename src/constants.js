@@ -41,6 +41,7 @@ export const PLAYERS = [
         spriteFront: "zippy_front",
         spriteBack: "zippy_back",
         spriteAnim: "zippy_anim",
+        scale: 4,
         keys: { up: "up", down: "down", left: "left", right: "right", brain: "m" }
     },
 ];

@@ -27,7 +27,7 @@ export function initMenuScenes() {
                 sprite(p.spriteFront),
                 pos(xPos, charY),
                 anchor("center"),
-                scale(0.12),
+                scale(0.12 * (p.scale || 1)),
             ]);
             add([
                 text(p.name, { size: 14 }),
@@ -446,7 +446,7 @@ export function initMenuScenes() {
                     sprite(PLAYERS[(i + 1) % PLAYERS.length].spriteFront),
                     pos(previewStartX + i * 100, 520),
                     anchor("center"),
-                    scale(0.08),
+                    scale(0.08 * (PLAYERS[(i + 1) % PLAYERS.length].scale || 1)),
                 ]);
                 opponentPreview.push(cpuSprite);
 
@@ -647,7 +647,7 @@ export function initMenuScenes() {
                     sprite(PLAYERS[i].spriteFront),
                     pos(startX + i * 120, 550),
                     anchor("center"),
-                    scale(0.1),
+                    scale(0.1 * (PLAYERS[i].scale || 1)),
                 ]);
                 playerIcons.push(icon);
 
@@ -902,7 +902,7 @@ export function initMenuScenes() {
                 sprite(p.spriteFront),
                 pos(x, rosterY - 10),
                 anchor("center"),
-                scale(0.1),
+                scale(0.12 * (p.scale || 1)),
                 opacity(isTaken ? 0.4 : 1),
                 z(1),
             ]);
@@ -997,7 +997,7 @@ export function initMenuScenes() {
                     sprite(PLAYERS[charIdx].spriteFront),
                     pos(50 + i * 70, 520),
                     anchor("center"),
-                    scale(0.08),
+                    scale(0.08 * (PLAYERS[(i + 1) % PLAYERS.length].scale || 1)),
                 ]);
                 add([
                     rect(24, 14, { radius: 2 }),

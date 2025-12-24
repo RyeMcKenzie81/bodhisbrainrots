@@ -103,7 +103,7 @@ export function initLobbyScene() {
                         sprite(charInfo.spriteFront),
                         pos(-150, y),
                         anchor("center"),
-                        scale(0.12)
+                        scale(0.12 * (charInfo.scale || 1))
                     ]);
                 }
 
