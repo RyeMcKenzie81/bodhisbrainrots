@@ -997,7 +997,7 @@ export function initMenuScenes() {
                     sprite(PLAYERS[charIdx].spriteFront),
                     pos(50 + i * 70, 520),
                     anchor("center"),
-                    scale(0.08 * (PLAYERS[(i + 1) % PLAYERS.length].scale || 1)),
+                    scale(0.08 * (PLAYERS[charIdx].scale || 1)),
                 ]);
                 add([
                     rect(24, 14, { radius: 2 }),
