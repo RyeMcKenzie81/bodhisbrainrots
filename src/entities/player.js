@@ -20,7 +20,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
         {
             playerIndex,
             characterIndex,
-            speed: 200,
+            speed: 175,
             brainCount: 1,
             brainsPlaced: 0,
             fireRange: 2,

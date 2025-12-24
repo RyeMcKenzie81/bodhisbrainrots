@@ -31,7 +31,7 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
         {
             playerIndex,
             characterIndex,
-            speed: 180,
+            speed: 170,
             brainCount: 1,
             brainsPlaced: 0,
             fireRange: 2,
