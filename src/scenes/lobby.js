@@ -78,6 +78,13 @@ export function initLobbyScene() {
             z(999),
         ]);
 
+        add([
+            text("Use [A] / [D] to Change Character", { size: 16 }),
+            pos(width() / 2, 160),
+            anchor("center"),
+            color(150, 150, 200),
+        ]);
+
         function renderPlayers() {
             // Destroy all children manually (Kaboom doesn't have removeAllChildren)
             playerListContainer.get("*").forEach(child => destroy(child));
@@ -283,7 +290,13 @@ export function initLobbyScene() {
             if (p && !p.ready) {
                 const charIndex = p.characterIndex || 0;
                 let newIdx = (charIndex + delta + PLAYERS.length) % PLAYERS.length;
+
+                // Optimistic Update
+                p.characterIndex = newIdx;
+                renderPlayers();
+
                 socket.send("update_character", { characterIndex: newIdx });
+                play("click"); // Ensure sound plays here too if keys used
             }
         }
 
