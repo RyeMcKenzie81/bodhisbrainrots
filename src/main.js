@@ -131,7 +131,7 @@ initOnlineGameScene();
 
 // Custom Loading Screen
 onDraw(() => {
-    if (numAssets() > 0 && loadProgress() < 1) {
+    if (loadProgress() < 1) {
         // Background
         drawRect({
             width: width(),
