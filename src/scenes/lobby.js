@@ -244,6 +244,8 @@ export function initLobbyScene() {
                 p.characterIndex = data.player.characterIndex;
                 p.name = data.player.name;
                 p.ready = data.player.ready;
+                p.wins = data.player.wins;
+                p.losses = data.player.losses;
                 renderPlayers();
             }
         };
