@@ -1062,10 +1062,6 @@ export function initMenuScenes() {
 
         const controls = PLAYERS[currentPlayer].keys;
 
-        onKeyPress(controls.left, () => moveSelection("left"));
-        onKeyPress(controls.right, () => moveSelection("right"));
-        onKeyPress(controls.up, () => moveSelection("up"));
-        onKeyPress(controls.down, () => moveSelection("down"));
 
         // Universal Controls
         onKeyPress("a", () => moveSelection("left"));
