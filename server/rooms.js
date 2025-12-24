@@ -30,6 +30,9 @@ export function handleConnection(ws) {
                 };
 
                 room.players.push(player);
+                player.wins = 0;
+                player.losses = 0;
+                console.log(`[SERVER] Player ${playerId} initialized stats: 0-0`);
                 // Add player to simulation state
                 addPlayerToSim(room.state, playerId);
 
@@ -73,6 +76,8 @@ export function handleConnection(ws) {
                 };
 
                 room.players.push(player);
+                player.wins = 0;
+                player.losses = 0;
                 addPlayerToSim(room.state, playerId);
 
                 // Notify new player
@@ -87,7 +92,13 @@ export function handleConnection(ws) {
                 // Notify others
                 broadcastToRoom(room, {
                     type: 'player_joined',
-                    player: { id: playerId, name: player.name, ready: player.ready }
+                    player: {
+                        id: playerId,
+                        name: player.name,
+                        ready: player.ready,
+                        wins: player.wins,
+                        losses: player.losses
+                    }
                 });
 
                 console.log(`${playerId} joined room ${roomId}`);
@@ -243,11 +254,30 @@ function startGameLoop(room) {
             clearInterval(room.interval);
             room.interval = null;
 
-            // Broadcast Game Over with next round info
+            // Update Stats
+            room.players.forEach(p => {
+                if (p.id === room.state.winner) {
+                    p.wins = (p.wins || 0) + 1;
+                } else if (room.state.players.find(sp => sp.id === p.id)) {
+                    // Only count loss if they were in the simulation (aka played)
+                    p.losses = (p.losses || 0) + 1;
+                }
+            });
+
+            // Broadcast Game Over with next round info AND updated stats
+            const updatedPlayers = room.players.map(p => ({
+                id: p.id,
+                name: p.name,
+                ready: p.ready,
+                wins: p.wins || 0,
+                losses: p.losses || 0
+            }));
+
             broadcastToRoom(room, {
                 type: 'game_over',
                 winner: room.state.winner,
-                restartDelay: 10
+                restartDelay: 10,
+                players: updatedPlayers
             });
 
             // Schedule Restart
