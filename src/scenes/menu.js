@@ -1000,7 +1000,7 @@ export function initMenuScenes() {
             previewName.text = PLAYERS[selectedChar].name;
 
             // Pulse effect reset?
-            cursor.outline.color = playerColors[currentPlayer];
+            // cursor.outline.color = playerColors[currentPlayer];
         }
 
         if (takenCharacters.length > 0) {
