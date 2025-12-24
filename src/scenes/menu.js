@@ -226,12 +226,139 @@ export function initMenuScenes() {
 
     // Scene: Online Menu
     scene("onlineMenu", () => {
-        // connect if not connected
-        import("../net/socket.js").then(({ socket }) => {
-            if (!socket.connected) {
-                const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-                const host = window.location.hostname === "localhost" ? "localhost:3000" : window.location.host;
-                socket.connect(`${protocol}://${host}`);
+        if (!socket.connected) {
+            const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const host = window.location.hostname === "localhost" ? "localhost:3000" : window.location.host;
+            socket.connect(`${protocol}://${host}`);
+        }
+
+        // --- DOM HELPER FOR NAME INPUT ---
+        // Inject Styles
+        if (!document.getElementById("game-styles")) {
+            const style = document.createElement("style");
+            style.id = "game-styles";
+            style.textContent = \`
+                    .game-input-overlay {
+                        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                        background: rgba(0,0,0,0.85); z-index: 10000;
+                        display: flex; flex-direction: column; justify-content: center; align-items: center;
+                    }
+                    .game-input-box {
+                        background: #2a2a3e; padding: 30px; border-radius: 12px;
+                        border: 2px solid #6464a0; text-align: center; color: white;
+                        font-family: monospace; box-shadow: 0 0 20px rgba(100,100,255,0.2);
+                    }
+                    .game-input-field {
+                        font-size: 20px; padding: 10px; border-radius: 6px; border: none;
+                        margin: 15px 0; width: 250px; text-align: center;
+                    }
+                    .game-btn {
+                        background: #4caf50; color: white; border: none; padding: 10px 20px;
+                        font-size: 18px; border-radius: 6px; cursor: pointer; margin: 5px;
+                    }
+                    .game-btn:hover { background: #45a049; }
+                    .game-btn.cancel { background: #d32f2f; }
+                    .game-btn.cancel:hover { background: #c62828; }
+                \`;
+                document.head.appendChild(style);
+            }
+
+            function createNameInput(defaultName, callback) {
+                const overlay = document.createElement("div");
+                overlay.className = "game-input-overlay";
+                
+                const box = document.createElement("div");
+                box.className = "game-input-box";
+                
+                const title = document.createElement("h2");
+                title.textContent = "WHO ARE YOU?";
+                title.style.margin = "0";
+                
+                const input = document.createElement("input");
+                input.className = "game-input-field";
+                input.value = defaultName;
+                input.placeholder = "Enter Name";
+                
+                const btnParams = document.createElement("div");
+
+                const okBtn = document.createElement("button");
+                okBtn.className = "game-btn";
+                okBtn.textContent = "CONFIRM";
+                
+                const cancelBtn = document.createElement("button");
+                cancelBtn.className = "game-btn cancel";
+                cancelBtn.textContent = "CANCEL";
+
+                btnParams.appendChild(cancelBtn);
+                btnParams.appendChild(okBtn);
+                
+                box.appendChild(title);
+                box.appendChild(input);
+                box.appendChild(btnParams);
+                overlay.appendChild(box);
+                document.body.appendChild(overlay);
+
+                input.focus();
+                input.select();
+
+                const close = (name) => {
+                    document.body.removeChild(overlay);
+                    callback(name);
+                };
+
+                okBtn.onclick = () => close(input.value || "Player");
+                cancelBtn.onclick = () => close(null);
+                
+                input.onkeydown = (e) => {
+                    if (e.key === "Enter") close(input.value || "Player");
+                    if (e.key === "Escape") close(null);
+                };
+            }
+
+            // --- DOM HELPER FOR ROOM CODE ---
+            function createCodeInput(callback) {
+                 const overlay = document.createElement("div");
+                overlay.className = "game-input-overlay";
+                
+                const box = document.createElement("div");
+                box.className = "game-input-box";
+                
+                const title = document.createElement("h2");
+                title.textContent = "ENTER ROOM CODE";
+                
+                const input = document.createElement("input");
+                input.className = "game-input-field";
+                input.placeholder = "CODE";
+                input.style.textTransform = "uppercase";
+                
+                const okBtn = document.createElement("button");
+                okBtn.className = "game-btn";
+                okBtn.textContent = "JOIN";
+
+                const cancelBtn = document.createElement("button");
+                cancelBtn.className = "game-btn cancel";
+                cancelBtn.textContent = "CANCEL";
+                
+                box.appendChild(title);
+                box.appendChild(input);
+                box.appendChild(cancelBtn);
+                box.appendChild(okBtn);
+                overlay.appendChild(box);
+                document.body.appendChild(overlay);
+
+                input.focus();
+
+                const close = (code) => {
+                    document.body.removeChild(overlay);
+                    callback(code);
+                };
+
+                okBtn.onclick = () => close(input.value);
+                cancelBtn.onclick = () => close(null);
+                input.onkeydown = (e) => {
+                    if (e.key === "Enter") close(input.value);
+                    if (e.key === "Escape") close(null);
+                };
             }
 
             let selectedOption = 0;
@@ -287,28 +414,26 @@ export function initMenuScenes() {
             onKeyPress("down", () => { selectedOption = 1; updateSelection(); });
 
             function confirm() {
-                // Get Player Name (Always prompt to allow change)
-                let defaultName = gameConfig.playerName || "Player";
-                let playerName = window.prompt("Enter your Handle (Name):", defaultName);
-                if (!playerName && playerName !== "") return; // Cancelled (null)
+                const defaultName = gameConfig.playerName || "Player";
+                
+                createNameInput(defaultName, (name) => {
+                    if (!name) return; // Cancelled
+                    gameConfig.playerName = name;
 
-                // Handle empty string if they cleared it
-                gameConfig.playerName = playerName || "Player";
-                playerName = gameConfig.playerName;
-
-                if (selectedOption === 0) {
-                    // Create
-                    socket.send("create_room", { name: playerName });
-                    // Listen for room_created (handled in lobby scene or global listener)
-                    go("lobby");
-                } else {
-                    // Join
-                    const code = window.prompt("Enter Room Code:");
-                    if (code) {
-                        socket.send("join_room", { roomId: code.toUpperCase(), name: playerName });
+                    if (selectedOption === 0) {
+                        // Create
+                        socket.send("create_room", { name: name });
                         go("lobby");
+                    } else {
+                        // Join
+                        createCodeInput((code) => {
+                            if (code) {
+                                socket.send("join_room", { roomId: code.toUpperCase(), name: name });
+                                go("lobby");
+                            }
+                        });
                     }
-                }
+                });
             }
 
             onKeyPress("space", confirm);
@@ -334,15 +459,15 @@ export function initMenuScenes() {
                 w: 300,
                 h: 60,
                 action: () => {
-                    let defaultName = gameConfig.playerName || "Player";
-                    let playerName = window.prompt("Enter your Handle (Name):", defaultName);
-                    if (playerName === null) return;
-                    gameConfig.playerName = playerName || "Player";
-                    playerName = gameConfig.playerName;
-
-                    import("../net/socket.js").then(({ socket }) => {
-                        socket.send("create_room", { name: playerName });
-                        go("lobby");
+                    const defaultName = gameConfig.playerName || "Player";
+                    createNameInput(defaultName, (name) => {
+                        if (!name) return;
+                        gameConfig.playerName = name;
+                        
+                        import("../net/socket.js").then(({ socket }) => {
+                            socket.send("create_room", { name: name });
+                            go("lobby");
+                        });
                     });
                 }
             },
@@ -353,19 +478,20 @@ export function initMenuScenes() {
                 w: 300,
                 h: 60,
                 action: () => {
-                    let defaultName = gameConfig.playerName || "Player";
-                    let playerName = window.prompt("Enter your Handle (Name):", defaultName);
-                    if (playerName === null) return;
-                    gameConfig.playerName = playerName || "Player";
-                    playerName = gameConfig.playerName;
+                    const defaultName = gameConfig.playerName || "Player";
+                    createNameInput(defaultName, (name) => {
+                        if (!name) return;
+                        gameConfig.playerName = name;
 
-                    const code = window.prompt("Enter Room Code:");
-                    if (code) {
-                        import("../net/socket.js").then(({ socket }) => {
-                            socket.send("join_room", { roomId: code.toUpperCase(), name: playerName });
-                            go("lobby");
+                        createCodeInput((code) => {
+                            if (code) {
+                                import("../net/socket.js").then(({ socket }) => {
+                                    socket.send("join_room", { roomId: code.toUpperCase(), name: name });
+                                    go("lobby");
+                                });
+                            }
                         });
-                    }
+                    });
                 }
             }
         ];
@@ -698,7 +824,7 @@ export function initMenuScenes() {
                 playerIcons.push(icon);
 
                 const label = add([
-                    text(`P${i + 1}`, { size: 16 }),
+                    text(`P${ i + 1 } `, { size: 16 }),
                     pos(startX + i * 120, 610),
                     anchor("center"),
                     color(255, 255, 255),
@@ -902,7 +1028,7 @@ export function initMenuScenes() {
         ]);
 
         add([
-            text(`PLAYER ${currentPlayer + 1}`, { size: 22 }),
+            text(`PLAYER ${ currentPlayer + 1 } `, { size: 22 }),
             pos(width() / 2, 90),
             anchor("center"),
             color(0, 0, 0),
@@ -989,7 +1115,7 @@ export function initMenuScenes() {
                     z(3),
                 ]);
                 add([
-                    text(`P${takenByPlayer + 1}`, { size: 10 }),
+                    text(`P${ takenByPlayer + 1 } `, { size: 10 }),
                     pos(x + boxSize / 2 - 20, y - boxSize / 2 + 15),
                     anchor("center"),
                     color(0, 0, 0),
@@ -1087,7 +1213,7 @@ export function initMenuScenes() {
                     color(playerColors[i]),
                 ]);
                 add([
-                    text(`P${i + 1}`, { size: 9 }),
+                    text(`P${ i + 1 } `, { size: 9 }),
                     pos(50 + i * 70, 560),
                     anchor("center"),
                     color(0, 0, 0),
@@ -1144,7 +1270,7 @@ export function initMenuScenes() {
         function confirmSelection() {
             if (takenCharacters.includes(selectedChar)) return;
 
-            play(`callout_${selectedChar}`, { volume: 0.9 });
+            play(`callout_${ selectedChar } `, { volume: 0.9 });
             gameConfig.playerCharacters.push(selectedChar);
 
             add([

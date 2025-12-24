@@ -131,43 +131,51 @@ export function initLobbyScene() {
                 if (p.id === myPlayerId && !p.ready) {
                     // Left Arrow
                     const leftBtn = playerListContainer.add([
-                        rect(40, 40, { radius: 6 }),
+                        rect(60, 60, { radius: 8 }),
                         pos(140, y),
                         anchor("center"),
-                        color(100, 100, 100),
-                        area(),
-                        z(100) // Ensure on top
+                        color(80, 80, 100),
+                        outline(2, rgb(150, 150, 200)),
+                        area({ cursor: "pointer" }),
+                        z(200) // Ensure WAY on top
                     ]);
                     playerListContainer.add([
-                        text("<", { size: 24 }),
+                        text("<", { size: 32 }),
                         pos(140, y),
                         anchor("center"),
-                        z(101)
+                        z(201)
                     ]);
 
-                    leftBtn.onHover(() => leftBtn.color = rgb(150, 150, 150));
-                    leftBtn.onHoverEnd(() => leftBtn.color = rgb(100, 100, 100));
-                    leftBtn.onClick(() => cycleMyCharacter(-1));
+                    leftBtn.onHover(() => leftBtn.color = rgb(100, 100, 150));
+                    leftBtn.onHoverEnd(() => leftBtn.color = rgb(80, 80, 100));
+                    leftBtn.onClick(() => {
+                        play("click"); // Feedback
+                        cycleMyCharacter(-1);
+                    });
 
                     // Right Arrow
                     const rightBtn = playerListContainer.add([
-                        rect(40, 40, { radius: 6 }),
-                        pos(190, y), // Shifted slightly right due to larger size
+                        rect(60, 60, { radius: 8 }),
+                        pos(210, y), // Move right more
                         anchor("center"),
-                        color(100, 100, 100),
-                        area(),
-                        z(100)
+                        color(80, 80, 100),
+                        outline(2, rgb(150, 150, 200)),
+                        area({ cursor: "pointer" }),
+                        z(200)
                     ]);
                     playerListContainer.add([
-                        text(">", { size: 24 }),
-                        pos(190, y),
+                        text(">", { size: 32 }),
+                        pos(210, y),
                         anchor("center"),
-                        z(101)
+                        z(201)
                     ]);
 
-                    rightBtn.onHover(() => rightBtn.color = rgb(150, 150, 150));
-                    rightBtn.onHoverEnd(() => rightBtn.color = rgb(100, 100, 100));
-                    rightBtn.onClick(() => cycleMyCharacter(1));
+                    rightBtn.onHover(() => rightBtn.color = rgb(100, 100, 150));
+                    rightBtn.onHoverEnd(() => rightBtn.color = rgb(80, 80, 100));
+                    rightBtn.onClick(() => {
+                        play("click"); // Feedback
+                        cycleMyCharacter(1);
+                    });
                 }
             });
 
