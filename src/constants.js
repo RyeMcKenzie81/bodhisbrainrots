@@ -13,7 +13,6 @@ export const PLAYERS = [
         spriteFront: "mamarizz_front",
         spriteBack: "mamarizz_back",
         spriteAnim: "mamarizz_anim",
-        scale: 4,
         keys: { up: "up", down: "down", left: "left", right: "right", brain: "n" }
     },
     {
@@ -49,7 +48,7 @@ export const PLAYERS = [
         spriteFront: "zippy_front",
         spriteBack: "zippy_back",
         spriteAnim: "zippy_anim",
-        scale: 4,
+        scale: 7,
         keys: { up: "up", down: "down", left: "left", right: "right", brain: "m" }
     },
 ];
