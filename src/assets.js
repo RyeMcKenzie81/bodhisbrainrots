@@ -52,6 +52,8 @@ export function loadAssets() {
             walk_right: { from: 12, to: 15, loop: true, speed: 8 },
             idle_down: { from: 0, to: 0 },
             idle_up: { from: 4, to: 4 },
+            idle_left: { from: 8, to: 8 },
+            idle_right: { from: 12, to: 12 },
             idle_side: { from: 8, to: 8 },
         }
     });
