@@ -824,7 +824,7 @@ export function initMenuScenes() {
                 playerIcons.push(icon);
 
                 const label = add([
-                    text(`P${ i + 1 } `, { size: 16 }),
+                    text("P" + (i + 1), { size: 16 }),
                     pos(startX + i * 120, 610),
                     anchor("center"),
                     color(255, 255, 255),
@@ -1028,7 +1028,7 @@ export function initMenuScenes() {
         ]);
 
         add([
-            text(`PLAYER ${ currentPlayer + 1 } `, { size: 22 }),
+            text("PLAYER " + (currentPlayer + 1), { size: 22 }),
             pos(width() / 2, 90),
             anchor("center"),
             color(0, 0, 0),
@@ -1115,7 +1115,7 @@ export function initMenuScenes() {
                     z(3),
                 ]);
                 add([
-                    text(`P${ takenByPlayer + 1 } `, { size: 10 }),
+                    text("P" + (takenByPlayer + 1), { size: 10 }),
                     pos(x + boxSize / 2 - 20, y - boxSize / 2 + 15),
                     anchor("center"),
                     color(0, 0, 0),
@@ -1213,7 +1213,7 @@ export function initMenuScenes() {
                     color(playerColors[i]),
                 ]);
                 add([
-                    text(`P${ i + 1 } `, { size: 9 }),
+                    text("P" + (i + 1), { size: 9 }),
                     pos(50 + i * 70, 560),
                     anchor("center"),
                     color(0, 0, 0),
@@ -1270,7 +1270,7 @@ export function initMenuScenes() {
         function confirmSelection() {
             if (takenCharacters.includes(selectedChar)) return;
 
-            play(`callout_${ selectedChar } `, { volume: 0.9 });
+            play("callout_" + selectedChar, { volume: 0.9 });
             gameConfig.playerCharacters.push(selectedChar);
 
             add([
