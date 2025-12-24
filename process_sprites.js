@@ -1,6 +1,6 @@
 import { Jimp } from "jimp";
 
-async function process(filename, outSheet, outFront, outBack) {
+async function processSprite(filename, outSheet, outFront, outBack) {
     console.log(`Reading ${filename}...`);
     const image = await Jimp.read(filename);
 
@@ -23,9 +23,21 @@ async function process(filename, outSheet, outFront, outBack) {
             Math.pow(b - 255, 2)
         );
 
-        // Threshold: 150 allows mostly magenta hues
-        // If dist < 150, transparent.
-        if (dist < 150) {
+        // Threshold: 180 allows mostly magenta hues
+        // Also check for dark magenta/purple artifacts where Green is low and Red/Blue are dominant and similar
+        // e.g. (100, 0, 100) -> dist to (255,0,255) is large, but for standard magenta masking we want broad coverage.
+        // For artifacts (blending with black):
+
+        // Strict Magenta
+        const isMagenta = dist < 180;
+
+        // Dark Purple Artifacts (e.g. hair edges)
+        // Green < 90 (Dark/Color)
+        // R > G+20, B > G+20 (Clearly purple/magenta tone)
+        // |R-B| < 60 (Balanced R/B)
+        const isPurpleArtifact = (g < 90) && (r > g + 20) && (b > g + 20) && (Math.abs(r - b) < 60);
+
+        if (isMagenta || isPurpleArtifact) {
             this.bitmap.data[idx + 3] = 0; // Alpha 0
         }
     });
@@ -49,11 +61,8 @@ async function process(filename, outSheet, outFront, outBack) {
     console.log("Done!");
 }
 
-// Example usage:
-// process("public/sprites/raw_sprite.jpg", "public/sprites/final_sheet.png", "public/sprites/front.png", "public/sprites/back.png").catch(console.error);
-
 if (process.argv.length > 5) {
-    process(process.argv[2], process.argv[3], process.argv[4], process.argv[5]).catch(console.error);
+    processSprite(process.argv[2], process.argv[3], process.argv[4], process.argv[5]).catch(console.error);
 } else {
     console.log("Usage: node process_sprites.js <input> <outSheet> <outFront> <outBack>");
 }
