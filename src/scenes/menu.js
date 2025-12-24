@@ -907,10 +907,17 @@ export function initMenuScenes() {
                 sprite(p.spriteFront),
                 pos(x, y - 10),
                 anchor("center"),
-                scale(0.12 * (p.scale || 1)),
+                // scale(0.12 * (p.scale || 1)),
+                scale(1),
                 opacity(isTaken ? 0.4 : 1),
                 z(1),
             ]);
+            // Auto-scale to fit box (Grid Icon)
+            if (charSprite.width) {
+                const fitSize = 80;
+                // Allow some distinct sizes? No, uniformity is safer for "Too Big/Small" complaints
+                charSprite.scale = vec2(Math.min(fitSize / charSprite.width, fitSize / charSprite.height));
+            }
             charSprites.push(charSprite);
 
             add([
@@ -996,7 +1003,12 @@ export function initMenuScenes() {
             cursor.pos.y = y;
 
             previewSprite.use(sprite(PLAYERS[selectedChar].spriteFront));
-            previewSprite.scale = vec2(0.45 * (PLAYERS[selectedChar].scale || 1));
+            // previewSprite.scale = vec2(0.45 * (PLAYERS[selectedChar].scale || 1));
+            // Auto-scale Preview
+            if (previewSprite.width) {
+                const fitHeight = 300;
+                previewSprite.scale = vec2(fitHeight / previewSprite.height);
+            }
             previewName.text = PLAYERS[selectedChar].name;
 
             // Pulse effect reset?
@@ -1012,12 +1024,18 @@ export function initMenuScenes() {
             ]);
 
             takenCharacters.forEach((charIdx, i) => {
-                add([
+                const listSprite = add([
                     sprite(PLAYERS[charIdx].spriteFront),
                     pos(50 + i * 70, 520),
                     anchor("center"),
-                    scale(0.08 * (PLAYERS[charIdx].scale || 1)),
+                    // scale(0.08 * (PLAYERS[charIdx].scale || 1)),
+                    scale(1),
                 ]);
+                // Auto-scale Selected List
+                if (listSprite.width) {
+                    const fitSize = 40;
+                    listSprite.scale = vec2(Math.min(fitSize / listSprite.width, fitSize / listSprite.height));
+                }
                 add([
                     rect(24, 14, { radius: 2 }),
                     pos(50 + i * 70, 560),
