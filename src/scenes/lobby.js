@@ -156,7 +156,6 @@ export function initLobbyScene() {
                     leftBtn.onHover(() => leftBtn.color = rgb(100, 100, 150));
                     leftBtn.onHoverEnd(() => leftBtn.color = rgb(80, 80, 100));
                     leftBtn.onClick(() => {
-                        play("click"); // Feedback
                         cycleMyCharacter(-1);
                     });
 
@@ -180,7 +179,6 @@ export function initLobbyScene() {
                     rightBtn.onHover(() => rightBtn.color = rgb(100, 100, 150));
                     rightBtn.onHoverEnd(() => rightBtn.color = rgb(80, 80, 100));
                     rightBtn.onClick(() => {
-                        play("click"); // Feedback
                         cycleMyCharacter(1);
                     });
                 }
@@ -296,7 +294,7 @@ export function initLobbyScene() {
                 renderPlayers();
 
                 socket.send("update_character", { characterIndex: newIdx });
-                play("click"); // Ensure sound plays here too if keys used
+                try { play("kick_sound", { volume: 0.2, speed: 3 }); } catch (e) { } // Click feedback
             }
         }
 
