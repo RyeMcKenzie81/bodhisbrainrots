@@ -122,6 +122,13 @@ export function handleConnection(ws) {
                     const player = room.players.find(p => p.id === playerId);
                     if (player) {
                         player.characterIndex = data.characterIndex;
+
+                        // Also update simulation state
+                        const simPlayer = room.state.players.find(p => p.id === playerId);
+                        if (simPlayer) {
+                            simPlayer.characterIndex = data.characterIndex;
+                        }
+
                         broadcastToRoom(room, {
                             type: 'player_updated',
                             player: player
