@@ -341,12 +341,14 @@ export function initLobbyScene() {
 
         // Cleanup on scene leave
         onSceneLeave(() => {
-            socket.off("room_created", handleRoomCreated);
-            socket.off("room_joined", handleRoomJoined);
-            socket.off("player_joined", handlePlayerJoined);
-            socket.off("player_ready", handlePlayerReady);
-            socket.off("game_start", handleGameStart);
             cleanupTouch();
+            socket.removeAllListeners();
+        });
+
+        // Loop to update debug text
+        onUpdate(() => {
+            const p = players.find(p => p.id === myPlayerId);
+            debugText.text = `ID: ${myPlayerId || "?"} | P: ${players.length} | Ready: ${p ? p.ready : "?"} | Idx: ${p ? p.characterIndex : "?"}`;
         });
     });
 }
