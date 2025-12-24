@@ -225,7 +225,7 @@ export function initMenuScenes() {
     });
 
     // Scene: Online Menu
-    scene("onlineMenu", () => {
+    scene("onlineMenu", () => import("../net/socket.js").then(({ socket }) => {
         if (!socket.connected) {
             const protocol = window.location.protocol === "https:" ? "wss" : "ws";
             const host = window.location.hostname === "localhost" ? "localhost:3000" : window.location.host;
