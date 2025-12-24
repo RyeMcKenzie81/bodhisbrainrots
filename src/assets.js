@@ -27,10 +27,12 @@ export function loadAssets() {
     loadSound("powerup_fire", "sprites/flamespoweredup.mp3");
     loadSound("powerup_speed", "sprites/speedpowerup.mp3");
     loadSound("selectmusic", "sprites/characterselect.mp3");
-    loadSound("callout_0", "sprites/callout_tungtung.mp3");
-    loadSound("callout_1", "sprites/callout_meowl.mp3");
-    loadSound("callout_2", "sprites/callout_strawberry.mp3");
-    loadSound("callout_3", "sprites/callout_cappucino.mp3");
+    loadSound("callout_0", "sprites/mamarizz-callout.mp3");
+    loadSound("callout_1", "sprites/callout_tungtung.mp3");
+    loadSound("callout_2", "sprites/callout_meowl.mp3");
+    loadSound("callout_3", "sprites/callout_strawberry.mp3");
+    loadSound("callout_4", "sprites/callout_cappucino.mp3");
+    loadSound("callout_5", "sprites/zippycallout.mp3");
 
     // New Audio Polish sounds
     loadSound("kick_sound", "sprites/kick.mp3");
@@ -57,7 +59,6 @@ export function loadAssets() {
             idle_side: { from: 8, to: 8 },
         }
     });
-    loadSound("callout_4", "sprites/zippycallout.mp3");
 
     // Mama Rizz
     loadSprite("mamarizz_front", "sprites/mamarizz_front.png");
@@ -76,66 +77,66 @@ export function loadAssets() {
             idle_side: { from: 8, to: 8 },
         }
     });
-    loadSound("callout_5", "sprites/mamarizz-callout.mp3");
+});
 
-    // Load animated sprite sheets (4x4 grid: down, up, left, right rows)
-    loadSprite("tungtung_anim", "sprites/tungtung_spritesheet.png", {
-        sliceX: 4,
-        sliceY: 4,
-        anims: {
-            walk_down: { from: 0, to: 3, loop: true, speed: 8 },
-            walk_up: { from: 4, to: 7, loop: true, speed: 8 },
-            walk_left: { from: 8, to: 11, loop: true, speed: 8 },
-            walk_right: { from: 12, to: 15, loop: true, speed: 8 },
-            idle_down: { from: 0, to: 0 },
-            idle_up: { from: 4, to: 4 },
-            idle_left: { from: 8, to: 8 },
-            idle_right: { from: 12, to: 12 },
-        },
-    });
+// Load animated sprite sheets (4x4 grid: down, up, left, right rows)
+loadSprite("tungtung_anim", "sprites/tungtung_spritesheet.png", {
+    sliceX: 4,
+    sliceY: 4,
+    anims: {
+        walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+        walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+        walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+        walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+        idle_down: { from: 0, to: 0 },
+        idle_up: { from: 4, to: 4 },
+        idle_left: { from: 8, to: 8 },
+        idle_right: { from: 12, to: 12 },
+    },
+});
 
-    loadSprite("meowl_anim", "sprites/meowl_spritesheet.png", {
-        sliceX: 4,
-        sliceY: 4,
-        anims: {
-            walk_down: { from: 0, to: 3, loop: true, speed: 8 },
-            walk_up: { from: 4, to: 7, loop: true, speed: 8 },
-            walk_left: { from: 8, to: 11, loop: true, speed: 8 },
-            walk_right: { from: 12, to: 15, loop: true, speed: 8 },
-            idle_down: { from: 0, to: 0 },
-            idle_up: { from: 4, to: 4 },
-            idle_left: { from: 8, to: 8 },
-            idle_right: { from: 12, to: 12 },
-        },
-    });
+loadSprite("meowl_anim", "sprites/meowl_spritesheet.png", {
+    sliceX: 4,
+    sliceY: 4,
+    anims: {
+        walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+        walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+        walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+        walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+        idle_down: { from: 0, to: 0 },
+        idle_up: { from: 4, to: 4 },
+        idle_left: { from: 8, to: 8 },
+        idle_right: { from: 12, to: 12 },
+    },
+});
 
-    loadSprite("strawberry_anim", "sprites/strawberry_spritesheet.png", {
-        sliceX: 4,
-        sliceY: 4,
-        anims: {
-            walk_down: { from: 0, to: 3, loop: true, speed: 8 },
-            walk_up: { from: 4, to: 7, loop: true, speed: 8 },
-            walk_left: { from: 8, to: 11, loop: true, speed: 8 },
-            walk_right: { from: 12, to: 15, loop: true, speed: 8 },
-            idle_down: { from: 0, to: 0 },
-            idle_up: { from: 4, to: 4 },
-            idle_left: { from: 8, to: 8 },
-            idle_right: { from: 12, to: 12 },
-        },
-    });
+loadSprite("strawberry_anim", "sprites/strawberry_spritesheet.png", {
+    sliceX: 4,
+    sliceY: 4,
+    anims: {
+        walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+        walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+        walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+        walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+        idle_down: { from: 0, to: 0 },
+        idle_up: { from: 4, to: 4 },
+        idle_left: { from: 8, to: 8 },
+        idle_right: { from: 12, to: 12 },
+    },
+});
 
-    loadSprite("cappucino_anim", "sprites/cappuccino_spritesheet.png", {
-        sliceX: 4,
-        sliceY: 4,
-        anims: {
-            walk_down: { from: 0, to: 3, loop: true, speed: 8 },
-            walk_up: { from: 4, to: 7, loop: true, speed: 8 },
-            walk_left: { from: 8, to: 11, loop: true, speed: 8 },
-            walk_right: { from: 12, to: 15, loop: true, speed: 8 },
-            idle_down: { from: 0, to: 0 },
-            idle_up: { from: 4, to: 4 },
-            idle_left: { from: 8, to: 8 },
-            idle_right: { from: 12, to: 12 },
-        },
-    });
+loadSprite("cappucino_anim", "sprites/cappuccino_spritesheet.png", {
+    sliceX: 4,
+    sliceY: 4,
+    anims: {
+        walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+        walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+        walk_left: { from: 8, to: 11, loop: true, speed: 8 },
+        walk_right: { from: 12, to: 15, loop: true, speed: 8 },
+        idle_down: { from: 0, to: 0 },
+        idle_up: { from: 4, to: 4 },
+        idle_left: { from: 8, to: 8 },
+        idle_right: { from: 12, to: 12 },
+    },
+});
 }

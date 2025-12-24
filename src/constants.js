@@ -9,7 +9,15 @@ export const MAX_TIME = 120; // 2 minutes
 // Player configs
 export const PLAYERS = [
     {
-        name: "Tung Tung",
+        name: "Mama Rizz",
+        spriteFront: "mamarizz_front",
+        spriteBack: "mamarizz_back",
+        spriteAnim: "mamarizz_anim",
+        scale: 4,
+        keys: { up: "up", down: "down", left: "left", right: "right", brain: "n" }
+    },
+    {
+        name: "Tung Tung Tung Sahur",
         spriteFront: "tungtung_front",
         spriteBack: "tungtung_back",
         spriteAnim: "tungtung_anim",
@@ -23,14 +31,14 @@ export const PLAYERS = [
         keys: { up: "up", down: "down", left: "left", right: "right", brain: "enter" }
     },
     {
-        name: "Strawberry",
+        name: "Strawberry Elephant",
         spriteFront: "strawberry_front",
         spriteBack: "strawberry_back",
         spriteAnim: "strawberry_anim",
         keys: { up: "i", down: "k", left: "j", right: "l", brain: "o" }
     },
     {
-        name: "Cappucino",
+        name: "Cappuccino Assassino",
         spriteFront: "cappucino_front",
         spriteBack: "cappucino_back",
         spriteAnim: "cappucino_anim",
@@ -44,14 +52,6 @@ export const PLAYERS = [
         scale: 4,
         keys: { up: "up", down: "down", left: "left", right: "right", brain: "m" }
     },
-    {
-        name: "Mama Rizz",
-        spriteFront: "mamarizz_front",
-        spriteBack: "mamarizz_back",
-        spriteAnim: "mamarizz_anim",
-        scale: 4,
-        keys: { up: "up", down: "down", left: "left", right: "right", brain: "n" }
-    },
 ];
 
 // Start positions (corners)
@@ -61,4 +61,3 @@ export const START_POSITIONS = [
     { x: GRID_WIDTH - 2, y: 1 },
     { x: 1, y: GRID_HEIGHT - 2 },
 ];
-

@@ -22,7 +22,9 @@ export function initMenuScenes() {
         // Character display
         const charY = 280;
         PLAYERS.forEach((p, i) => {
-            const xPos = width() / 2 - 225 + i * 150;
+            const totalWidth = (PLAYERS.length - 1) * 150;
+            const startX = width() / 2 - totalWidth / 2;
+            const xPos = startX + i * 150;
             add([
                 sprite(p.spriteFront),
                 pos(xPos, charY),
