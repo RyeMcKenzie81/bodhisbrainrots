@@ -86,5 +86,13 @@ export const socket = {
         if (eventListeners[event]) {
             eventListeners[event].forEach(cb => cb(data));
         }
+    },
+
+    removeAllListeners(event) {
+        if (event) {
+            delete eventListeners[event];
+        } else {
+            for (const key in eventListeners) delete eventListeners[key];
+        }
     }
 };

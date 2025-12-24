@@ -287,10 +287,14 @@ export function initMenuScenes() {
             onKeyPress("down", () => { selectedOption = 1; updateSelection(); });
 
             function confirm() {
-                // Get Player Name
-                let playerName = gameConfig.playerName || window.prompt("Enter your Handle (Name):", "Player");
-                if (!playerName) return; // Cancelled
-                gameConfig.playerName = playerName; // Persist for session
+                // Get Player Name (Always prompt to allow change)
+                let defaultName = gameConfig.playerName || "Player";
+                let playerName = window.prompt("Enter your Handle (Name):", defaultName);
+                if (!playerName && playerName !== "") return; // Cancelled (null)
+
+                // Handle empty string if they cleared it
+                gameConfig.playerName = playerName || "Player";
+                playerName = gameConfig.playerName;
 
                 if (selectedOption === 0) {
                     // Create
@@ -330,9 +334,11 @@ export function initMenuScenes() {
                 w: 300,
                 h: 60,
                 action: () => {
-                    let playerName = gameConfig.playerName || window.prompt("Enter your Handle (Name):", "Player");
-                    if (!playerName) return;
-                    gameConfig.playerName = playerName;
+                    let defaultName = gameConfig.playerName || "Player";
+                    let playerName = window.prompt("Enter your Handle (Name):", defaultName);
+                    if (playerName === null) return;
+                    gameConfig.playerName = playerName || "Player";
+                    playerName = gameConfig.playerName;
 
                     import("../net/socket.js").then(({ socket }) => {
                         socket.send("create_room", { name: playerName });
@@ -347,9 +353,11 @@ export function initMenuScenes() {
                 w: 300,
                 h: 60,
                 action: () => {
-                    let playerName = gameConfig.playerName || window.prompt("Enter your Handle (Name):", "Player");
-                    if (!playerName) return;
-                    gameConfig.playerName = playerName;
+                    let defaultName = gameConfig.playerName || "Player";
+                    let playerName = window.prompt("Enter your Handle (Name):", defaultName);
+                    if (playerName === null) return;
+                    gameConfig.playerName = playerName || "Player";
+                    playerName = gameConfig.playerName;
 
                     const code = window.prompt("Enter Room Code:");
                     if (code) {
