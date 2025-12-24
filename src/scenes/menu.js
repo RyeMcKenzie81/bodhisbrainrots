@@ -443,7 +443,7 @@ export function initMenuScenes() {
             const previewStartX = width() / 2 - (selectedOpponents - 1) * 50;
             for (let i = 0; i < selectedOpponents; i++) {
                 const cpuSprite = add([
-                    sprite(PLAYERS[(i + 1) % 4].spriteFront),
+                    sprite(PLAYERS[(i + 1) % PLAYERS.length].spriteFront),
                     pos(previewStartX + i * 100, 520),
                     anchor("center"),
                     scale(0.08),
@@ -585,7 +585,7 @@ export function initMenuScenes() {
                 w: 80,
                 h: 80,
                 action: () => {
-                    selectedOpponents = Math.min(3, selectedOpponents + 1);
+                    selectedOpponents = Math.min(PLAYERS.length - 1, selectedOpponents + 1);
                     countDisplay.text = selectedOpponents.toString();
                     updateOpponentPreview();
                 }
@@ -796,15 +796,17 @@ export function initMenuScenes() {
         let selectedChar = 0;
         const takenCharacters = gameConfig.playerCharacters;
 
-        while (takenCharacters.includes(selectedChar) && selectedChar < 4) {
+        while (takenCharacters.includes(selectedChar) && selectedChar < PLAYERS.length) {
             selectedChar++;
         }
+        if (selectedChar >= PLAYERS.length) selectedChar = 0; // Fallback
 
         const playerColors = [
             rgb(255, 200, 50),
             rgb(100, 150, 255),
             rgb(255, 100, 150),
             rgb(100, 255, 150),
+            rgb(200, 100, 255),
         ];
 
         add([
@@ -865,7 +867,7 @@ export function initMenuScenes() {
         const rosterY = 280;
         const boxSize = 140;
         const spacing = 160;
-        const rosterStartX = width() / 2 - (spacing * 1.5);
+        const rosterStartX = width() / 2 - (spacing * (PLAYERS.length - 1) / 2);
 
         PLAYERS.forEach((p, i) => {
             const x = rosterStartX + i * spacing;

@@ -40,9 +40,9 @@ export function loadAssets() {
     loadSound("overtime", "sprites/overtime.mp3");
 
     // Zippy Zartle
-    loadSprite("zippy_front", "sprites/zippysprite.jpeg");
-    loadSprite("zippy_back", "sprites/zippysprite.jpeg");
-    loadSprite("zippy_anim", "sprites/zippysprite.jpeg", {
+    loadSprite("zippy_front", "sprites/zippysprite.png");
+    loadSprite("zippy_back", "sprites/zippysprite.png");
+    loadSprite("zippy_anim", "sprites/zippysprite.png", {
         sliceX: 1, sliceY: 1,
         anims: {
             walk_down: { from: 0, to: 0, loop: true },
