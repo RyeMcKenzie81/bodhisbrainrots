@@ -287,16 +287,21 @@ export function initMenuScenes() {
             onKeyPress("down", () => { selectedOption = 1; updateSelection(); });
 
             function confirm() {
+                // Get Player Name
+                let playerName = gameConfig.playerName || window.prompt("Enter your Handle (Name):", "Player");
+                if (!playerName) return; // Cancelled
+                gameConfig.playerName = playerName; // Persist for session
+
                 if (selectedOption === 0) {
                     // Create
-                    socket.send("create_room", { name: `Player_${Math.floor(Math.random() * 1000)}` });
+                    socket.send("create_room", { name: playerName });
                     // Listen for room_created (handled in lobby scene or global listener)
                     go("lobby");
                 } else {
                     // Join
                     const code = window.prompt("Enter Room Code:");
                     if (code) {
-                        socket.send("join_room", { roomId: code.toUpperCase(), name: `Player_${Math.floor(Math.random() * 1000)}` });
+                        socket.send("join_room", { roomId: code.toUpperCase(), name: playerName });
                         go("lobby");
                     }
                 }
@@ -325,8 +330,12 @@ export function initMenuScenes() {
                 w: 300,
                 h: 60,
                 action: () => {
+                    let playerName = gameConfig.playerName || window.prompt("Enter your Handle (Name):", "Player");
+                    if (!playerName) return;
+                    gameConfig.playerName = playerName;
+
                     import("../net/socket.js").then(({ socket }) => {
-                        socket.send("create_room", { name: `Player_${Math.floor(Math.random() * 1000)}` });
+                        socket.send("create_room", { name: playerName });
                         go("lobby");
                     });
                 }
@@ -338,10 +347,14 @@ export function initMenuScenes() {
                 w: 300,
                 h: 60,
                 action: () => {
+                    let playerName = gameConfig.playerName || window.prompt("Enter your Handle (Name):", "Player");
+                    if (!playerName) return;
+                    gameConfig.playerName = playerName;
+
                     const code = window.prompt("Enter Room Code:");
                     if (code) {
                         import("../net/socket.js").then(({ socket }) => {
-                            socket.send("join_room", { roomId: code.toUpperCase(), name: `Player_${Math.floor(Math.random() * 1000)}` });
+                            socket.send("join_room", { roomId: code.toUpperCase(), name: playerName });
                             go("lobby");
                         });
                     }
