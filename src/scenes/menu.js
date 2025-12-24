@@ -6,7 +6,7 @@ export function initMenuScenes() {
     // Scene: Main Menu
     scene("menu", () => {
         add([
-            text("BODHI'S BRAINROTS", { size: 48 }),
+            text("BoDawg's Brainrots", { size: 48 }),
             pos(width() / 2, 80),
             anchor("center"),
             color(255, 100, 150),
