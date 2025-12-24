@@ -1020,14 +1020,14 @@ export function initMenuScenes() {
             if (dir === "left") newChar = selectedChar - 1;
             if (dir === "right") newChar = selectedChar + 1;
 
-            if (newChar < 0) newChar = 3;
-            if (newChar > 3) newChar = 0;
+            if (newChar < 0) newChar = PLAYERS.length - 1;
+            if (newChar > PLAYERS.length - 1) newChar = 0;
 
             let attempts = 0;
             while (takenCharacters.includes(newChar) && attempts < 4) {
                 newChar = dir === "left" ? newChar - 1 : newChar + 1;
-                if (newChar < 0) newChar = 3;
-                if (newChar > 3) newChar = 0;
+                if (newChar < 0) newChar = PLAYERS.length - 1;
+                if (newChar > PLAYERS.length - 1) newChar = 0;
                 attempts++;
             }
 
@@ -1078,7 +1078,7 @@ export function initMenuScenes() {
 
             wait(0.5, () => {
                 if (gameConfig.mode === "singleplayer" && currentPlayer === 0) {
-                    const availableChars = [0, 1, 2, 3].filter(c => !gameConfig.playerCharacters.includes(c));
+                    const availableChars = Array.from({ length: PLAYERS.length }, (_, i) => i).filter(c => !gameConfig.playerCharacters.includes(c));
                     for (let i = 1; i < gameConfig.playerCount; i++) {
                         const randomIndex = Math.floor(Math.random() * availableChars.length);
                         gameConfig.playerCharacters.push(availableChars.splice(randomIndex, 1)[0]);
