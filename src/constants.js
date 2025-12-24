@@ -44,6 +44,14 @@ export const PLAYERS = [
         scale: 4,
         keys: { up: "up", down: "down", left: "left", right: "right", brain: "m" }
     },
+    {
+        name: "Mama Rizz",
+        spriteFront: "mamarizz_front",
+        spriteBack: "mamarizz_back",
+        spriteAnim: "mamarizz_anim",
+        scale: 4,
+        keys: { up: "up", down: "down", left: "left", right: "right", brain: "n" }
+    },
 ];
 
 // Start positions (corners)
