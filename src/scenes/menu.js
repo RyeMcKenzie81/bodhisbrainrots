@@ -226,6 +226,134 @@ export function initMenuScenes() {
 
     // Scene: Online Menu
     scene("onlineMenu", () => {
+        // --- DOM HELPER FOR NAME INPUT ---
+        // Inject Styles
+        if (!document.getElementById("game-styles")) {
+            const style = document.createElement("style");
+            style.id = "game-styles";
+            style.textContent = `
+                .game-input-overlay {
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.85); z-index: 10000;
+                    display: flex; flex-direction: column; justify-content: center; align-items: center;
+                }
+                .game-input-box {
+                    background: #2a2a3e; padding: 30px; border-radius: 12px;
+                    border: 2px solid #6464a0; text-align: center; color: white;
+                    font-family: monospace; box-shadow: 0 0 20px rgba(100,100,255,0.2);
+                }
+                .game-input-field {
+                    font-size: 20px; padding: 10px; border-radius: 6px; border: none;
+                    margin: 15px 0; width: 250px; text-align: center;
+                }
+                .game-btn {
+                    background: #4caf50; color: white; border: none; padding: 10px 20px;
+                    font-size: 18px; border-radius: 6px; cursor: pointer; margin: 5px;
+                }
+                .game-btn:hover { background: #45a049; }
+                .game-btn.cancel { background: #d32f2f; }
+                .game-btn.cancel:hover { background: #c62828; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function createNameInput(defaultName, callback) {
+            const overlay = document.createElement("div");
+            overlay.className = "game-input-overlay";
+
+            const box = document.createElement("div");
+            box.className = "game-input-box";
+
+            const title = document.createElement("h2");
+            title.textContent = "WHO ARE YOU?";
+            title.style.margin = "0";
+
+            const input = document.createElement("input");
+            input.className = "game-input-field";
+            input.value = defaultName;
+            input.placeholder = "Enter Name";
+
+            const btnParams = document.createElement("div");
+
+            const okBtn = document.createElement("button");
+            okBtn.className = "game-btn";
+            okBtn.textContent = "CONFIRM";
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.className = "game-btn cancel";
+            cancelBtn.textContent = "CANCEL";
+
+            btnParams.appendChild(cancelBtn);
+            btnParams.appendChild(okBtn);
+
+            box.appendChild(title);
+            box.appendChild(input);
+            box.appendChild(btnParams);
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+
+            input.focus();
+            input.select();
+
+            const close = (name) => {
+                document.body.removeChild(overlay);
+                callback(name);
+            };
+
+            okBtn.onclick = () => close(input.value || "Player");
+            cancelBtn.onclick = () => close(null);
+
+            input.onkeydown = (e) => {
+                if (e.key === "Enter") close(input.value || "Player");
+                if (e.key === "Escape") close(null);
+            };
+        }
+
+        // --- DOM HELPER FOR ROOM CODE ---
+        function createCodeInput(callback) {
+            const overlay = document.createElement("div");
+            overlay.className = "game-input-overlay";
+
+            const box = document.createElement("div");
+            box.className = "game-input-box";
+
+            const title = document.createElement("h2");
+            title.textContent = "ENTER ROOM CODE";
+
+            const input = document.createElement("input");
+            input.className = "game-input-field";
+            input.placeholder = "CODE";
+            input.style.textTransform = "uppercase";
+
+            const okBtn = document.createElement("button");
+            okBtn.className = "game-btn";
+            okBtn.textContent = "JOIN";
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.className = "game-btn cancel";
+            cancelBtn.textContent = "CANCEL";
+
+            box.appendChild(title);
+            box.appendChild(input);
+            box.appendChild(cancelBtn);
+            box.appendChild(okBtn);
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+
+            input.focus();
+
+            const close = (code) => {
+                document.body.removeChild(overlay);
+                callback(code);
+            };
+
+            okBtn.onclick = () => close(input.value);
+            cancelBtn.onclick = () => close(null);
+            input.onkeydown = (e) => {
+                if (e.key === "Enter") close(input.value);
+                if (e.key === "Escape") close(null);
+            };
+        }
         import("../net/socket.js").then(({ socket }) => {
             if (!socket.connected) {
                 const protocol = window.location.protocol === "https:" ? "wss" : "ws";
