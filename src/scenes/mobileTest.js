@@ -5,6 +5,8 @@ export function initMobileTestScene() {
     scene("mobileTest", () => {
         // Enable Portrait Mode
         window.MOBILE_PORTRAIT_MODE = true;
+        document.body.classList.add("allow-portrait"); // Force hide overlay immediately
+
         // Trigger resize to apply rotation
         window.dispatchEvent(new Event("resize"));
 
@@ -101,6 +103,7 @@ export function initMobileTestScene() {
         // Clean up on leave
         onSceneLeave(() => {
             window.MOBILE_PORTRAIT_MODE = false;
+            document.body.classList.remove("allow-portrait");
             window.dispatchEvent(new Event("resize"));
         });
     });
