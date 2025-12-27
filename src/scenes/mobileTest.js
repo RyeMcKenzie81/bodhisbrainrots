@@ -10,11 +10,21 @@ export function initMobileTestScene() {
         // Trigger resize to apply rotation
         window.dispatchEvent(new Event("resize"));
 
-        // Background
+        // Background (Distinct Color)
         add([
             rect(width(), height()),
             pos(0, 0),
-            color(20, 20, 30),
+            color(50, 50, 100), // Distinct Blue
+        ]);
+
+        // Status Text
+        add([
+            text("PORTRAIT MODE ACTIVE", { size: 48 }),
+            pos(width() / 2, height() / 2),
+            anchor("center"),
+            color(0, 255, 0),
+            opacity(0.5),
+            z(0),
         ]);
 
         // Center Camera

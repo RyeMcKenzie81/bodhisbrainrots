@@ -157,16 +157,21 @@ function setupTouchFix() {
     canvas.addEventListener("touchstart", (e) => {
         if (e.touches.length > 0) {
             const pos = translateTouch(e.touches[0]);
-            // Kaboom uses mousePos() internally - we need to update it
-            // The simplest way is to dispatch a mousemove + mousedown
+
+            // We need to reverse-engineer the clientX/Y that would make Kaboom calculate this Game Pos
+            const rect = canvas.getBoundingClientRect();
+            const fakeClientX = (pos.x / 1280) * rect.width + rect.left;
+            const fakeClientY = (pos.y / 720) * rect.height + rect.top;
+
+            // Dispatch events with FAKE coordinates that map to correct Game Logic
             canvas.dispatchEvent(new MouseEvent("mousemove", {
-                clientX: e.touches[0].clientX,
-                clientY: e.touches[0].clientY,
+                clientX: fakeClientX,
+                clientY: fakeClientY,
                 bubbles: true
             }));
             canvas.dispatchEvent(new MouseEvent("mousedown", {
-                clientX: e.touches[0].clientX,
-                clientY: e.touches[0].clientY,
+                clientX: fakeClientX,
+                clientY: fakeClientY,
                 bubbles: true
             }));
         }
@@ -175,15 +180,19 @@ function setupTouchFix() {
     canvas.addEventListener("touchend", (e) => {
         // Dispatch click at last touch position for onClick handlers
         if (e.changedTouches.length > 0) {
-            const touch = e.changedTouches[0];
+            const pos = translateTouch(e.changedTouches[0]);
+            const rect = canvas.getBoundingClientRect();
+            const fakeClientX = (pos.x / 1280) * rect.width + rect.left;
+            const fakeClientY = (pos.y / 720) * rect.height + rect.top;
+
             canvas.dispatchEvent(new MouseEvent("mouseup", {
-                clientX: touch.clientX,
-                clientY: touch.clientY,
+                clientX: fakeClientX,
+                clientY: fakeClientY,
                 bubbles: true
             }));
             canvas.dispatchEvent(new MouseEvent("click", {
-                clientX: touch.clientX,
-                clientY: touch.clientY,
+                clientX: fakeClientX,
+                clientY: fakeClientY,
                 bubbles: true
             }));
         }
