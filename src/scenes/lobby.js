@@ -338,15 +338,11 @@ export function initLobbyScene() {
             if (isHost && players.length >= 1) {
                 startBtn.opacity = 1;
                 startBtnText.opacity = 1;
-                if (players.length === 1) {
-                    waitingText.text = "Press SPACE or tap START (solo testing mode)";
-                } else {
-                    waitingText.text = "Press SPACE or tap START to begin!";
-                }
+                waitingText.text = "↑↓ Navigate | ←→ Change | SPACE Confirm | Navigate to START";
             } else {
                 startBtn.opacity = 0;
                 startBtnText.opacity = 0;
-                waitingText.text = "Waiting for host to start the game...";
+                waitingText.text = "←→ Change Character | SPACE Ready Up";
             }
         }
 
@@ -457,32 +453,153 @@ export function initLobbyScene() {
             }
         }
 
-        // Input
-        onKeyPress("space", () => {
-            if (isHost) {
-                startGame();
-            } else {
-                socket.send("ready");
-            }
-        });
-
-        onKeyPress("enter", () => {
-            if (isHost) {
-                startGame();
-            } else {
-                socket.send("ready");
-            }
-        });
+        // (Old input handlers removed - now using row-based navigation below)
 
         onKeyPress("escape", () => {
             go("menu");
         });
 
-        // Character Selection Keys
-        onKeyPress("left", () => cycleMyCharacter(-1));
-        onKeyPress("a", () => cycleMyCharacter(-1));
-        onKeyPress("right", () => cycleMyCharacter(1));
-        onKeyPress("d", () => cycleMyCharacter(1));
+        // === ROW-BASED NAVIGATION ===
+        // Rows: 0 = Character, 1 = Time, 2 = Speed, 3 = Start
+        let selectedRow = 0;
+
+        // Visual indicator for selected row
+        const rowIndicator = add([
+            text("▶", { size: 20 }),
+            pos(0, 0),
+            anchor("center"),
+            color(255, 255, 100),
+            z(50),
+        ]);
+
+        function updateRowIndicator() {
+            // Position indicator based on selected row
+            const me = players.find(p => p.id === myPlayerId);
+            const myIndex = players.indexOf(me);
+
+            if (selectedRow === 0) {
+                // Character row (player's own box)
+                const y = 180 + myIndex * 85;
+                rowIndicator.pos = vec2(width() / 2 - 220, y);
+                rowIndicator.opacity = 1;
+            } else if (selectedRow === 1 && isHost) {
+                // Time row
+                rowIndicator.pos = vec2(width() / 2 - 200, 470);
+                rowIndicator.opacity = 1;
+            } else if (selectedRow === 2 && isHost) {
+                // Speed row
+                rowIndicator.pos = vec2(width() / 2 + 40, 470);
+                rowIndicator.opacity = 1;
+            } else if (selectedRow === 3 && isHost) {
+                // Start button
+                rowIndicator.pos = vec2(width() / 2 - 160, 550);
+                rowIndicator.opacity = 1;
+            } else {
+                rowIndicator.opacity = 0;
+            }
+        }
+
+        // Navigation
+        onKeyPress("up", () => {
+            if (isHost) {
+                selectedRow = (selectedRow - 1 + 4) % 4;
+            }
+            updateRowIndicator();
+        });
+        onKeyPress("w", () => {
+            if (isHost) {
+                selectedRow = (selectedRow - 1 + 4) % 4;
+            }
+            updateRowIndicator();
+        });
+
+        onKeyPress("down", () => {
+            if (isHost) {
+                selectedRow = (selectedRow + 1) % 4;
+            }
+            updateRowIndicator();
+        });
+        onKeyPress("s", () => {
+            if (isHost) {
+                selectedRow = (selectedRow + 1) % 4;
+            }
+            updateRowIndicator();
+        });
+
+        // Left/Right controls current row
+        onKeyPress("left", () => {
+            if (selectedRow === 0) {
+                cycleMyCharacter(-1);
+            } else if (selectedRow === 1 && isHost) {
+                currentTimeIdx = (currentTimeIdx - 1 + timeOptions.length) % timeOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            } else if (selectedRow === 2 && isHost) {
+                currentSpeedIdx = (currentSpeedIdx - 1 + speedOptions.length) % speedOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+        onKeyPress("a", () => {
+            if (selectedRow === 0) {
+                cycleMyCharacter(-1);
+            } else if (selectedRow === 1 && isHost) {
+                currentTimeIdx = (currentTimeIdx - 1 + timeOptions.length) % timeOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            } else if (selectedRow === 2 && isHost) {
+                currentSpeedIdx = (currentSpeedIdx - 1 + speedOptions.length) % speedOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+
+        onKeyPress("right", () => {
+            if (selectedRow === 0) {
+                cycleMyCharacter(1);
+            } else if (selectedRow === 1 && isHost) {
+                currentTimeIdx = (currentTimeIdx + 1) % timeOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            } else if (selectedRow === 2 && isHost) {
+                currentSpeedIdx = (currentSpeedIdx + 1) % speedOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+        onKeyPress("d", () => {
+            if (selectedRow === 0) {
+                cycleMyCharacter(1);
+            } else if (selectedRow === 1 && isHost) {
+                currentTimeIdx = (currentTimeIdx + 1) % timeOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            } else if (selectedRow === 2 && isHost) {
+                currentSpeedIdx = (currentSpeedIdx + 1) % speedOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+
+        // Space/Enter activates current row
+        onKeyPress("space", () => {
+            if (selectedRow === 0) {
+                // Ready up
+                socket.send("ready");
+            } else if (selectedRow === 3 && isHost) {
+                // Start game
+                startGame();
+            }
+        });
+        onKeyPress("enter", () => {
+            if (selectedRow === 0) {
+                // Ready up
+                socket.send("ready");
+            } else if (selectedRow === 3 && isHost) {
+                // Start game
+                startGame();
+            }
+        });
 
         // NATIVE TOUCH HANDLERS
         const touchButtons = [
