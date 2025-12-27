@@ -20,7 +20,7 @@ export const PLAYERS = [
         spriteFront: "tungtung_front",
         spriteBack: "tungtung_back",
         spriteAnim: "tungtung_anim",
-        keys: { up: "w", down: "s", left: "a", right: "d", brain: "space" }
+        keys: { up: "w", down: "s", left: "a", right: "d", brain: "e" }
     },
     {
         name: "Meowl",
