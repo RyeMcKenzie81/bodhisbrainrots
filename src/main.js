@@ -36,6 +36,7 @@ function fitCanvas() {
 
     // Check if we are in portrait mode rotato-town
     if (window.MOBILE_PORTRAIT_MODE) {
+        document.body.classList.add("allow-portrait");
         canvas.style.transform = "rotate(90deg)"; // Rotate 90 CW
 
         // In rotated mode:
@@ -82,6 +83,7 @@ function fitCanvas() {
         canvas.style.left = `${(winWidth - fittedWidth) / 2}px`;
 
     } else {
+        document.body.classList.remove("allow-portrait");
         canvas.style.transform = "none";
 
         const gameWidth = 1280;
