@@ -5,7 +5,6 @@ import { initGameScene } from "./scenes/game.js";
 import { initGameOverScene } from "./scenes/gameover.js";
 import { initMenuScenes } from "./scenes/menu.js";
 import { initLobbyScene } from "./scenes/lobby.js";
-import { initLobbyScene } from "./scenes/lobby.js";
 import { initOnlineGameScene } from "./scenes/onlineGame.js";
 import { initMobileTestScene } from "./scenes/mobileTest.js";
 
