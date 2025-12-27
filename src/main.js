@@ -126,6 +126,96 @@ setInterval(fitCanvas, 500);
 // Load all assets
 loadAssets();
 
+// GLOBAL TOUCH COORDINATE FIX RE-IMPLEMENTATION
+// Required because manual CSS scaling confuses Kaboom's native input.
+function setupTouchFix() {
+    const canvas = document.querySelector("canvas");
+    if (!canvas) {
+        setTimeout(setupTouchFix, 100);
+        return;
+    }
+
+    function dispatchSafeMouseEvent(type, clientX, clientY) {
+        if (!isFinite(clientX) || !isFinite(clientY)) return;
+
+        // CRITICAL: Round to integers to prevent browser errors
+        const safeX = Math.round(clientX);
+        const safeY = Math.round(clientY);
+
+        try {
+            // Minimal event properties
+            const evt = new MouseEvent(type, {
+                clientX: safeX,
+                clientY: safeY,
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            canvas.dispatchEvent(evt);
+        } catch (e) {
+            // Silent catch to prevent UI blocking alerts
+            console.warn("Input fix failed:", e);
+        }
+    }
+
+    function handleTouch(e) {
+        // Do NOT run this fix in Portrait Mode (it handles itself now)
+        if (window.MOBILE_PORTRAIT_MODE) return;
+
+        // Prevent default browser/Kaboom handling to avoid duplicates
+        // e.preventDefault(); // Warning: might block scrolling/other behavior? 
+        // We act on 'passive: false' ideally but 'touchstart' is passive by default.
+
+        if (e.changedTouches.length > 0) {
+            const touch = e.changedTouches[0];
+            const rect = canvas.getBoundingClientRect();
+
+            // Standard Mode Scaling Logic
+            // We want to map Touch Visual Pos -> Game Coordinate -> Synthetic Mouse Visual Pos
+            // Actually, for Standard Mode, we just want to ensure coordinates are mapped via the Canvas Rect correctly.
+            // If Kaboom uses (Client - Left) / Width...
+            // And we produce a MouseEvent with the SAME ClientX...
+            // Then Kaboom does the same math.
+
+            // WAIT. If Kaboom is wrong natively, it's because it uses the wrong Scale or Rect?
+            // If we provide a mouse event with calculated Game Coordinates?
+            // Kaboom takes Mouse Event -> Transforms to Game.
+
+            // The original issue was likely that Kaboom didn't account for the CSS scaling vs Internal resolution correctly.
+            // So we need to Provide a ClientX that calculates to the Correct GameX.
+
+            const gameX = ((touch.clientX - rect.left) / rect.width) * 1280;
+            const gameY = ((touch.clientY - rect.top) / rect.height) * 720;
+
+            // Now reverse-engineer a "Perfect" ClientX that Kaboom will like.
+            // Kaboom: mousePos = (Client - Rect.left) ...
+            // If we give it a synthetic event, it uses the current Rect.
+            // So SyntheticClientX = (GameX / 1280) * Rect.Width + Rect.Left
+
+            const fakeClientX = (gameX / 1280) * rect.width + rect.left;
+            const fakeClientY = (gameY / 720) * rect.height + rect.top;
+
+            // Pass the touch type as mouse type
+            let mouseType = "";
+            if (e.type === "touchstart") mouseType = "mousedown";
+            if (e.type === "touchmove") mouseType = "mousemove";
+            if (e.type === "touchend") mouseType = "mouseup";
+
+            dispatchSafeMouseEvent(mouseType, fakeClientX, fakeClientY);
+
+            // For click simulation
+            if (e.type === "touchend") {
+                dispatchSafeMouseEvent("click", fakeClientX, fakeClientY);
+            }
+        }
+    }
+
+    canvas.addEventListener("touchstart", handleTouch, { passive: true });
+    canvas.addEventListener("touchmove", handleTouch, { passive: true });
+    canvas.addEventListener("touchend", handleTouch, { passive: true });
+}
+setupTouchFix();
+
 // Initialize Scenes
 initMenuScenes();
 initGameScene();
