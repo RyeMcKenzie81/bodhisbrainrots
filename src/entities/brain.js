@@ -222,7 +222,12 @@ function createExplosion(gridX, gridY, playSound = true) {
         exp.opacity -= dt() * 1.5;
     });
 
-    // Destroy
+    // Remove hitbox early for forgiveness (before visual fully fades)
+    wait(EXPLOSION_DURATION * 0.6, () => {
+        if (exp.exists()) exp.unuse("area");
+    });
+
+    // Destroy visual
     wait(EXPLOSION_DURATION, () => {
         destroy(exp);
     });
