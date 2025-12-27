@@ -154,7 +154,7 @@ function setupTouchFix() {
             canvas.dispatchEvent(evt);
         } catch (e) {
             // Silent catch to prevent UI blocking alerts
-            console.warn("Input fix failed:", e);
+            // console.warn("Input fix failed:", e);
         }
     }
 

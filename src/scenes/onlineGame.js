@@ -534,8 +534,8 @@ export function initOnlineGameScene() {
 
             function getGamePos(touch) {
                 const rect = canvas.getBoundingClientRect();
-                const scaleX = 960 / rect.width;
-                const scaleY = 744 / rect.height;
+                const scaleX = width() / rect.width;
+                const scaleY = height() / rect.height;
                 return {
                     x: (touch.clientX - rect.left) * scaleX,
                     y: (touch.clientY - rect.top) * scaleY
