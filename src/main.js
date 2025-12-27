@@ -130,6 +130,26 @@ function setupTouchFix() {
         return;
     }
 
+    function dispatchMouseEvent(type, clientX, clientY) {
+        if (isNaN(clientX) || isNaN(clientY)) return;
+        try {
+            const evt = new MouseEvent(type, {
+                clientX: clientX,
+                clientY: clientY,
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            canvas.dispatchEvent(evt);
+        } catch (e) {
+            try {
+                const evt = document.createEvent("MouseEvents");
+                evt.initMouseEvent(type, true, true, window, 1, 0, 0, clientX, clientY, false, false, false, false, 0, null);
+                canvas.dispatchEvent(evt);
+            } catch (e2) { }
+        }
+    }
+
     function translateTouch(touch) {
         const rect = canvas.getBoundingClientRect();
 
@@ -164,16 +184,8 @@ function setupTouchFix() {
             const fakeClientY = (pos.y / 720) * rect.height + rect.top;
 
             // Dispatch events with FAKE coordinates that map to correct Game Logic
-            canvas.dispatchEvent(new MouseEvent("mousemove", {
-                clientX: fakeClientX,
-                clientY: fakeClientY,
-                bubbles: true
-            }));
-            canvas.dispatchEvent(new MouseEvent("mousedown", {
-                clientX: fakeClientX,
-                clientY: fakeClientY,
-                bubbles: true
-            }));
+            dispatchMouseEvent("mousemove", fakeClientX, fakeClientY);
+            dispatchMouseEvent("mousedown", fakeClientX, fakeClientY);
         }
     }, { passive: true });
 
@@ -185,16 +197,8 @@ function setupTouchFix() {
             const fakeClientX = (pos.x / 1280) * rect.width + rect.left;
             const fakeClientY = (pos.y / 720) * rect.height + rect.top;
 
-            canvas.dispatchEvent(new MouseEvent("mouseup", {
-                clientX: fakeClientX,
-                clientY: fakeClientY,
-                bubbles: true
-            }));
-            canvas.dispatchEvent(new MouseEvent("click", {
-                clientX: fakeClientX,
-                clientY: fakeClientY,
-                bubbles: true
-            }));
+            dispatchMouseEvent("mouseup", fakeClientX, fakeClientY);
+            dispatchMouseEvent("click", fakeClientX, fakeClientY);
         }
     }, { passive: true });
 }
