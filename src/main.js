@@ -175,6 +175,9 @@ function setupTouchFix() {
 
     // Override Kaboom's internal mouse position on touch
     canvas.addEventListener("touchstart", (e) => {
+        // Only override in Portrait Mode where rotation breaks standard logic
+        if (!window.MOBILE_PORTRAIT_MODE) return;
+
         if (e.touches.length > 0) {
             const pos = translateTouch(e.touches[0]);
 
@@ -190,6 +193,8 @@ function setupTouchFix() {
     }, { passive: true });
 
     canvas.addEventListener("touchend", (e) => {
+        if (!window.MOBILE_PORTRAIT_MODE) return;
+
         // Dispatch click at last touch position for onClick handlers
         if (e.changedTouches.length > 0) {
             const pos = translateTouch(e.changedTouches[0]);
