@@ -1253,6 +1253,9 @@ export function initMenuScenes() {
 
         const controls = PLAYERS[currentPlayer].keys;
 
+        // Initialize cursor position
+        updateSelection();
+
 
         // Universal Controls
         onKeyPress("a", () => moveSelection("left"));
