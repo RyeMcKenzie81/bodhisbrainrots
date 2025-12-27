@@ -8,22 +8,13 @@ export function initMobileTestScene() {
         document.body.classList.add("allow-portrait"); // Force hide overlay immediately
 
         // Safe Resize Trigger
-        function safeResize() {
-            try {
-                window.dispatchEvent(new Event("resize"));
-            } catch (e) {
-                try {
-                    const evt = document.createEvent("Event");
-                    evt.initEvent("resize", true, true);
-                    window.dispatchEvent(evt);
-                } catch (e2) {
-                    console.log("Resize dispatch failed silently");
-                }
-            }
+        // Initial Resize
+        if (window.fitCanvas) {
+            window.fitCanvas();
+        } else {
+            // Fallback (shouldn't be needed)
+            try { window.dispatchEvent(new Event("resize")); } catch (e) { }
         }
-
-        // Trigger resize to apply rotation
-        safeResize();
 
         // Background (Distinct Color)
         add([
@@ -86,8 +77,12 @@ export function initMobileTestScene() {
 
         // Manual Touch Handling for Portrait Mode
         let dest = player.pos.clone();
+        let sceneStartTime = time(); // For debounce
 
         function handleTouch(e) {
+            // Debounce: Ignore touches for first 0.5s to prevent immediate exit from menu click
+            if (time() - sceneStartTime < 0.5) return;
+
             e.preventDefault();
             const touch = e.changedTouches[0];
             const canvas = document.querySelector("canvas");
@@ -144,11 +139,13 @@ export function initMobileTestScene() {
         ]);
 
         // Clean up on leave
+        // Clean up on leave
         onSceneLeave(() => {
             window.removeEventListener("touchstart", handleTouch);
             window.MOBILE_PORTRAIT_MODE = false;
             document.body.classList.remove("allow-portrait");
-            safeResize();
+            if (window.fitCanvas) window.fitCanvas();
+            else try { window.dispatchEvent(new Event("resize")); } catch (e) { }
         });
     });
 }

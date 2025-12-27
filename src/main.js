@@ -113,6 +113,7 @@ function fitCanvas() {
         canvas.style.left = `${(winWidth - parseFloat(canvas.style.width)) / 2}px`;
     }
 }
+window.fitCanvas = fitCanvas;
 
 window.addEventListener("resize", fitCanvas);
 window.addEventListener("load", fitCanvas);
