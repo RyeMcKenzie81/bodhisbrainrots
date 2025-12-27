@@ -31,6 +31,17 @@ export function initMenuScenes() {
             toggleFullscreen();
         });
 
+        // Portrait Test Button
+        add([
+            text("PORTRAIT PROTOTYPE", { size: 16 }),
+            pos(20, 20),
+            anchor("topleft"),
+            color(150, 150, 150),
+            area(),
+        ]).onClick(() => {
+            go("mobileTest");
+        });
+
         // Character display
         const charY = 280;
         PLAYERS.forEach((p, i) => {

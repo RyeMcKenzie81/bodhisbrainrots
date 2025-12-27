@@ -5,6 +5,10 @@ import { SIM_CONSTANTS } from "../sim/state.js";
 export function initOnlineGameScene() {
     scene("onlineGame", ({ roomId, myPlayerId, players }) => {
 
+        // Center camera on the grid (Grid is 960x704, Center is 480x352)
+        // This centers the game content on our wider 1280px screen
+        camPos(SIM_CONSTANTS.GRID_WIDTH * SIM_CONSTANTS.TILE_SIZE / 2, SIM_CONSTANTS.GRID_HEIGHT * SIM_CONSTANTS.TILE_SIZE / 2);
+
         // 1. Setup Input map
         let seq = 0;
 

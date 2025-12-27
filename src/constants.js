@@ -60,3 +60,7 @@ export const START_POSITIONS = [
     { x: GRID_WIDTH - 2, y: 1 },
     { x: 1, y: GRID_HEIGHT - 2 },
 ];
+
+// Offsets to center the 960x704 grid in 1280x720 canvas
+export const GRID_OFFSET_X = 160;
+export const GRID_OFFSET_Y = 8;

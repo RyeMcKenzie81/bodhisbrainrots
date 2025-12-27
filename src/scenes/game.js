@@ -19,6 +19,10 @@ export function initGameScene() {
         // Reset Game State
         gameState.players = [];
 
+        // Center camera on the grid (Grid is 960x704, Center is 480x352)
+        // This centers the game content on our wider 1280px screen
+        camPos(GRID_WIDTH * TILE_SIZE / 2, GRID_HEIGHT * TILE_SIZE / 2);
+
         gameState.gameStarted = false;
         gameState.matchTime = 120; // 2 minutes
         gameState.matchEnded = false;
