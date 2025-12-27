@@ -6,6 +6,10 @@ import { toggleFullscreen } from "../utils/fullscreen.js";
 export function initMenuScenes() {
     // Scene: Main Menu
     scene("menu", () => {
+        // Ensure strictly standard mode
+        window.MOBILE_PORTRAIT_MODE = false;
+        if (window.fitCanvas) window.fitCanvas();
+
         add([
             text("BoDawg's Brainrots", { size: 48 }),
             pos(width() / 2, 80),

@@ -6,6 +6,9 @@ import { spawnPowerup, createLevel } from "../entities/environment.js";
 
 export function initGameScene() {
     scene("game", () => {
+        window.MOBILE_PORTRAIT_MODE = false;
+        if (window.fitCanvas) window.fitCanvas();
+
         let bgMusic = play("music", { loop: true, volume: 0.4 });
         if (!bgMusic || !bgMusic.stop) {
             bgMusic = null;

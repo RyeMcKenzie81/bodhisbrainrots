@@ -4,6 +4,9 @@ import { SIM_CONSTANTS } from "../sim/state.js";
 
 export function initOnlineGameScene() {
     scene("onlineGame", ({ roomId, myPlayerId, players }) => {
+        window.MOBILE_PORTRAIT_MODE = false;
+        if (window.fitCanvas) window.fitCanvas();
+
 
         // Center camera on the grid (Grid is 960x704, Center is 480x352)
         // This centers the game content on our wider 1280px screen
