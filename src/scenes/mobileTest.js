@@ -69,49 +69,68 @@ export function initMobileTestScene() {
             area(),
         ]);
 
-        // Touch Interaction
-        // We use standard Kaboom events because we remapped the coordinates in main.js!
-
+        // Manual Touch Handling for Portrait Mode
         let dest = player.pos.clone();
 
-        onClick(() => {
-            const m = mousePos();
-            dest = m;
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            const canvas = document.querySelector("canvas");
+            const rect = canvas.getBoundingClientRect();
+
+            // Calculate Game Coordinates based on 90deg rotation
+            const visualX = (touch.clientX - rect.left) / rect.width;
+            const visualY = (touch.clientY - rect.top) / rect.height;
+
+            const gameX = visualY * 1280;
+            const gameY = (1 - visualX) * 720;
+            const gamePos = vec2(gameX, gameY);
+
+            // Check Exit Button (Box: 0..200, 20..80)
+            if (gameX >= 0 && gameX <= 200 && gameY >= 20 && gameY <= 80) {
+                go("menu");
+                return;
+            }
+
+            // Move Player
+            dest = gamePos;
 
             // Visual indicator
             add([
                 circle(10),
-                pos(m),
+                pos(gamePos),
                 color(255, 0, 0),
                 lifespan(0.5, { fade: 0.5 }),
                 anchor("center"),
             ]);
-        });
+        }
+
+        window.addEventListener("touchstart", handleTouch, { passive: false });
 
         onUpdate(() => {
             player.pos = player.pos.lerp(dest, dt() * 5);
         });
 
-        // Exit Button
+        // Exit Button (Visual Only)
         add([
             rect(200, 60, { radius: 8 }),
             pos(100, 50),
             anchor("center"),
             color(200, 50, 50),
-            area(),
-        ]).onClick(() => {
-            go("menu");
-        });
+            z(100),
+        ]);
 
         add([
             text("EXIT", { size: 24 }),
             pos(100, 50),
             anchor("center"),
             color(255, 255, 255),
+            z(101),
         ]);
 
         // Clean up on leave
         onSceneLeave(() => {
+            window.removeEventListener("touchstart", handleTouch);
             window.MOBILE_PORTRAIT_MODE = false;
             document.body.classList.remove("allow-portrait");
             window.dispatchEvent(new Event("resize"));
