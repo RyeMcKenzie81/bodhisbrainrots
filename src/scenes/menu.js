@@ -799,7 +799,7 @@ export function initMenuScenes() {
 
         add([
             text("Press SPACE to continue", { size: 20 }),
-            pos(width() / 2, 450),
+            pos(width() / 2, 400),
             anchor("center"),
             color(200, 200, 200),
         ]);
@@ -814,7 +814,7 @@ export function initMenuScenes() {
             for (let i = 0; i < selectedCount; i++) {
                 const icon = add([
                     sprite(PLAYERS[i].spriteFront),
-                    pos(startX + i * 120, 550),
+                    pos(startX + i * 120, 500),
                     anchor("center"),
                     scale(1),
                 ]);
@@ -827,7 +827,7 @@ export function initMenuScenes() {
 
                 const label = add([
                     text("P" + (i + 1), { size: 16 }),
-                    pos(startX + i * 120, 610),
+                    pos(startX + i * 120, 560),
                     anchor("center"),
                     color(255, 255, 255),
                 ]);
@@ -888,7 +888,7 @@ export function initMenuScenes() {
         // Confirm Button (Touch)
         add([
             rect(240, 70, { radius: 8 }),
-            pos(width() / 2, 450),
+            pos(width() / 2, 630),
             anchor("center"),
             color(rgb(40, 40, 60)),
             outline(4, rgb(100, 200, 100)),
@@ -942,7 +942,7 @@ export function initMenuScenes() {
             // Confirm button
             {
                 x: width() / 2,
-                y: 450,
+                y: 630,
                 w: 240,
                 h: 70,
                 action: confirmPlayerCount
