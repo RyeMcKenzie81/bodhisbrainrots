@@ -69,6 +69,154 @@ export function initLobbyScene() {
             color(150, 150, 150),
         ]);
 
+        // ===== SETTINGS UI (Host Only) =====
+        const timeOptions = [
+            { label: "1 MIN", value: 60 },
+            { label: "2 MIN", value: 120 },
+            { label: "3 MIN", value: 180 },
+            { label: "∞", value: 0 }, // Endless
+        ];
+        const speedOptions = [
+            { label: "SLOW", value: 140 },
+            { label: "NORMAL", value: 175 },
+            { label: "FAST", value: 220 },
+            { label: "TURBO", value: 280 },
+        ];
+
+        let currentTimeIdx = 1;  // Default: 2 MIN
+        let currentSpeedIdx = 1; // Default: NORMAL
+
+        // Time Label
+        const timeLabelText = add([
+            text("TIME:", { size: 16 }),
+            pos(width() / 2 - 180, 470),
+            anchor("center"),
+            color(180, 180, 180),
+            opacity(0), // Hidden until host
+        ]);
+
+        const timeValueText = add([
+            text(timeOptions[currentTimeIdx].label, { size: 20 }),
+            pos(width() / 2 - 80, 470),
+            anchor("center"),
+            color(255, 255, 100),
+            opacity(0),
+        ]);
+
+        const timeLeftBtn = add([
+            text("◀", { size: 24 }),
+            pos(width() / 2 - 130, 470),
+            anchor("center"),
+            color(200, 200, 200),
+            area(),
+            opacity(0),
+            "settingsBtn",
+        ]);
+
+        const timeRightBtn = add([
+            text("▶", { size: 24 }),
+            pos(width() / 2 - 30, 470),
+            anchor("center"),
+            color(200, 200, 200),
+            area(),
+            opacity(0),
+            "settingsBtn",
+        ]);
+
+        // Speed Label
+        const speedLabelText = add([
+            text("SPEED:", { size: 16 }),
+            pos(width() / 2 + 60, 470),
+            anchor("center"),
+            color(180, 180, 180),
+            opacity(0),
+        ]);
+
+        const speedValueText = add([
+            text(speedOptions[currentSpeedIdx].label, { size: 20 }),
+            pos(width() / 2 + 180, 470),
+            anchor("center"),
+            color(100, 255, 255),
+            opacity(0),
+        ]);
+
+        const speedLeftBtn = add([
+            text("◀", { size: 24 }),
+            pos(width() / 2 + 120, 470),
+            anchor("center"),
+            color(200, 200, 200),
+            area(),
+            opacity(0),
+            "settingsBtn",
+        ]);
+
+        const speedRightBtn = add([
+            text("▶", { size: 24 }),
+            pos(width() / 2 + 240, 470),
+            anchor("center"),
+            color(200, 200, 200),
+            area(),
+            opacity(0),
+            "settingsBtn",
+        ]);
+
+        function updateSettingsUI() {
+            // Labels and values visible to all, arrows only to host
+            const showLabels = 1; // Always show settings info
+            const showArrows = isHost ? 1 : 0;
+
+            timeLabelText.opacity = showLabels;
+            timeValueText.opacity = showLabels;
+            timeLeftBtn.opacity = showArrows;
+            timeRightBtn.opacity = showArrows;
+            speedLabelText.opacity = showLabels;
+            speedValueText.opacity = showLabels;
+            speedLeftBtn.opacity = showArrows;
+            speedRightBtn.opacity = showArrows;
+
+            timeValueText.text = timeOptions[currentTimeIdx].label;
+            speedValueText.text = speedOptions[currentSpeedIdx].label;
+        }
+
+        function sendSettings() {
+            socket.send("update_settings", {
+                timeLimit: timeOptions[currentTimeIdx].value,
+                playerSpeed: speedOptions[currentSpeedIdx].value,
+            });
+        }
+
+        timeLeftBtn.onClick(() => {
+            if (isHost) {
+                currentTimeIdx = (currentTimeIdx - 1 + timeOptions.length) % timeOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+
+        timeRightBtn.onClick(() => {
+            if (isHost) {
+                currentTimeIdx = (currentTimeIdx + 1) % timeOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+
+        speedLeftBtn.onClick(() => {
+            if (isHost) {
+                currentSpeedIdx = (currentSpeedIdx - 1 + speedOptions.length) % speedOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+
+        speedRightBtn.onClick(() => {
+            if (isHost) {
+                currentSpeedIdx = (currentSpeedIdx + 1) % speedOptions.length;
+                updateSettingsUI();
+                sendSettings();
+            }
+        });
+
         // Debug display for mobile
         const debugText = add([
             text("", { size: 14 }),
@@ -210,6 +358,7 @@ export function initLobbyScene() {
             isHost = true;
             players = [{ id: data.playerId, name: "You", ready: false }];
             renderPlayers();
+            updateSettingsUI(); // Show settings controls for host
         };
 
         const handleRoomJoined = (data) => {
@@ -267,6 +416,15 @@ export function initLobbyScene() {
             go("onlineGame", { roomId, myPlayerId, players });
         };
 
+        const handleSettingsUpdated = (data) => {
+            // Update local settings display (for non-hosts to see)
+            const timeIdx = timeOptions.findIndex(t => t.value === data.settings.timeLimit);
+            const speedIdx = speedOptions.findIndex(s => s.value === data.settings.playerSpeed);
+            if (timeIdx >= 0) currentTimeIdx = timeIdx;
+            if (speedIdx >= 0) currentSpeedIdx = speedIdx;
+            updateSettingsUI();
+        };
+
         // Register handlers
         socket.on("room_created", handleRoomCreated);
         socket.on("room_joined", handleRoomJoined);
@@ -274,6 +432,7 @@ export function initLobbyScene() {
         socket.on("player_ready", handlePlayerReady);
         socket.on("player_updated", handlePlayerUpdated);
         socket.on("game_start", handleGameStart);
+        socket.on("settings_updated", handleSettingsUpdated);
 
         // Start game function (host only, allow solo for testing)
         function startGame() {

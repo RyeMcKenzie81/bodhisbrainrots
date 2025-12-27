@@ -99,8 +99,9 @@ export function tick(state, dt) {
             }
 
             // Apply speed multiplier (20% per speed powerup)
+            const baseSpeed = state.settings?.playerSpeed || SIM_CONSTANTS.PLAYER_SPEED;
             const speedMultiplier = 1 + (player.speedLevel || 0) * 0.2;
-            const moveAmt = SIM_CONSTANTS.PLAYER_SPEED * speedMultiplier * dt;
+            const moveAmt = baseSpeed * speedMultiplier * dt;
             let newX = player.pos.x + player.intent.dx * moveAmt;
             let newY = player.pos.y + player.intent.dy * moveAmt;
 
@@ -229,8 +230,8 @@ export function tick(state, dt) {
         }
     });
 
-    // 8. Timer & Sudden Death
-    if (!state.gameOver) {
+    // 8. Timer & Sudden Death (Skip in endless mode)
+    if (!state.gameOver && !state.settings?.endless) {
         state.gameTime -= dt;
         if (state.gameTime <= 0) {
             state.gameTime = 0;

@@ -148,6 +148,42 @@ export function handleConnection(ws) {
                 }
             }
 
+            // Host can update room settings
+            else if (type === 'update_settings') {
+                if (currentRoomId && playerId === 'p0') { // Only host
+                    const room = rooms.get(currentRoomId);
+                    if (room && !room.state.gameStarted) {
+                        // Update room settings
+                        if (data.timeLimit !== undefined) {
+                            room.settings.timeLimit = data.timeLimit;
+                        }
+                        if (data.playerSpeed !== undefined) {
+                            room.settings.playerSpeed = data.playerSpeed;
+                        }
+
+                        // Recreate state with new settings (preserves players)
+                        const oldPlayers = room.state.players;
+                        room.state = createGameState(room.id, room.settings);
+                        room.state.players = oldPlayers;
+
+                        // Update state settings reference
+                        room.state.settings = {
+                            timeLimit: room.settings.timeLimit,
+                            playerSpeed: room.settings.playerSpeed,
+                            endless: room.settings.timeLimit === 0,
+                        };
+
+                        // Broadcast to all players
+                        broadcastToRoom(room, {
+                            type: 'settings_updated',
+                            settings: room.settings
+                        });
+
+                        console.log(`[SERVER] Room ${room.id} settings updated:`, room.settings);
+                    }
+                }
+            }
+
             // Host can explicitly start the game (even solo for testing)
             else if (type === 'start_game') {
                 if (currentRoomId) {
@@ -182,10 +218,17 @@ export function handleConnection(ws) {
 }
 
 function createRoom(id) {
+    // Default settings (host can modify in lobby)
+    const settings = {
+        timeLimit: 120,    // 2 minutes (0 = endless)
+        playerSpeed: 175,  // Base speed
+    };
+
     return {
         id,
         players: [], // { id, ws, name, ready }
-        state: createGameState(id), // Seed with Room ID
+        settings,    // Configurable by host
+        state: createGameState(id, settings),
         interval: null
     };
 }

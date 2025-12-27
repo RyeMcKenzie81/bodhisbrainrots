@@ -14,9 +14,15 @@ export const SIM_CONSTANTS = {
 /**
  * Creates the initial game state.
  * @param {string} seed - Seed for deterministic RNG.
+ * @param {object} options - Optional settings overrides.
+ * @param {number} options.timeLimit - Game time in seconds (0 = endless).
+ * @param {number} options.playerSpeed - Base player speed.
  * @returns {object} The initial game state.
  */
-export function createGameState(seed) {
+export function createGameState(seed, options = {}) {
+    const timeLimit = options.timeLimit ?? SIM_CONSTANTS.MAX_TIME;
+    const playerSpeed = options.playerSpeed ?? SIM_CONSTANTS.PLAYER_SPEED;
+
     return {
         step: 0,
         time: 0,
@@ -26,13 +32,19 @@ export function createGameState(seed) {
         brains: [],  // Array of active Brain objects
         explosions: [], // Array of active Explosion objects
         powerups: [], // Array of Powerup objects
-        gameTime: SIM_CONSTANTS.MAX_TIME,
+        gameTime: timeLimit,
         suddenDeath: false,
         suddenDeathTimer: 0,
         deathSpiralIndex: 0,
         gameStarted: false,
         gameOver: false,
         winner: null,
+        // Store settings for use in simulation
+        settings: {
+            timeLimit,
+            playerSpeed,
+            endless: timeLimit === 0,
+        },
     };
 }
 
