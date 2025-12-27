@@ -13,14 +13,14 @@ export const PLAYERS = [
         spriteFront: "mamarizz_front",
         spriteBack: "mamarizz_back",
         spriteAnim: "mamarizz_anim",
-        keys: { up: "up", down: "down", left: "left", right: "right", brain: "n" }
+        keys: { up: "up", down: "down", left: "left", right: "right", brain: "enter" }
     },
     {
         name: "Tung Tung Tung Sahur",
         spriteFront: "tungtung_front",
         spriteBack: "tungtung_back",
         spriteAnim: "tungtung_anim",
-        keys: { up: "w", down: "s", left: "a", right: "d", brain: "e" }
+        keys: { up: "w", down: "s", left: "a", right: "d", brain: "space" }
     },
     {
         name: "Meowl",

@@ -261,10 +261,6 @@ export function spawnPlayer(playerIndex, characterIndex) {
         }
     };
     onKeyPress(keys.brain, player.dropBomb);
-    // Force Space for Player 1 (Single Player convenience)
-    if (playerIndex === 0) {
-        onKeyPress("space", player.dropBomb);
-    }
 
     // Dynamic Z-ordering for Player
     player.onUpdate(() => {
