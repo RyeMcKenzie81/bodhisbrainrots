@@ -1,6 +1,7 @@
 import { PLAYERS } from "../constants.js";
 import { gameConfig } from "../state.js";
 import { setupMenuTouch } from "../utils/touchUtils.js";
+import { toggleFullscreen } from "../utils/fullscreen.js";
 
 export function initMenuScenes() {
     // Scene: Main Menu
@@ -18,6 +19,17 @@ export function initMenuScenes() {
             anchor("center"),
             color(200, 200, 200),
         ]);
+
+        // Fullscreen Button
+        add([
+            text("FULLSCREEN", { size: 16 }),
+            pos(width() - 20, 20),
+            anchor("topright"),
+            color(150, 150, 150),
+            area(),
+        ]).onClick(() => {
+            toggleFullscreen();
+        });
 
         // Character display
         const charY = 280;
