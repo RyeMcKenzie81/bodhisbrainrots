@@ -30,6 +30,7 @@ export function initMobileTestScene() {
             anchor("center"),
             color(0, 255, 0),
             opacity(0.5),
+            rotate(-90),
             z(0),
         ]);
 
@@ -57,13 +58,15 @@ export function initMobileTestScene() {
             pos(width() / 2, 50),
             anchor("center"),
             color(255, 255, 0),
+            rotate(-90),
         ]);
 
         add([
-            text("Hold phone vertically!\nTap top = Move Right\nTap bottom = Move Left", { size: 24, align: "center" }),
+            text("Hold phone vertically!\nTap Top = Forward\nTap Bottom = Backward", { size: 24, align: "center" }),
             pos(width() / 2, height() - 100),
             anchor("center"),
             color(200, 200, 200),
+            rotate(-90),
         ]);
 
         // Player
@@ -72,6 +75,7 @@ export function initMobileTestScene() {
             pos(width() / 2, height() / 2),
             anchor("center"),
             scale(1),
+            rotate(-90), // Player faces up
             area(),
         ]);
 
@@ -127,6 +131,9 @@ export function initMobileTestScene() {
             pos(100, 50),
             anchor("center"),
             color(200, 50, 50),
+            rotate(-90),
+            fixed(),
+            area(), // Make it clickable if we used onClick, but we use manual handling
             z(100),
         ]);
 
@@ -135,6 +142,8 @@ export function initMobileTestScene() {
             pos(100, 50),
             anchor("center"),
             color(255, 255, 255),
+            rotate(-90),
+            fixed(),
             z(101),
         ]);
 
