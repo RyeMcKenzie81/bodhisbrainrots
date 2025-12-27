@@ -27,6 +27,7 @@ export function initMenuScenes() {
             anchor("topright"),
             color(150, 150, 150),
             area(),
+            "ui", // Tag as UI to prevent global click
         ]).onClick(() => {
             toggleFullscreen();
         });
@@ -39,6 +40,7 @@ export function initMenuScenes() {
             color(0, 200, 100),
             area(),
             z(100),
+            "ui", // Tag as UI
         ]);
 
         portraitBtn.onClick(() => {
@@ -94,7 +96,18 @@ export function initMenuScenes() {
         ]);
 
         onKeyPress("space", () => go("modeSelect"));
-        onClick(() => go("modeSelect"));
+
+        // Only trigger start if NOT clicking a UI element
+        onClick(() => {
+            // Check if mouse is hovering over any object with "ui" tag
+            // Kaboom's isHovering() checks the specific object.
+            // We can iterate all "ui" objects.
+            const uiElements = get("ui");
+            for (const el of uiElements) {
+                if (el.isHovering()) return;
+            }
+            go("modeSelect");
+        });
     });
 
     // Scene: Mode Selection
