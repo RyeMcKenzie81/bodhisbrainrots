@@ -7,8 +7,23 @@ export function initMobileTestScene() {
         window.MOBILE_PORTRAIT_MODE = true;
         document.body.classList.add("allow-portrait"); // Force hide overlay immediately
 
+        // Safe Resize Trigger
+        function safeResize() {
+            try {
+                window.dispatchEvent(new Event("resize"));
+            } catch (e) {
+                try {
+                    const evt = document.createEvent("Event");
+                    evt.initEvent("resize", true, true);
+                    window.dispatchEvent(evt);
+                } catch (e2) {
+                    console.log("Resize dispatch failed silently");
+                }
+            }
+        }
+
         // Trigger resize to apply rotation
-        window.dispatchEvent(new Event("resize"));
+        safeResize();
 
         // Background (Distinct Color)
         add([
@@ -133,7 +148,7 @@ export function initMobileTestScene() {
             window.removeEventListener("touchstart", handleTouch);
             window.MOBILE_PORTRAIT_MODE = false;
             document.body.classList.remove("allow-portrait");
-            window.dispatchEvent(new Event("resize"));
+            safeResize();
         });
     });
 }
