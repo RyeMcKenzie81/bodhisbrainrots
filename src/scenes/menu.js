@@ -688,7 +688,7 @@ export function initMenuScenes() {
         // Confirm Button for touch
         add([
             rect(200, 60, { radius: 8 }),
-            pos(width() / 2, 650),
+            pos(width() / 2, 680),
             anchor("center"),
             color(rgb(40, 40, 60)),
             outline(4, rgb(100, 200, 100)),
@@ -698,7 +698,7 @@ export function initMenuScenes() {
 
         add([
             text("CONFIRM", { size: 24 }),
-            pos(width() / 2, 650),
+            pos(width() / 2, 680),
             anchor("center"),
             color(255, 255, 255),
         ]);
@@ -717,7 +717,7 @@ export function initMenuScenes() {
 
         add([
             text("< A / D > DIFFICULTY     < W / S > OPPONENTS     SPACE CONFIRM", { size: 12 }),
-            pos(width() / 2, 650),
+            pos(width() / 2, 730),
             anchor("center"),
             color(120, 120, 120),
         ]);
