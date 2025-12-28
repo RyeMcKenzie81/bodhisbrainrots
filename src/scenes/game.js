@@ -336,19 +336,20 @@ export function initGameScene() {
         function startBossBattle() {
             gameState.isBossPhase = true;
 
-            // Audio Switch
-            if (bgMusic && bgMusic.stop) bgMusic.stop();
+            // Audio Sequence
+            // 1. Play "Boss Battle" Alert (One-shot)
+            // DO NOT stop bgMusic since we don't have boss music, just let standard music play.
+            // if (bgMusic && bgMusic.stop) bgMusic.stop(); 
 
+            play("boss_battle", { volume: 1.0, loop: false });
+
+            // 2. Play Boss Name Callout (Delayed)
             if (!gameState.bossVoicePlayed) {
-                play("boss_voice", { volume: 1.0, loop: false });
+                wait(1.5, () => {
+                    play("boss_voice", { volume: 1.0, loop: false });
+                });
                 gameState.bossVoicePlayed = true;
             }
-
-            // Delay music to avoid overlap with voice
-            wait(1.5, () => {
-                if (bgMusic && bgMusic.stop) bgMusic.stop(); // Safe check
-                bgMusic = play("boss_battle", { loop: true, volume: 0.6 });
-            });
 
             // 1. Announce
             const bossText = add([
