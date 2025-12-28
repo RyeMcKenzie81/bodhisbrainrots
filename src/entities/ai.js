@@ -55,7 +55,7 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
 
     if (difficulty === "BOSS") {
         // ai.use(color(255, 100, 100)); // REMOVED TINT for Cappuccino
-        ai.use(scale(0.35)); // Larger (base was 0.25)
+        ai.use(scale(0.45)); // Even bigger (was 0.35)
     }
 
     ai.play("idle_down");
