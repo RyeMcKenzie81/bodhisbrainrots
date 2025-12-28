@@ -11,6 +11,7 @@ export function initGameScene() {
         gameState.isBossPhase = false;
         gameState.bossSpawned = false;
         gameState.bossDefeated = false;
+        gameState.bossVoicePlayed = false;
 
         let bgMusic = play("music", { loop: true, volume: 0.4 });
         if (!bgMusic || !bgMusic.stop) {
@@ -337,7 +338,11 @@ export function initGameScene() {
 
             // Audio Switch
             if (bgMusic && bgMusic.stop) bgMusic.stop();
-            play("boss_voice", { volume: 1.0 });
+
+            if (!gameState.bossVoicePlayed) {
+                play("boss_voice", { volume: 1.0, loop: false });
+                gameState.bossVoicePlayed = true;
+            }
 
             // Delay music to avoid overlap with voice
             wait(1.5, () => {
