@@ -24,8 +24,21 @@ export function loadAssets() {
         sliceX: 4,
         sliceY: 4,
         anims: {
-            idle: { from: 0, to: 3, loop: true, speed: 5 },
-            walk: { from: 4, to: 7, loop: true, speed: 10 },
+            // Row 0: Up (Back) ??
+            idle_up: { from: 0, to: 3, loop: true, speed: 5 },
+            walk_up: { from: 0, to: 3, loop: true, speed: 10 },
+
+            // Row 1: Right ??
+            idle_right: { from: 4, to: 7, loop: true, speed: 5 },
+            walk_right: { from: 4, to: 7, loop: true, speed: 10 },
+
+            // Row 2: Down (Front) ??
+            idle_down: { from: 8, to: 11, loop: true, speed: 5 },
+            walk_down: { from: 8, to: 11, loop: true, speed: 10 },
+
+            // Row 3: Left ??
+            idle_left: { from: 12, to: 15, loop: true, speed: 5 },
+            walk_left: { from: 12, to: 15, loop: true, speed: 10 },
         },
     });
     loadSound("bomb1", "sprites/bomb1.mp3");
