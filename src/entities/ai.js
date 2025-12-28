@@ -55,9 +55,9 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
 
     if (difficulty === "BOSS") {
         // ai.use(color(255, 100, 100)); // REMOVED TINT for Cappuccino
-        ai.use(scale(0.4)); // Reduced from 0.45 to prevent stuck in walls
-        // Make hitbox smaller relative to the larger sprite to navigate corners
-        ai.use(area({ scale: 0.5, offset: vec2(0, 10) }));
+        ai.use(scale(0.35)); // Reduced again to 0.35 to ensure smooth movement
+        // Very tight hitbox to prevent clipping on corners
+        ai.use(area({ scale: 0.4, offset: vec2(0, 10) }));
     }
 
     ai.play("idle_down");
