@@ -363,6 +363,20 @@ export function initGameScene() {
             });
         }
 
+
+        // DEBUG CHEAT: Press 'B' to kill all AI and start Boss Battle
+        onKeyPress("b", () => {
+            if (gameConfig.mode === "singleplayer" && !gameState.bossDefeated && !gameState.isBossPhase) {
+                gameState.players.forEach(p => {
+                    if (p.playerIndex > 0 && p.alive) {
+                        p.alive = false;
+                        destroy(p);
+                    }
+                });
+                checkWinCondition();
+            }
+        });
+
         // Create level and spawn players based on selection
         createLevel();
         let localPlayer = null;
