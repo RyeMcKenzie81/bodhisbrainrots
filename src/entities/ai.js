@@ -56,9 +56,10 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
     if (difficulty === "BOSS") {
         // ai.use(color(255, 100, 100)); // REMOVED TINT for Cappuccino
         ai.use(scale(0.35)); // Larger (base was 0.25)
+        ai.play("idle");
+    } else {
+        ai.play("idle_down");
     }
-
-    if (!isBoss) ai.play("idle_down");
 
     // Name tag
     const aiNameTag = add([
@@ -420,7 +421,9 @@ function setFacing(ai, dir) {
     if (ai.facing !== dir || !ai.isMoving) {
         ai.facing = dir;
         ai.isMoving = true;
-        if (ai.difficulty !== "BOSS") {
+        if (ai.difficulty === "BOSS") {
+            ai.play("walk");
+        } else {
             ai.play("walk_" + dir);
         }
     }

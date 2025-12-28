@@ -20,7 +20,14 @@ export function loadAssets() {
     loadSound("music", "sprites/music.mp3");
     loadSound("boss_battle", "sprites/boss_battle.mp3");
     loadSound("boss_voice", "sprites/boss_voice.mp3");
-    loadSprite("boss_cappuccino", "sprites/boss_cappuccino.png");
+    loadSprite("boss_cappuccino", "sprites/boss_cappuccino.png", {
+        sliceX: 4,
+        sliceY: 4,
+        anims: {
+            idle: { from: 0, to: 3, loop: true, speed: 5 },
+            walk: { from: 4, to: 7, loop: true, speed: 10 },
+        },
+    });
     loadSound("bomb1", "sprites/bomb1.mp3");
     loadSound("bomb2", "sprites/bomb2.mp3");
     loadSound("die", "sprites/die.mp3");

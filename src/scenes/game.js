@@ -9,6 +9,8 @@ export function initGameScene() {
         window.MOBILE_PORTRAIT_MODE = false;
         if (window.fitCanvas) window.fitCanvas();
         gameState.isBossPhase = false;
+        gameState.bossSpawned = false;
+        gameState.bossDefeated = false;
 
         let bgMusic = play("music", { loop: true, volume: 0.4 });
         if (!bgMusic || !bgMusic.stop) {
@@ -307,10 +309,20 @@ export function initGameScene() {
             const alivePlayers = gameState.players.filter((p) => p.alive);
             if (alivePlayers.length <= 1) {
                 // BOSS BATTLE CHECK (Single Player Only)
-                // If the only survivor is the Human (Player 0), and we haven't fought the boss yet
-                if (gameConfig.mode === "singleplayer" && alivePlayers[0]?.playerIndex === 0 && !gameState.isBossPhase) {
-                    wait(1, () => startBossBattle());
-                    return;
+                if (gameConfig.mode === "singleplayer" && alivePlayers[0]?.playerIndex === 0 && !gameState.bossDefeated) {
+
+                    if (!gameState.isBossPhase) {
+                        gameState.isBossPhase = true;
+                        wait(1, () => startBossBattle());
+                        return;
+                    }
+
+                    if (!gameState.bossSpawned) return;
+
+                    const boss = gameState.players.find(p => p.difficulty === "BOSS");
+                    if (boss && boss.alive) return;
+
+                    gameState.bossDefeated = true;
                 }
 
                 wait(1, () => {
@@ -347,6 +359,7 @@ export function initGameScene() {
             // Use Character 0 (Brainy) but the AI logic will tint it Red.
             wait(2, () => {
                 spawnAIPlayer(3, 0, "BOSS");
+                gameState.bossSpawned = true;
             });
         }
 
