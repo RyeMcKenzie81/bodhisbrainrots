@@ -8,6 +8,7 @@ export function initGameScene() {
     scene("game", () => {
         window.MOBILE_PORTRAIT_MODE = false;
         if (window.fitCanvas) window.fitCanvas();
+        gameState.isBossPhase = false;
 
         let bgMusic = play("music", { loop: true, volume: 0.4 });
         if (!bgMusic || !bgMusic.stop) {
@@ -305,11 +306,44 @@ export function initGameScene() {
         function checkWinCondition() {
             const alivePlayers = gameState.players.filter((p) => p.alive);
             if (alivePlayers.length <= 1) {
+                // BOSS BATTLE CHECK (Single Player Only)
+                // If the only survivor is the Human (Player 0), and we haven't fought the boss yet
+                if (gameConfig.mode === "singleplayer" && alivePlayers[0]?.playerIndex === 0 && !gameState.isBossPhase) {
+                    wait(1, () => startBossBattle());
+                    return;
+                }
+
                 wait(1, () => {
                     if (bgMusic && bgMusic.stop) bgMusic.stop();
                     go("gameover", alivePlayers[0]?.name || "Nobody");
                 });
             }
+        }
+
+        function startBossBattle() {
+            gameState.isBossPhase = true;
+            play("callout_0"); // Alarm sound?
+
+            // 1. Announce
+            const bossText = add([
+                text("BOSS WAVE", { size: 64 }),
+                pos(width() / 2, height() / 2),
+                anchor("center"),
+                color(255, 50, 50),
+                scale(0),
+                fixed(),
+                z(1000),
+            ]);
+
+            tween(0, 1.2, 0.5, (v) => bossText.scale = vec2(v), easings.easeOutElastic)
+                .then(() => wait(1.5, () => destroy(bossText)));
+
+            // 2. Spawn Boss
+            // Use Index 3 (Bottom Right) for spawn position.
+            // Use Character 0 (Brainy) but the AI logic will tint it Red.
+            wait(2, () => {
+                spawnAIPlayer(3, 0, "BOSS");
+            });
         }
 
         // Create level and spawn players based on selection

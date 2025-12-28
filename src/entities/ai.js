@@ -31,12 +31,12 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
         {
             playerIndex,
             characterIndex,
-            speed: 170,
-            brainCount: 1,
+            speed: difficulty === "BOSS" ? 220 : 170, // Faster boss
+            brainCount: difficulty === "BOSS" ? 5 : 1,
             brainsPlaced: 0,
-            fireRange: 2,
+            fireRange: difficulty === "BOSS" ? 6 : 2,
             alive: true,
-            name: character.name + " (CPU)",
+            name: difficulty === "BOSS" ? "THE BOSS" : (character.name + " (CPU)"),
             spriteFront: character.spriteFront,
             spriteBack: character.spriteBack,
             spriteAnim: character.spriteAnim,
@@ -48,17 +48,23 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
             currentAction: "wander", // wander | flee | attack
             lastPos: vec2(0, 0),
             stuckTimer: 0,
+            difficulty: difficulty, // Store it
         },
     ]);
+
+    if (difficulty === "BOSS") {
+        ai.use(color(255, 100, 100)); // Red Tint
+        ai.use(scale(0.35)); // Larger (base was 0.25)
+    }
 
     ai.play("idle_down");
 
     // Name tag
     const aiNameTag = add([
-        text(`CPU${playerIndex} `, { size: 12 }),
+        text(difficulty === "BOSS" ? "BOSS" : `CPU${playerIndex} `, { size: 12 }),
         pos(ai.pos.x, ai.pos.y - 40),
         anchor("center"),
-        color(100, 200, 255),
+        color(difficulty === "BOSS" ? rgb(255, 50, 50) : rgb(100, 200, 255)),
         z(12),
         "nametag",
         { owner: ai },
@@ -120,6 +126,22 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
             ai.currentAction = "wander";
         } else {
             ai.currentAction = "wander";
+        }
+
+        // LAYER 4: HUNT STRATEGY (Hard/BOSS Mode)
+        // If we are currently wandering, try to hunt the nearest player
+        if ((ai.difficulty === "hard" || ai.difficulty === "BOSS") && ai.currentAction === "wander") {
+            const targetPos = findNearestEnemy(ai, myPos.x, myPos.y);
+            if (targetPos) {
+                // Try to find a safe path to the enemy
+                const path = findPathToAdjacent(myPos.x, myPos.y, targetPos.x, targetPos.y);
+                if (path && path.length > 0) {
+                    executeMove(ai, path[0].dir);
+                    ai.moveDirection = path[0].dir;
+                    ai.currentAction = "hunt"; // Semantic state (behaves like wander but focused)
+                    return;
+                }
+            }
         }
 
         // LAYER 1: PURE RANDOM WANDER (Modified for Safety)
