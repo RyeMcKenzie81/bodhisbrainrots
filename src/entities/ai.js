@@ -17,9 +17,10 @@ import { placeBrain } from "./brain.js";
 export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
     const character = PLAYERS[characterIndex];
     const startPos = START_POSITIONS[playerIndex];
+    const isBoss = difficulty === "BOSS";
 
     const ai = add([
-        sprite(character.spriteAnim),
+        sprite(isBoss ? "boss_cappuccino" : character.spriteAnim),
         pos(startPos.x * TILE_SIZE + TILE_SIZE / 2, startPos.y * TILE_SIZE + TILE_SIZE / 2),
         anchor("center"),
         scale(0.25),
@@ -31,15 +32,15 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
         {
             playerIndex,
             characterIndex,
-            speed: difficulty === "BOSS" ? 220 : 170, // Faster boss
-            brainCount: difficulty === "BOSS" ? 5 : 1,
+            speed: isBoss ? 220 : 170, // Faster boss
+            brainCount: isBoss ? 5 : 1,
             brainsPlaced: 0,
-            fireRange: difficulty === "BOSS" ? 6 : 2,
+            fireRange: isBoss ? 6 : 2,
             alive: true,
-            name: difficulty === "BOSS" ? "THE BOSS" : (character.name + " (CPU)"),
-            spriteFront: character.spriteFront,
-            spriteBack: character.spriteBack,
-            spriteAnim: character.spriteAnim,
+            name: isBoss ? "Cappuccino Clownino" : (character.name + " (CPU)"),
+            spriteFront: isBoss ? "boss_cappuccino" : character.spriteFront,
+            spriteBack: isBoss ? "boss_cappuccino" : character.spriteBack,
+            spriteAnim: isBoss ? undefined : character.spriteAnim,
             facing: "down",
             isMoving: false,
             isAI: true,
@@ -53,11 +54,11 @@ export function spawnAIPlayer(playerIndex, characterIndex, difficulty) {
     ]);
 
     if (difficulty === "BOSS") {
-        ai.use(color(255, 100, 100)); // Red Tint
+        // ai.use(color(255, 100, 100)); // REMOVED TINT for Cappuccino
         ai.use(scale(0.35)); // Larger (base was 0.25)
     }
 
-    ai.play("idle_down");
+    if (!isBoss) ai.play("idle_down");
 
     // Name tag
     const aiNameTag = add([
@@ -419,7 +420,9 @@ function setFacing(ai, dir) {
     if (ai.facing !== dir || !ai.isMoving) {
         ai.facing = dir;
         ai.isMoving = true;
-        ai.play("walk_" + dir);
+        if (ai.difficulty !== "BOSS") {
+            ai.play("walk_" + dir);
+        }
     }
 }
 

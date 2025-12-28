@@ -322,7 +322,11 @@ export function initGameScene() {
 
         function startBossBattle() {
             gameState.isBossPhase = true;
-            play("callout_0"); // Alarm sound?
+
+            // Audio Switch
+            if (bgMusic && bgMusic.stop) bgMusic.stop();
+            play("boss_voice", { volume: 1.0 });
+            bgMusic = play("boss_battle", { loop: true, volume: 0.6 });
 
             // 1. Announce
             const bossText = add([
