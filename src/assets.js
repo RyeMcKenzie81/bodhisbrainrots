@@ -17,6 +17,7 @@ export function loadAssets() {
     loadSprite("powerup_bomb", "sprites/powerupbomb.png");
     loadSprite("powerup_fire", "sprites/powerupfire.png");
     loadSprite("powerup_speed", "sprites/powerupspeed.png");
+    loadSprite("powerup_67", "sprites/powerup_67.png");
     loadSound("music", "sprites/music.mp3");
     loadSound("boss_battle", "sprites/boss_battle.mp3");
     loadSound("boss_voice", "sprites/boss_voice.mp3");

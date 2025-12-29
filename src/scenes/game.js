@@ -198,6 +198,9 @@ export function initGameScene() {
                     // Random curse effect!
                     applyCurse(player);
                     break;
+                case "67":
+                    triggerRingExplosion(powerup.pos);
+                    break;
             }
             destroy(powerup);
 
@@ -303,6 +306,63 @@ export function initGameScene() {
             });
 
             player.glowCancel = () => curseUpdate.cancel();
+        }
+
+        // Trigger Ring Explosion for Powerup 67
+        function triggerRingExplosion(centerPos) {
+            const cx = Math.round((centerPos.x - TILE_SIZE / 2) / TILE_SIZE);
+            const cy = Math.round((centerPos.y - TILE_SIZE / 2) / TILE_SIZE);
+
+            // Visual Text
+            add([
+                text("67", { size: 32 }),
+                pos(centerPos),
+                anchor("center"),
+                color(255, 215, 0),
+                z(100),
+                lifespan(1, { fade: 1 }),
+                move(UP, 50),
+            ]);
+
+            play("bomb2", { volume: 0.8 });
+
+            const rMax = 4;
+            for (let x = -rMax; x <= rMax; x++) {
+                for (let y = -rMax; y <= rMax; y++) {
+                    const dist = Math.sqrt(x * x + y * y);
+                    // Ring radius 3 to 4.5
+                    if (dist >= 3 && dist <= 4.5) {
+                        const tx = cx + x;
+                        const ty = cy + y;
+                        const exPos = vec2(tx * TILE_SIZE + TILE_SIZE / 2, ty * TILE_SIZE + TILE_SIZE / 2);
+
+                        // Visual - Harmless explosion
+                        const ex = add([
+                            sprite("brainboom"),
+                            pos(exPos),
+                            anchor("center"),
+                            scale(0.06),
+                            opacity(1),
+                            z(15),
+                            "visual_explosion"
+                        ]);
+
+                        ex.onUpdate(() => {
+                            ex.opacity -= dt() * 1.5;
+                            if (ex.opacity <= 0) destroy(ex);
+                        });
+
+                        // Destroy Blocks in the ring
+                        get("block").forEach(b => {
+                            if (Math.abs(b.pos.x - exPos.x) < 2 && Math.abs(b.pos.y - exPos.y) < 2) {
+                                destroy(b);
+                            }
+                        });
+                        // Destroy Woodblocks too if they are just tagged "block".
+                        // (environment.js line 163 tags them "block")
+                    }
+                }
+            }
         }
 
         // Check for winner

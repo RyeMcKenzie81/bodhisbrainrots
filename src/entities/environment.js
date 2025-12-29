@@ -21,6 +21,7 @@ export function spawnPowerup(gridX, gridY) {
         { type: "speed", sprite: "powerup_speed", weight: 25 },
         { type: "kick", sprite: null, weight: 10 },   // No sprite - use text
         { type: "skull", sprite: null, weight: 5 },   // No sprite - use text (curse!)
+        { type: "67", sprite: "powerup_67", weight: 2 },      // Rare (2%) - "67" Ring Explosion
     ];
 
     // Weighted random selection
@@ -64,10 +65,12 @@ export function spawnPowerup(gridX, gridY) {
         const puColors = {
             kick: rgb(100, 200, 255),   // Cyan for kick
             skull: rgb(150, 50, 200),   // Purple for skull (danger!)
+            "67": rgb(255, 215, 0),     // Gold for 67
         };
         const puLabels = {
             kick: "KICK",
             skull: "SKULL",
+            "67": "67",
         };
 
         // We create a container for text powerups
