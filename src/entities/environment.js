@@ -37,10 +37,16 @@ export function spawnPowerup(gridX, gridY) {
     }
 
     // Adjust base size assumption: standard powerups are 500x500, but 67 is 64x64
+    // Also applying a boost (0.8 vs 0.63) to 67 because it looks small visually
     let sourceSize = 500;
-    if (powerupType.type === "67") sourceSize = 64;
+    let visualFactor = 0.63;
 
-    const baseScale = (TILE_SIZE * 0.63) / sourceSize;
+    if (powerupType.type === "67") {
+        sourceSize = 64;
+        visualFactor = 0.85; // Boost size to match visual weight of others
+    }
+
+    const baseScale = (TILE_SIZE * visualFactor) / sourceSize;
     const baseX = gridX * TILE_SIZE + TILE_SIZE / 2;
     const baseY = gridY * TILE_SIZE + TILE_SIZE / 2;
 

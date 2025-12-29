@@ -457,7 +457,7 @@ export function initGameScene() {
                     sprite("powerup_67"),
                     pos(player.pos.x + 64, player.pos.y), // Spawn slightly to the right
                     anchor("center"),
-                    scale((TILE_SIZE * 0.63) / 64), // Adjusted for 64x64 sprite
+                    scale((TILE_SIZE * 0.85) / 64), // Adjusted for 64x64 sprite with visual boost
                     area({ scale: 0.7 }),
                     z(10),
                     "powerup",
