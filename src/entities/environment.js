@@ -135,7 +135,7 @@ export function createLevel() {
                     anchor("center"),
                     scale((TILE_SIZE * 0.85) / 400),
                     color(120, 120, 140), // Slightly blue-ish tint to distinguish from pillars
-                    area(),
+                    area({ scale: 0.9 }),
                     body({ isStatic: true }),
                     z(y),
                     "wall",
