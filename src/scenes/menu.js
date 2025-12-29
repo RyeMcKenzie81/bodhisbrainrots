@@ -1128,7 +1128,7 @@ export function initMenuScenes() {
 
             const charSprite = add([
                 sprite(p.spriteFront),
-                pos(x, y - 10),
+                pos(x, y - 20), // Moved Sprite UP to make room for text
                 anchor("center"),
                 // scale(0.12 * (p.scale || 1)),
                 scale(1),
@@ -1144,16 +1144,21 @@ export function initMenuScenes() {
             charSprites.push(charSprite);
 
             add([
-                rect(boxSize - 10, 22, { radius: 2 }),
-                pos(x, y + 55),
+                rect(boxSize - 10, 36, { radius: 2 }), // Taller background for wrapped text
+                pos(x, y + 45), // Adjusted Y
                 anchor("center"),
                 color(isTaken ? rgb(40, 40, 50) : rgb(20, 20, 30)),
                 z(1),
             ]);
 
             add([
-                text(p.name, { size: 11 }),
-                pos(x, y + 55),
+                text(p.name, {
+                    size: 11,
+                    width: boxSize - 12, // Force wrapping inside box
+                    align: "center",
+                    lineSpacing: 4, // Better readability
+                }),
+                pos(x, y + 45),
                 anchor("center"),
                 color(isTaken ? rgb(100, 100, 100) : rgb(255, 255, 255)),
                 z(2),
