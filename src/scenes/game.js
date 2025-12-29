@@ -324,6 +324,7 @@ export function initGameScene() {
                 move(UP, 50),
             ]);
 
+            play("callout_67", { volume: 1.0 });
             play("bomb2", { volume: 0.8 });
 
             const rMax = 4;

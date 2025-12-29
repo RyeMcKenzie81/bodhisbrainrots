@@ -57,6 +57,7 @@ export function loadAssets() {
     loadSound("callout_3", "sprites/callout_strawberry.mp3");
     loadSound("callout_4", "sprites/callout_cappucino.mp3");
     loadSound("callout_5", "sprites/zippycallout.mp3");
+    loadSound("callout_67", "sprites/callout_67.mp3");
 
     // New Audio Polish sounds
     loadSound("kick_sound", "sprites/kick.mp3");
