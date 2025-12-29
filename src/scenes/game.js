@@ -448,6 +448,25 @@ export function initGameScene() {
             }
         });
 
+        // DEBUG CHEAT: Press '6' to drop Powerup 67
+        onKeyPress("6", () => {
+            const player = gameState.players.find(p => p.playerIndex === 0 && p.alive);
+            if (player) {
+                add([
+                    sprite("powerup_67"),
+                    pos(player.pos.x + 64, player.pos.y), // Spawn slightly to the right
+                    anchor("center"),
+                    scale((TILE_SIZE * 0.63) / 500),
+                    area({ scale: 0.7 }),
+                    z(10),
+                    "powerup",
+                    {
+                        powerupType: "67",
+                    }
+                ]);
+            }
+        });
+
         // Create level and spawn players based on selection
         createLevel();
         let localPlayer = null;
