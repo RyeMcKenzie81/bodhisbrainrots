@@ -1137,7 +1137,7 @@ export function initMenuScenes() {
             ]);
             // Auto-scale to fit box (Grid Icon)
             if (charSprite.width) {
-                const fitSize = 80;
+                const fitSize = 60; // Reduced from 80 to fit with text box
                 // Allow some distinct sizes? No, uniformity is safer for "Too Big/Small" complaints
                 charSprite.scale = vec2(Math.min(fitSize / charSprite.width, fitSize / charSprite.height));
             }
