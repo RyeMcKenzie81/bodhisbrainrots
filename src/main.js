@@ -238,7 +238,7 @@ onDraw(() => {
 
         // Title
         drawText({
-            text: "BoDawg's Brainrots",
+            text: "BoDawg's Brainrots \n", // Space+Newline padding to prevent descender clipping
             pos: vec2(width() / 2, height() / 2 - 60),
             anchor: "center",
             size: 48,
