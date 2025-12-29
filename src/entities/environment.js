@@ -127,10 +127,11 @@ export function createLevel() {
             // Walls on edges and grid pattern
             if (x === 0 || x === GRID_WIDTH - 1 || y === 0 || y === GRID_HEIGHT - 1) {
                 add([
-                    rect(TILE_SIZE - 2, TILE_SIZE - 2, { radius: 4 }),
+                    sprite("diamondblock"),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    color(80, 80, 100),
+                    scale((TILE_SIZE * 0.85) / 400),
+                    color(120, 120, 140), // Slightly blue-ish tint to distinguish from pillars
                     area(),
                     body({ isStatic: true }),
                     z(y),
