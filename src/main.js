@@ -238,8 +238,8 @@ onDraw(() => {
 
         // Title
         drawText({
-            text: "BoDawg's Brainrots \n ", // Extra space+newline to ensure descenders aren't clipped
-            pos: vec2(width() / 2, height() / 2 - 60),
+            text: "\nBoDawg's Brainrots\n", // Prepend/Append newline for max vertical buffer
+            pos: vec2(width() / 2, height() / 2 - 84), // Shift UP to compensate for top newline
             anchor: "center",
             size: 48,
             font: "monospace", // Or default

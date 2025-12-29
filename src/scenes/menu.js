@@ -1128,7 +1128,7 @@ export function initMenuScenes() {
 
             const charSprite = add([
                 sprite(p.spriteFront),
-                pos(x, y - 25), // Moved Sprite UP further to fit text
+                pos(x, y - 30), // Sprite shifted UP to clear spacing for text
                 anchor("center"),
                 // scale(0.12 * (p.scale || 1)),
                 scale(1),
@@ -1145,7 +1145,7 @@ export function initMenuScenes() {
 
             add([
                 rect(boxSize - 10, 36, { radius: 2 }), // Taller background for wrapped text
-                pos(x, y + 42), // Adjusted Y to fit inside main box (Bottom = 42+18=60)
+                pos(x, y + 38), // Shifted UP to y+38. Bottom = 38+18 = 56. Clears 60px card edge + 4px outline.
                 anchor("center"),
                 color(isTaken ? rgb(40, 40, 50) : rgb(20, 20, 30)),
                 z(1),
@@ -1158,7 +1158,7 @@ export function initMenuScenes() {
                     align: "center",
                     lineSpacing: 4, // Better readability
                 }),
-                pos(x, y + 42),
+                pos(x, y + 38),
                 anchor("center"),
                 color(isTaken ? rgb(100, 100, 100) : rgb(255, 255, 255)),
                 z(2),
@@ -1207,18 +1207,19 @@ export function initMenuScenes() {
             scale(0.45 * (PLAYERS[selectedChar].scale || 1)), // Much bigger
         ]);
 
-        add([
-            rect(200, 30, { radius: 4 }),
-            pos(width() / 2, 620),
-            anchor("center"),
-            color(playerColors[currentPlayer]),
-        ]);
+        // REMOVED: Stray box with no text
+        // add([
+        //     rect(200, 30, { radius: 4 }),
+        //     pos(width() / 2, 620),
+        //     anchor("center"),
+        //     color(playerColors[currentPlayer]),
+        // ]);
 
         const previewName = add([
             text(PLAYERS[selectedChar].name, { size: 24 }),
             pos(width() * 0.25, 600),
             anchor("center"),
-            color(0, 0, 0),
+            color(255, 255, 255), // Changed to White for readability
         ]);
 
         function updateSelection() {
