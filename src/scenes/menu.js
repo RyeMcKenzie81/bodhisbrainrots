@@ -1128,7 +1128,7 @@ export function initMenuScenes() {
 
             const charSprite = add([
                 sprite(p.spriteFront),
-                pos(x, y - 30), // Sprite shifted UP to clear spacing for text
+                pos(x, y - 20), // Shifted down to y-20. Fits 80px sprite exactly between top (-60) and text box (+20)
                 anchor("center"),
                 // scale(0.12 * (p.scale || 1)),
                 scale(1),
@@ -1137,7 +1137,7 @@ export function initMenuScenes() {
             ]);
             // Auto-scale to fit box (Grid Icon)
             if (charSprite.width) {
-                const fitSize = 60; // Reduced from 80 to fit with text box
+                const fitSize = 80; // Reverted to 80.
                 // Allow some distinct sizes? No, uniformity is safer for "Too Big/Small" complaints
                 charSprite.scale = vec2(Math.min(fitSize / charSprite.width, fitSize / charSprite.height));
             }
