@@ -118,11 +118,16 @@ export function spawnCrocodilo(startPos) {
             }
 
             if (boss.timer <= 0) {
+                console.log("DEBUG: Starting Bomb Attack Sequence");
                 boss.play("attack_open");
                 wait(0.2, () => {
+                    console.log("DEBUG: Playing Sound");
                     play("rocket_shoot");
+
+                    console.log("DEBUG: Spawning Projectile START");
                     // Use clone() to prevent shared reference bugs
                     spawnProjectile(boss.pos.clone(), boss.targetLockedPos ? boss.targetLockedPos.clone() : boss.pos.add(vec2(0, 100)));
+                    console.log("DEBUG: Spawning Projectile END");
 
                     if (reticle) {
                         destroy(reticle);
@@ -130,6 +135,7 @@ export function spawnCrocodilo(startPos) {
                     }
 
                     wait(0.5, () => {
+                        console.log("DEBUG: Attack Finished, resetting");
                         boss.play("fly_down");
                         boss.state = "idle";
                         boss.timer = 1.0;
