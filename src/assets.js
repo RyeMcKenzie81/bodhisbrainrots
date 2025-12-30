@@ -163,4 +163,39 @@ export function loadAssets() {
             idle_right: { from: 12, to: 12 },
         },
     });
+
+    // BOSS: Crocodilo Bombardino
+    loadSprite("boss_crocodilo", "sprites/boss_crocodilo.png", {
+        sliceX: 4, sliceY: 4,
+        anims: {
+            fly_down: { from: 0, to: 3, loop: true, speed: 10 },
+            fly_up: { from: 4, to: 7, loop: true, speed: 10 },
+            fly_side: { from: 8, to: 11, loop: true, speed: 10 },
+            attack_open: { from: 12, to: 15, loop: false, speed: 10 },
+        }
+    });
+
+    loadSprite("boss_minion", "sprites/boss_minion.png", {
+        sliceX: 4, sliceY: 3,
+        anims: {
+            walk_down: { from: 0, to: 3, loop: true, speed: 8 },
+            walk_up: { from: 4, to: 7, loop: true, speed: 8 },
+            walk_side: { from: 8, to: 11, loop: true, speed: 8 },
+        }
+    });
+
+    loadSprite("boss_items", "sprites/boss_items.png", {
+        sliceX: 4, sliceY: 2,
+        anims: {
+            egg_crack: { from: 0, to: 3, loop: true, speed: 5 },
+            missile_fly: { from: 4, to: 7, loop: true, speed: 12 },
+        }
+    });
+
+    loadSound("boss_hovering", "sprites/boss_hovering.mp3");
+    loadSound("egg_crack", "sprites/egg_crack.mp3");
+    loadSound("rocket_shoot", "sprites/rocket_shoot.mp3");
+    loadSound("egg_lay", "sprites/egg_lay.mp3");
+    loadSound("callout_boss", "sprites/callout_boss.mp3");
+    loadSound("callout_minion", "sprites/callout_minion.mp3");
 }

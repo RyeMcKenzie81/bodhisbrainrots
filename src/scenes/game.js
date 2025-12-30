@@ -3,6 +3,7 @@ import { gameState, gameConfig } from "../state.js";
 import { spawnPlayer } from "../entities/player.js";
 import { spawnAIPlayer } from "../entities/ai.js";
 import { spawnPowerup, createLevel } from "../entities/environment.js";
+import { spawnCrocodilo } from "../entities/bossCrocodile.js";
 
 export function initGameScene() {
     scene("game", () => {
@@ -466,6 +467,12 @@ export function initGameScene() {
                     }
                 ]);
             }
+        });
+
+        // DEBUG CHEAT: Press 'c' to spawn Crocodilo Bombardino
+        onKeyPress("c", () => {
+            // Spawn at center of screen
+            spawnCrocodilo(vec2(width() / 2, height() / 2));
         });
 
         // Create level and spawn players based on selection

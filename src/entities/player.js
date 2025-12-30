@@ -34,6 +34,8 @@ export function spawnPlayer(playerIndex, characterIndex) {
             canKick: false,  // For kick powerup
             cursed: false,   // For skull curse
             curseType: null,
+            curseType: null,
+            frozen: false, // New Status Effect
         },
     ]);
 
@@ -127,7 +129,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     // Up
     setupControl("up", keys.up, "up",
         () => { // On Press
-            if (player.alive && gameState.gameStarted) {
+            if (player.alive && !player.frozen && gameState.gameStarted) {
                 player.move(0, -player.speed);
                 snapToLane("x");
                 if (player.facing !== "up" || !player.isMoving) {
@@ -149,7 +151,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     // Down
     setupControl("down", keys.down, "down",
         () => {
-            if (player.alive && gameState.gameStarted) {
+            if (player.alive && !player.frozen && gameState.gameStarted) {
                 player.move(0, player.speed);
                 snapToLane("x");
                 if (player.facing !== "down" || !player.isMoving) {
@@ -171,7 +173,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     // Left
     setupControl("left", keys.left, "left",
         () => {
-            if (player.alive && gameState.gameStarted) {
+            if (player.alive && !player.frozen && gameState.gameStarted) {
                 player.move(-player.speed, 0);
                 snapToLane("y");
                 if (player.facing !== "left" || !player.isMoving) {
@@ -193,7 +195,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
     // Right
     setupControl("right", keys.right, "right",
         () => {
-            if (player.alive && gameState.gameStarted) {
+            if (player.alive && !player.frozen && gameState.gameStarted) {
                 player.move(player.speed, 0);
                 snapToLane("y");
                 if (player.facing !== "right" || !player.isMoving) {
@@ -256,7 +258,7 @@ export function spawnPlayer(playerIndex, characterIndex) {
 
     // Brain placement
     player.dropBomb = () => {
-        if (player.alive && gameState.gameStarted && player.brainsPlaced < player.brainCount) {
+        if (player.alive && !player.frozen && gameState.gameStarted && player.brainsPlaced < player.brainCount) {
             placeBrain(player);
         }
     };
