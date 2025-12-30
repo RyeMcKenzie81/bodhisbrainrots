@@ -206,21 +206,9 @@ export function spawnCrocodilo(startPos) {
             }
         });
 
-        proj.onCollide("wall", () => {
-            // Explode on wall
-            // Explode on wall
-            add([
-                sprite("brainboom"),
-                pos(proj.pos),
-                anchor("center"),
-                scale(0.07),
-                lifespan(0.5),
-                "explosion",
-                area({ scale: 0.5 }),
-            ]);
-            play("bomb1");
-            proj.destroy();
-        });
+        // Missiles are "flying" so they ignore walls/blocks
+        // They only explode on players or timeout (lifespan)
+        // proj.onCollide("wall", () => { ... });
     }
 
     // Hurt Logic
