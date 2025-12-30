@@ -35,9 +35,9 @@ export function spawnEgg(startPos) {
         }
     });
 
-    // Damage Logic
+    // Damage Logic (Event Handler: Visuals Only outside of hurt())
+    // Note: hurt() triggers "hurt". DO NOT call hurt() inside here.
     egg.on("hurt", () => {
-        egg.hurt(1);
         // Flash Red
         egg.color = rgb(255, 100, 100);
         wait(0.1, () => egg.color = rgb(255, 255, 255));
@@ -49,6 +49,6 @@ export function spawnEgg(startPos) {
     });
 
     egg.onCollide("explosion", () => {
-        egg.trigger("hurt");
+        egg.hurt(1); // Trigger damage here
     });
 }

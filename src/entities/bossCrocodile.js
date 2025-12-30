@@ -82,7 +82,7 @@ export function spawnCrocodilo(startPos) {
                             opacity(0.5),
                             pos(boss.targetLockedPos),
                             anchor("center"),
-                            z(5), // On ground
+                            z(50), // On ground, above tiles
                             "reticle"
                         ]);
                     }
