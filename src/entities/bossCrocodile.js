@@ -37,18 +37,38 @@ export function spawnCrocodilo(startPos) {
         hoverSound.paused = true;
     });
 
-    // Draw Laser in onDraw (Immediate Mode)
+    // Draw Target Circle in onDraw
     boss.onDraw(() => {
         if (boss.state === "attack_bomb" && boss.targetLockedPos) {
-            // Pulse opacity
+            // Draw Bullseye at target position
+            // We must draw relative to the boss because onDraw transforms by boss.pos??
+            // standard onDraw is relative to entity.
+            // So we must subtract boss.pos from targetLockedPos
+            const relPos = boss.targetLockedPos.sub(boss.pos);
+
             const op = 0.5 + Math.sin(time() * 20) * 0.2;
-            drawLine({
-                p1: vec2(0, 0), // Relative to boss center
-                p2: boss.targetLockedPos.sub(boss.pos), // Relative vector
-                width: 4,
+
+            // Outer Circle
+            drawCircle({
+                pos: relPos,
+                radius: 30 + Math.sin(time() * 10) * 5,
                 color: rgb(255, 0, 0),
                 opacity: op,
+                fill: false,
+                width: 4,
             });
+
+            // Inner Dot
+            drawCircle({
+                pos: relPos,
+                radius: 5,
+                color: rgb(255, 0, 0),
+                opacity: 0.8,
+                fill: true,
+            });
+
+            // Connecting line (optional, maybe skip to be safe/clean)
+            // simplified: just the bullseye
         }
     });
 
