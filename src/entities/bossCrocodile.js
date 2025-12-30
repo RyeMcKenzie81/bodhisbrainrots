@@ -124,7 +124,8 @@ export function spawnCrocodilo(startPos) {
                 boss.play("attack_open"); // Open hatch
                 wait(0.2, () => {
                     play("rocket_shoot");
-                    spawnProjectile(boss.pos, boss.targetLockedPos || boss.pos.add(0, 100));
+                    // Use clone() to prevent shared reference bugs
+                    spawnProjectile(boss.pos.clone(), boss.targetLockedPos ? boss.targetLockedPos.clone() : boss.pos.add(vec2(0, 100)));
 
                     wait(0.5, () => {
                         boss.play("fly_down");
@@ -153,13 +154,12 @@ export function spawnCrocodilo(startPos) {
     });
 
     // Projectile Helper
-    // Projectile Helper
     function spawnProjectile(startPos, targetPos) {
         const dir = targetPos.sub(startPos).unit();
 
         const proj = add([
             sprite("boss_items", { anim: "missile_fly" }),
-            pos(startPos),
+            pos(startPos), // startPos is already a clone now
             anchor("center"),
             area({ scale: 0.5 }),
             z(200), // Above Boss
