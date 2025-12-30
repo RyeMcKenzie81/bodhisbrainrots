@@ -37,6 +37,21 @@ export function spawnCrocodilo(startPos) {
         hoverSound.paused = true;
     });
 
+    // Draw Laser in onDraw (Immediate Mode)
+    boss.onDraw(() => {
+        if (boss.state === "attack_bomb" && boss.targetLockedPos) {
+            // Pulse opacity
+            const op = 0.5 + Math.sin(time() * 20) * 0.2;
+            drawLine({
+                p1: vec2(0, 0), // Relative to boss center
+                p2: boss.targetLockedPos.sub(boss.pos), // Relative vector
+                width: 4,
+                color: rgb(255, 0, 0),
+                opacity: op,
+            });
+        }
+    });
+
     boss.onUpdate(() => {
         // State Machine
         boss.timer -= dt();
@@ -44,7 +59,9 @@ export function spawnCrocodilo(startPos) {
         if (boss.state === "idle") {
             // Pick new action often
             if (boss.timer <= 0) {
-                const action = choose(["move", "move", "bomb", "egg", "egg"]);
+                // FORCE EGG TEST: Increase weight significantly or alternate
+                const action = choose(["move", "bomb", "egg", "egg"]);
+                console.log("Boss Action:", action); // DEBUG
 
                 if (action === "move") {
                     // Pick random spot within grid
@@ -66,6 +83,7 @@ export function spawnCrocodilo(startPos) {
                         boss.targetLockedPos = boss.targetPlayer.pos.clone();
                     }
                 } else if (action === "egg") {
+                    console.log("Boss State: ATTACK_EGG"); // DEBUG
                     boss.state = "attack_egg";
                     boss.timer = 0.5;
                 }
@@ -90,24 +108,15 @@ export function spawnCrocodilo(startPos) {
 
                 if (boss.pos.dist(boss.targetPos) < 10) {
                     boss.state = "idle";
-                    boss.timer = rand(0.5, 1.5);
+                    boss.timer = rand(0.5, 1.0);
                 }
             }
         }
         else if (boss.state === "attack_bomb") {
-            // Telegraph
-            if (boss.targetPlayer && boss.targetPlayer.alive) {
-                if (boss.timer > 0.3) boss.targetLockedPos = boss.targetPlayer.pos.clone();
-
-                // Draw Line
-                drawLine({
-                    p1: boss.pos,
-                    p2: boss.targetLockedPos,
-                    width: 4,
-                    color: rgb(255, 0, 0),
-                    opacity: 0.5 + Math.sin(time() * 20) * 0.2,
-                    z: 200,
-                });
+            // Logic handled in onDraw for lines
+            // Update target lock if still telegraphing
+            if (boss.targetPlayer && boss.targetPlayer.alive && boss.timer > 0.3) {
+                boss.targetLockedPos = boss.targetPlayer.pos.clone();
             }
 
             if (boss.timer <= 0) {
