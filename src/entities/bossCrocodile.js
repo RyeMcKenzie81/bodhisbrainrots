@@ -11,6 +11,7 @@ export function spawnCrocodilo(startPos) {
         sprite("boss_crocodilo"),
         pos(startPos),
         anchor("center"),
+        scale(2), // Double size "100% bigger"
         area({ scale: 0.6 }), // Smaller hitbox than visual
         // No body() means it ignores physics/walls
         health(10),
@@ -153,10 +154,10 @@ export function spawnCrocodilo(startPos) {
                     sprite("brainboom"), // Reusing explosion sprite
                     pos(proj.pos),
                     anchor("center"),
-                    scale(1),
+                    scale(0.07), // Match brain.js scale (source is huge)
                     lifespan(0.5),
                     "explosion", // Hurts player
-                    area(),
+                    area({ scale: 0.5 }),
                 ]);
                 play("bomb1");
                 proj.destroy();
@@ -165,14 +166,15 @@ export function spawnCrocodilo(startPos) {
 
         proj.onCollide("wall", () => {
             // Explode on wall
+            // Explode on wall
             add([
                 sprite("brainboom"),
                 pos(proj.pos),
                 anchor("center"),
-                scale(1),
+                scale(0.07),
                 lifespan(0.5),
                 "explosion",
-                area(),
+                area({ scale: 0.5 }),
             ]);
             play("bomb1");
             proj.destroy();
