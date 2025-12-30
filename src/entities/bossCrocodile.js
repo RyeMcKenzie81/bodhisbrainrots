@@ -37,40 +37,7 @@ export function spawnCrocodilo(startPos) {
         hoverSound.paused = true;
     });
 
-    // Draw Target Circle in onDraw
-    boss.onDraw(() => {
-        if (boss.state === "attack_bomb" && boss.targetLockedPos) {
-            // Draw Bullseye at target position
-            // We must draw relative to the boss because onDraw transforms by boss.pos??
-            // standard onDraw is relative to entity.
-            // So we must subtract boss.pos from targetLockedPos
-            const relPos = boss.targetLockedPos.sub(boss.pos);
-
-            const op = 0.5 + Math.sin(time() * 20) * 0.2;
-
-            // Outer Circle
-            drawCircle({
-                pos: relPos,
-                radius: 30 + Math.sin(time() * 10) * 5,
-                color: rgb(255, 0, 0),
-                opacity: op,
-                fill: false,
-                width: 4,
-            });
-
-            // Inner Dot
-            drawCircle({
-                pos: relPos,
-                radius: 5,
-                color: rgb(255, 0, 0),
-                opacity: 0.8,
-                fill: true,
-            });
-
-            // Connecting line (optional, maybe skip to be safe/clean)
-            // simplified: just the bullseye
-        }
-    });
+    let reticle = null;
 
     boss.onUpdate(() => {
         // State Machine
@@ -81,7 +48,6 @@ export function spawnCrocodilo(startPos) {
             if (boss.timer <= 0) {
                 // FORCE EGG TEST: Increase weight significantly or alternate
                 const action = choose(["move", "bomb", "egg", "egg"]);
-                console.log("Boss Action:", action); // DEBUG
 
                 if (action === "move") {
                     // Pick random spot within grid
@@ -94,16 +60,25 @@ export function spawnCrocodilo(startPos) {
                     boss.state = "moving";
                 } else if (action === "bomb") {
                     boss.state = "attack_bomb";
-                    boss.timer = 1.0; // Telegraph time
-
-                    // Lock Target
+                    boss.timer = 1.0;
                     const targets = gameState.players.filter(p => p.alive);
                     if (targets.length > 0) {
                         boss.targetPlayer = choose(targets);
                         boss.targetLockedPos = boss.targetPlayer.pos.clone();
+
+                        // Spawn Reticle Entity
+                        if (reticle) destroy(reticle);
+                        reticle = add([
+                            circle(30),
+                            color(255, 0, 0),
+                            opacity(0.5),
+                            pos(boss.targetLockedPos),
+                            anchor("center"),
+                            z(5), // On ground
+                            "reticle"
+                        ]);
                     }
                 } else if (action === "egg") {
-                    console.log("Boss State: ATTACK_EGG"); // DEBUG
                     boss.state = "attack_egg";
                     boss.timer = 0.5;
                 }
@@ -114,7 +89,6 @@ export function spawnCrocodilo(startPos) {
                 const dir = boss.targetPos.sub(boss.pos).unit();
                 boss.move(dir.scale(boss.speed));
 
-                // Animation
                 if (Math.abs(dir.x) > Math.abs(dir.y)) {
                     if (boss.curAnim() !== "fly_side") boss.play("fly_side");
                     boss.flipX = dir.x < 0;
@@ -133,19 +107,27 @@ export function spawnCrocodilo(startPos) {
             }
         }
         else if (boss.state === "attack_bomb") {
-            // Logic handled in onDraw for lines
-            // Update target lock if still telegraphing
+            // Update Reticle
             if (boss.targetPlayer && boss.targetPlayer.alive && boss.timer > 0.3) {
                 boss.targetLockedPos = boss.targetPlayer.pos.clone();
             }
+            if (reticle) {
+                reticle.pos = boss.targetLockedPos;
+                // Pulse effect
+                reticle.radius = 30 + Math.sin(time() * 20) * 5;
+            }
 
             if (boss.timer <= 0) {
-                // Drop Bomb!
-                boss.play("attack_open"); // Open hatch
+                boss.play("attack_open");
                 wait(0.2, () => {
                     play("rocket_shoot");
                     // Use clone() to prevent shared reference bugs
                     spawnProjectile(boss.pos.clone(), boss.targetLockedPos ? boss.targetLockedPos.clone() : boss.pos.add(vec2(0, 100)));
+
+                    if (reticle) {
+                        destroy(reticle);
+                        reticle = null;
+                    }
 
                     wait(0.5, () => {
                         boss.play("fly_down");
@@ -154,7 +136,7 @@ export function spawnCrocodilo(startPos) {
                         boss.targetPlayer = null;
                     });
                 });
-                boss.timer = 999; // Wait for callback
+                boss.timer = 999;
             }
         }
         else if (boss.state === "attack_egg") {
