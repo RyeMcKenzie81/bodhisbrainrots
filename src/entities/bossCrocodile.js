@@ -44,9 +44,7 @@ export function spawnCrocodilo(startPos) {
         if (boss.state === "idle") {
             // Pick new action often
             if (boss.timer <= 0) {
-                const action = choose(["move", "move", "bomb", "bomb", "egg"]);
-                // "Egg" should be rare or constrained?
-                // Actually if "egg" is chosen, switch state.
+                const action = choose(["move", "move", "bomb", "egg", "egg"]);
 
                 if (action === "move") {
                     // Pick random spot within grid
@@ -59,7 +57,14 @@ export function spawnCrocodilo(startPos) {
                     boss.state = "moving";
                 } else if (action === "bomb") {
                     boss.state = "attack_bomb";
-                    boss.timer = 0.5; // Delay before drop
+                    boss.timer = 1.0; // Telegraph time
+
+                    // Lock Target
+                    const targets = gameState.players.filter(p => p.alive);
+                    if (targets.length > 0) {
+                        boss.targetPlayer = choose(targets);
+                        boss.targetLockedPos = boss.targetPlayer.pos.clone();
+                    }
                 } else if (action === "egg") {
                     boss.state = "attack_egg";
                     boss.timer = 0.5;
@@ -90,18 +95,33 @@ export function spawnCrocodilo(startPos) {
             }
         }
         else if (boss.state === "attack_bomb") {
+            // Telegraph
+            if (boss.targetPlayer && boss.targetPlayer.alive) {
+                if (boss.timer > 0.3) boss.targetLockedPos = boss.targetPlayer.pos.clone();
+
+                // Draw Line
+                drawLine({
+                    p1: boss.pos,
+                    p2: boss.targetLockedPos,
+                    width: 4,
+                    color: rgb(255, 0, 0),
+                    opacity: 0.5 + Math.sin(time() * 20) * 0.2,
+                    z: 200,
+                });
+            }
+
             if (boss.timer <= 0) {
                 // Drop Bomb!
                 boss.play("attack_open"); // Open hatch
-                wait(0.3, () => {
+                wait(0.2, () => {
                     play("rocket_shoot");
-                    spawnProjectile(boss.pos);
+                    spawnProjectile(boss.pos, boss.targetLockedPos || boss.pos.add(0, 100));
 
-                    // Reset
                     wait(0.5, () => {
                         boss.play("fly_down");
                         boss.state = "idle";
                         boss.timer = 1.0;
+                        boss.targetPlayer = null;
                     });
                 });
                 boss.timer = 999; // Wait for callback
@@ -124,19 +144,16 @@ export function spawnCrocodilo(startPos) {
     });
 
     // Projectile Helper
-    function spawnProjectile(startPos) {
-        // Target random player
-        const targets = gameState.players.filter(p => p.alive);
-        if (targets.length === 0) return;
-        const target = choose(targets);
-
-        const dir = target.pos.sub(startPos).unit();
+    // Projectile Helper
+    function spawnProjectile(startPos, targetPos) {
+        const dir = targetPos.sub(startPos).unit();
 
         const proj = add([
             sprite("boss_items", { anim: "missile_fly" }),
             pos(startPos),
             anchor("center"),
             area({ scale: 0.5 }),
+            z(200), // Above Boss
             move(dir, 300), // Fast
             lifespan(3), // Dies if misses
             "boss_projectile",
