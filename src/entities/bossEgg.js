@@ -1,10 +1,10 @@
 import { spawnMinion } from "./minionCrocodile.js";
 
-export function spawnEgg(pos) {
+export function spawnEgg(startPos) {
     play("egg_lay");
     const egg = add([
         sprite("boss_items", { anim: "egg_crack" }),
-        pos(pos),
+        pos(startPos),
         anchor("center"),
         area(),
         body({ isStatic: true }), // Solid

@@ -1,9 +1,9 @@
 import { gameState } from "../state.js";
 
-export function spawnMinion(pos) {
+export function spawnMinion(startPos) {
     const minion = add([
         sprite("boss_minion"),
-        pos(pos),
+        pos(startPos),
         anchor("center"),
         scale(1),
         area({ scale: 0.6 }),

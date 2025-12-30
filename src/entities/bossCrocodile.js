@@ -2,14 +2,14 @@ import { TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_OFFSET_X, GRID_OFFSET_Y } from
 import { gameState } from "../state.js";
 import { spawnEgg } from "./bossEgg.js";
 
-export function spawnCrocodilo(pos) {
+export function spawnCrocodilo(startPos) {
     play("callout_boss");
     const hoverSound = play("boss_hovering", { loop: true, volume: 0.4 });
 
     // Boss Entity
     const boss = add([
         sprite("boss_crocodilo"),
-        pos(pos),
+        pos(startPos),
         anchor("center"),
         area({ scale: 0.6 }), // Smaller hitbox than visual
         // No body() means it ignores physics/walls
