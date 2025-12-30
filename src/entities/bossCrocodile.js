@@ -25,6 +25,7 @@ export function spawnCrocodilo(startPos) {
             timer: 0,
             targetPos: null,
             needsReset: false, // Flag to break stack recursion
+            isHurting: false, // I-Frame flag
         }
     ]);
 
@@ -131,10 +132,9 @@ export function spawnCrocodilo(startPos) {
                     console.log("DEBUG: Playing Sound");
                     play("rocket_shoot");
 
-                    console.log("DEBUG: Spawning Projectile START");
                     // Use clone() to prevent shared reference bugs
-                    spawnProjectile(boss.pos.clone(), boss.targetLockedPos ? boss.targetLockedPos.clone() : boss.pos.add(vec2(0, 100)));
-                    console.log("DEBUG: Spawning Projectile END");
+                    // Spawn slightly lower (y+50) to avoid instant wall collision if hovering
+                    spawnProjectile(boss.pos.add(vec2(0, 50)), boss.targetLockedPos ? boss.targetLockedPos.clone() : boss.pos.add(vec2(0, 100)));
 
                     if (reticle) {
                         destroy(reticle);
@@ -225,9 +225,15 @@ export function spawnCrocodilo(startPos) {
 
     // Hurt Logic
     boss.onCollide("explosion", () => {
+        if (boss.isHurting) return; // Prevent recursion/double-hits
+        boss.isHurting = true;
+
         boss.hurt(1);
         boss.color = rgb(255, 100, 100);
-        wait(0.1, () => boss.color = rgb(255, 255, 255));
+        wait(0.5, () => {
+            boss.color = rgb(255, 255, 255);
+            boss.isHurting = false;
+        });
     });
 
     boss.on("death", () => {
