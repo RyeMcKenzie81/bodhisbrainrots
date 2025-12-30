@@ -24,6 +24,7 @@ export function spawnCrocodilo(startPos) {
             state: "idle",
             timer: 0,
             targetPos: null,
+            needsReset: false, // Flag to break stack recursion
         }
     ]);
 
@@ -42,6 +43,12 @@ export function spawnCrocodilo(startPos) {
     boss.onUpdate(() => {
         // State Machine
         boss.timer -= dt();
+
+        // Handle deferred animation reset to prevent stack overflow
+        if (boss.needsReset) {
+            boss.play("fly_down");
+            boss.needsReset = false;
+        }
 
         if (boss.state === "idle") {
             // Pick new action often
@@ -135,8 +142,9 @@ export function spawnCrocodilo(startPos) {
                     }
 
                     wait(0.5, () => {
-                        console.log("DEBUG: Attack Finished, resetting");
-                        boss.play("fly_down");
+                        console.log("DEBUG: Attack Finished, scheduling reset");
+                        // Defer play() to next frame to break call stack
+                        boss.needsReset = true;
                         boss.state = "idle";
                         boss.timer = 1.0;
                         boss.targetPlayer = null;
