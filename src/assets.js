@@ -172,7 +172,7 @@ export function loadAssets() {
             fly_up: { from: 4, to: 7, loop: true, speed: 10 },
             fly_side: { from: 8, to: 8, loop: true, speed: 10 }, // Row 3 Left Frame (Clean Fly)
             attack_open: { from: 12, to: 15, loop: false, speed: 10 },
-            attack_egg: { from: 12, to: 12, loop: false, speed: 10 }, // Just open mouth, no missile
+            attack_egg: { from: 8, to: 8, loop: false, speed: 10 }, // Just fly normally, no hatch
         }
     });
 
