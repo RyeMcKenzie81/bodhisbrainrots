@@ -170,7 +170,7 @@ export function loadAssets() {
         anims: {
             fly_down: { from: 0, to: 3, loop: true, speed: 10 },
             fly_up: { from: 4, to: 7, loop: true, speed: 10 },
-            fly_side: { from: 8, to: 11, loop: true, speed: 10 },
+            fly_side: { from: 8, to: 8, loop: true, speed: 10 },
             attack_open: { from: 12, to: 15, loop: false, speed: 10 },
         }
     });
