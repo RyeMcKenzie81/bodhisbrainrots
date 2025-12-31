@@ -175,8 +175,8 @@ export function loadAssets() {
         }
     });
 
-    loadSprite("boss_minion", "sprites/boss_minion_v2.png", {
-        sliceX: 4, sliceY: 3,
+    loadSprite("boss_minion", "sprites/boss_minion_v3.png", {
+        sliceX: 4, sliceY: 4,
         anims: {
             walk_down: { from: 0, to: 3, loop: true, speed: 8 },
             walk_up: { from: 4, to: 7, loop: true, speed: 8 },

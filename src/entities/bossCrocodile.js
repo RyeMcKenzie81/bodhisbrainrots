@@ -181,7 +181,6 @@ export function spawnCrocodilo(startPos) {
             if (boss.timer <= 0) {
                 boss.play("attack_open");
                 wait(0.3, () => {
-                    console.log(`DEBUG: Dropping Egg at ${boss.pos.x}, ${boss.pos.y}`);
                     spawnEgg(boss.pos);
                     wait(0.5, () => {
                         boss.play("fly_down");
