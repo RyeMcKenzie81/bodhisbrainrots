@@ -185,11 +185,10 @@ export function loadAssets() {
         }
     });
 
-    loadSprite("boss_items", "sprites/boss_items.png", {
-        sliceX: 4, sliceY: 2,
+    loadSprite("boss_items", "sprites/boss_items_v2.png", {
+        sliceX: 2, sliceY: 2,
         anims: {
             egg_crack: { from: 0, to: 3, loop: true, speed: 5 },
-            missile_fly: { from: 4, to: 7, loop: true, speed: 12 },
         }
     });
 
