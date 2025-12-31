@@ -196,7 +196,7 @@ export function spawnCrocodilo(startPos) {
         }
         else if (boss.state === "attack_egg") {
             if (boss.timer <= 0) {
-                boss.play("attack_open");
+                boss.play("attack_egg");
                 wait(0.3, () => {
                     spawnEgg(boss.pos);
                     wait(0.5, () => {
