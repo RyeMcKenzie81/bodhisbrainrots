@@ -165,23 +165,23 @@ export function loadAssets() {
     });
 
     // BOSS: Crocodilo Bombardino
-    loadSprite("boss_crocodilo", "sprites/boss_crocodilo_v6.png", {
-        sliceX: 3, sliceY: 3,
+    loadSprite("boss_crocodilo", "sprites/boss_crocodilo_v5.png", {
+        sliceX: 4, sliceY: 4,
         anims: {
-            fly_down: { from: 0, to: 2, loop: true, speed: 10 },
-            fly_up: { from: 3, to: 5, loop: true, speed: 10 },
-            fly_side: { from: 6, to: 8, loop: true, speed: 10 },
-            attack_open: { from: 0, to: 2, loop: true, speed: 15 }, // Faster flap for attack
-            attack_egg: { from: 0, to: 2, loop: true, speed: 10 },
+            fly_down: { from: 0, to: 3, loop: true, speed: 10 },
+            fly_up: { from: 4, to: 7, loop: true, speed: 10 },
+            fly_side: { from: 8, to: 8, loop: true, speed: 10 }, // Row 3 Left Frame (Clean Fly)
+            attack_open: { from: 12, to: 15, loop: false, speed: 10 },
+            attack_egg: { from: 8, to: 8, loop: false, speed: 10 }, // Just fly normally, no hatch
         }
     });
 
-    loadSprite("boss_minion", "sprites/boss_minion_v5.png", {
-        sliceX: 4, sliceY: 4,
+    loadSprite("boss_minion", "sprites/boss_minion_v6.png", {
+        sliceX: 3, sliceY: 3,
         anims: {
-            walk_down: { from: 0, to: 3, loop: true, speed: 8 },
-            walk_up: { from: 4, to: 7, loop: true, speed: 8 },
-            walk_side: { from: 8, to: 11, loop: true, speed: 8 },
+            walk_down: { from: 0, to: 2, loop: true, speed: 8 },
+            walk_up: { from: 3, to: 5, loop: true, speed: 8 },
+            walk_side: { from: 6, to: 8, loop: true, speed: 8 },
         }
     });
 
