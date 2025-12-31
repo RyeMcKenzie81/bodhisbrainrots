@@ -6,6 +6,7 @@ export function spawnEgg(startPos) {
         sprite("boss_items", { anim: "egg_crack" }),
         pos(startPos),
         anchor("center"),
+        scale(1.5), // "At least size of regular character, maybe 50% bigger"
         area(),
         body({ isStatic: true }), // Solid
         health(2),
