@@ -27,8 +27,16 @@ export function spawnEgg(startPos) {
             for (let i = 0; i < num; i++) {
                 // Offset slightly so they don't stack perfectly
                 const offset = vec2(rand(-40, 40), rand(-40, 40));
-                // Ensure spawn on grid? Minions will resolve collision.
-                spawnMinion(egg.pos.add(offset));
+                let spawnPos = egg.pos.add(offset);
+
+                // Clamp to map bounds (approx 0 to width/height with padding)
+                // Width ~960, Height ~720
+                if (spawnPos.x < 32) spawnPos.x = 32;
+                if (spawnPos.x > 960 - 32) spawnPos.x = 960 - 32;
+                if (spawnPos.y < 32) spawnPos.y = 32;
+                if (spawnPos.y > 704 - 32) spawnPos.y = 704 - 32;
+
+                spawnMinion(spawnPos);
             }
 
             // Create "broken egg" debris?
