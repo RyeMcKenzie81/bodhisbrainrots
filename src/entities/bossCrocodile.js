@@ -94,11 +94,12 @@ export function spawnCrocodilo(startPos) {
                     // Fly to a corner first to drop egg
                     // Add TILE_SIZE/2 to center in the tile
                     const halfTile = TILE_SIZE / 2;
-                    // Use Index 2 and Index MAX-3 (Inner Corners) to be SAFE from walls
-                    const minX = GRID_OFFSET_X + TILE_SIZE * 2 + halfTile;
-                    const maxX = GRID_OFFSET_X + (GRID_WIDTH - 3) * TILE_SIZE + halfTile;
-                    const minY = GRID_OFFSET_Y + TILE_SIZE * 2 + halfTile;
-                    const maxY = GRID_OFFSET_Y + (GRID_HEIGHT - 3) * TILE_SIZE + halfTile;
+                    // User requested "pull them in one more"
+                    // Use Index 3 and Index MAX-4
+                    const minX = GRID_OFFSET_X + TILE_SIZE * 3 + halfTile;
+                    const maxX = GRID_OFFSET_X + (GRID_WIDTH - 4) * TILE_SIZE + halfTile;
+                    const minY = GRID_OFFSET_Y + TILE_SIZE * 3 + halfTile;
+                    const maxY = GRID_OFFSET_Y + (GRID_HEIGHT - 4) * TILE_SIZE + halfTile;
 
                     const corners = [
                         vec2(minX, minY), // Top Left
@@ -180,6 +181,7 @@ export function spawnCrocodilo(startPos) {
             if (boss.timer <= 0) {
                 boss.play("attack_open");
                 wait(0.3, () => {
+                    console.log(`DEBUG: Dropping Egg at ${boss.pos.x}, ${boss.pos.y}`);
                     spawnEgg(boss.pos);
                     wait(0.5, () => {
                         boss.play("fly_down");
