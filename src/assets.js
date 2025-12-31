@@ -165,7 +165,7 @@ export function loadAssets() {
     });
 
     // BOSS: Crocodilo Bombardino
-    loadSprite("boss_crocodilo", "sprites/boss_crocodilo.png", {
+    loadSprite("boss_crocodilo", "sprites/boss_crocodilo_v2.png", {
         sliceX: 4, sliceY: 4,
         anims: {
             fly_down: { from: 0, to: 3, loop: true, speed: 10 },
