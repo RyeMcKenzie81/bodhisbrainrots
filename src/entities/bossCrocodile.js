@@ -59,8 +59,11 @@ export function spawnCrocodilo(startPos) {
 
                 if (action === "move") {
                     // Pick random spot within grid
-                    const gridX = rand(1, GRID_WIDTH - 1);
-                    const gridY = rand(1, GRID_HEIGHT - 1);
+                    // Restrict bounds significantly to keep Boss on screen (Sprite is HUGE)
+                    // Grid Width is 15. Boss is ~8 tiles wide visually.
+                    // Range: 4 to 10 (Width-5)
+                    const gridX = rand(4, GRID_WIDTH - 5);
+                    const gridY = rand(2, GRID_HEIGHT - 3);
                     // Center on tile: Offset + (Index * 64) + 32
                     boss.targetPos = vec2(
                         GRID_OFFSET_X + gridX * TILE_SIZE + TILE_SIZE / 2,
