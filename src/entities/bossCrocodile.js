@@ -92,14 +92,19 @@ export function spawnCrocodilo(startPos) {
                     }
                 } else if (action === "egg") {
                     // Fly to a corner first to drop egg
-                    // Use Index 1 and Index MAX-2 for corners
-                    // Add TILE_SIZE/2 to center in the tile (Start Position is Index 1)
+                    // Add TILE_SIZE/2 to center in the tile
                     const halfTile = TILE_SIZE / 2;
+                    // Use Index 2 and Index MAX-3 (Inner Corners) to be SAFE from walls
+                    const minX = GRID_OFFSET_X + TILE_SIZE * 2 + halfTile;
+                    const maxX = GRID_OFFSET_X + (GRID_WIDTH - 3) * TILE_SIZE + halfTile;
+                    const minY = GRID_OFFSET_Y + TILE_SIZE * 2 + halfTile;
+                    const maxY = GRID_OFFSET_Y + (GRID_HEIGHT - 3) * TILE_SIZE + halfTile;
+
                     const corners = [
-                        vec2(GRID_OFFSET_X + TILE_SIZE + halfTile, GRID_OFFSET_Y + TILE_SIZE + halfTile), // Top Left (1,1)
-                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE + halfTile, GRID_OFFSET_Y + TILE_SIZE + halfTile), // Top Right
-                        vec2(GRID_OFFSET_X + TILE_SIZE + halfTile, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE + halfTile), // Bot Left
-                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE + halfTile, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE + halfTile), // Bot Right
+                        vec2(minX, minY), // Top Left
+                        vec2(maxX, minY), // Top Right
+                        vec2(minX, maxY), // Bot Left
+                        vec2(maxX, maxY), // Bot Right
                     ];
                     boss.targetPos = choose(corners);
                     boss.state = "moving_to_egg";
