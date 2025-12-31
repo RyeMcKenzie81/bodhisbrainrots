@@ -61,9 +61,10 @@ export function spawnCrocodilo(startPos) {
                     // Pick random spot within grid
                     const gridX = rand(1, GRID_WIDTH - 1);
                     const gridY = rand(1, GRID_HEIGHT - 1);
+                    // Center on tile: Offset + (Index * 64) + 32
                     boss.targetPos = vec2(
-                        GRID_OFFSET_X + gridX * TILE_SIZE,
-                        GRID_OFFSET_Y + gridY * TILE_SIZE
+                        GRID_OFFSET_X + gridX * TILE_SIZE + TILE_SIZE / 2,
+                        GRID_OFFSET_Y + gridY * TILE_SIZE + TILE_SIZE / 2
                     );
                     boss.state = "moving";
                 } else if (action === "bomb") {
@@ -88,11 +89,14 @@ export function spawnCrocodilo(startPos) {
                     }
                 } else if (action === "egg") {
                     // Fly to a corner first to drop egg
+                    // Use Index 1 and Index MAX-2 for corners
+                    // Add TILE_SIZE/2 to center in the tile (Start Position is Index 1)
+                    const halfTile = TILE_SIZE / 2;
                     const corners = [
-                        vec2(GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + TILE_SIZE), // Top Left
-                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE, GRID_OFFSET_Y + TILE_SIZE), // Top Right
-                        vec2(GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE), // Bot Left
-                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE), // Bot Right
+                        vec2(GRID_OFFSET_X + TILE_SIZE + halfTile, GRID_OFFSET_Y + TILE_SIZE + halfTile), // Top Left (1,1)
+                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE + halfTile, GRID_OFFSET_Y + TILE_SIZE + halfTile), // Top Right
+                        vec2(GRID_OFFSET_X + TILE_SIZE + halfTile, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE + halfTile), // Bot Left
+                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE + halfTile, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE + halfTile), // Bot Right
                     ];
                     boss.targetPos = choose(corners);
                     boss.state = "moving_to_egg";
