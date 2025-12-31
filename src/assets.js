@@ -170,12 +170,12 @@ export function loadAssets() {
         anims: {
             fly_down: { from: 0, to: 3, loop: true, speed: 10 },
             fly_up: { from: 4, to: 7, loop: true, speed: 10 },
-            fly_side: { from: 8, to: 8, loop: true, speed: 10 },
+            fly_side: { from: 12, to: 12, loop: true, speed: 10 }, // Bottom Left frame as requested
             attack_open: { from: 12, to: 15, loop: false, speed: 10 },
         }
     });
 
-    loadSprite("boss_minion", "sprites/boss_minion_v4.png", {
+    loadSprite("boss_minion", "sprites/boss_minion_v5.png", {
         sliceX: 4, sliceY: 4,
         anims: {
             walk_down: { from: 0, to: 3, loop: true, speed: 8 },
