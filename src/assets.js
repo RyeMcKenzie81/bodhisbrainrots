@@ -165,12 +165,12 @@ export function loadAssets() {
     });
 
     // BOSS: Crocodilo Bombardino
-    loadSprite("boss_crocodilo", "sprites/boss_crocodilo_v3.png", {
+    loadSprite("boss_crocodilo", "sprites/boss_crocodilo_v4.png", {
         sliceX: 4, sliceY: 4,
         anims: {
             fly_down: { from: 0, to: 3, loop: true, speed: 10 },
             fly_up: { from: 4, to: 7, loop: true, speed: 10 },
-            fly_side: { from: 12, to: 12, loop: true, speed: 10 }, // Bottom Left frame as requested
+            fly_side: { from: 12, to: 12, loop: true, speed: 10 }, // Bottom Left frame (Clean)
             attack_open: { from: 12, to: 15, loop: false, speed: 10 },
         }
     });
