@@ -55,7 +55,8 @@ export function spawnCrocodilo(startPos) {
             // Pick new action often
             if (boss.timer <= 0) {
                 // Determine action
-                const action = choose(["move", "bomb", "egg", "egg"]);
+                // Increased bomb weight: move (1), bomb (2), egg (2) -> 20%, 40%, 40%
+                const action = choose(["move", "bomb", "bomb", "egg", "egg"]);
 
                 if (action === "move") {
                     // Pick random spot within grid
@@ -72,7 +73,7 @@ export function spawnCrocodilo(startPos) {
                     boss.state = "moving";
                 } else if (action === "bomb") {
                     boss.state = "attack_bomb";
-                    boss.timer = 1.0;
+                    boss.timer = 0.5; // Faster reaction (was 1.0)
                     const targets = gameState.players.filter(p => p.alive);
                     if (targets.length > 0) {
                         boss.targetPlayer = choose(targets);
@@ -101,14 +102,38 @@ export function spawnCrocodilo(startPos) {
                     const minY = GRID_OFFSET_Y + TILE_SIZE * 3 + halfTile;
                     const maxY = GRID_OFFSET_Y + (GRID_HEIGHT - 4) * TILE_SIZE + halfTile;
 
-                    const corners = [
+                    const allCorners = [
                         vec2(minX, minY), // Top Left
                         vec2(maxX, minY), // Top Right
                         vec2(minX, maxY), // Bot Left
                         vec2(maxX, maxY), // Bot Right
                     ];
-                    boss.targetPos = choose(corners);
-                    boss.state = "moving_to_egg";
+
+                    // Filter corners that have blocks/walls
+                    // We check if any wall/block is close to the corner
+                    const obstacles = get("wall").concat(get("block"));
+
+                    const validCorners = allCorners.filter(corner => {
+                        // Check if any obstacle is within < half tile distance
+                        for (const obs of obstacles) {
+                            if (corner.dist(obs.pos) < halfTile) {
+                                return false; // Blocked
+                            }
+                        }
+                        return true;
+                    });
+
+                    if (validCorners.length > 0) {
+                        boss.targetPos = choose(validCorners);
+                        boss.state = "moving_to_egg";
+                    } else {
+                        // All corners blocked? Fallback to Move
+                        boss.state = "moving"; // Re-roll or just move
+                        boss.targetPos = vec2(
+                            GRID_OFFSET_X + (GRID_WIDTH / 2) * TILE_SIZE,
+                            GRID_OFFSET_Y + (GRID_HEIGHT / 2) * TILE_SIZE
+                        );
+                    }
                 }
             }
         }
@@ -137,7 +162,7 @@ export function spawnCrocodilo(startPos) {
                     } else {
                         // Just finished moving
                         boss.state = "idle";
-                        boss.timer = rand(0.5, 1.0);
+                        boss.timer = rand(0.3, 0.7); // Faster idle (was 0.5-1.0)
                     }
                 }
             }
@@ -171,7 +196,7 @@ export function spawnCrocodilo(startPos) {
                         // Defer play() to next frame to break call stack
                         boss.needsReset = true;
                         boss.state = "idle";
-                        boss.timer = 1.0;
+                        boss.timer = 0.5; // Faster recovery (was 1.0)
                         boss.targetPlayer = null;
                     });
                 });
