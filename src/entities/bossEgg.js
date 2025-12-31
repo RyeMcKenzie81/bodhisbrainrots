@@ -9,6 +9,7 @@ export function spawnEgg(startPos) {
         area(),
         body({ isStatic: true }), // Solid
         health(2),
+        z(10), // Above floor
         "egg",
         "enemy",
         "destructible", // Tag for easier destruction logic if needed

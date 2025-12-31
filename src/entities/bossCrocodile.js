@@ -54,7 +54,7 @@ export function spawnCrocodilo(startPos) {
         if (boss.state === "idle") {
             // Pick new action often
             if (boss.timer <= 0) {
-                // FORCE EGG TEST: Increase weight significantly or alternate
+                // Determine action
                 const action = choose(["move", "bomb", "egg", "egg"]);
 
                 if (action === "move") {
@@ -82,17 +82,24 @@ export function spawnCrocodilo(startPos) {
                             opacity(0.5),
                             pos(boss.targetLockedPos),
                             anchor("center"),
-                            z(50), // On ground, above tiles
+                            z(50), // On ground
                             "reticle"
                         ]);
                     }
                 } else if (action === "egg") {
-                    boss.state = "attack_egg";
-                    boss.timer = 0.5;
+                    // Fly to a corner first to drop egg
+                    const corners = [
+                        vec2(GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + TILE_SIZE), // Top Left
+                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE, GRID_OFFSET_Y + TILE_SIZE), // Top Right
+                        vec2(GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE), // Bot Left
+                        vec2(GRID_OFFSET_X + (GRID_WIDTH - 2) * TILE_SIZE, GRID_OFFSET_Y + (GRID_HEIGHT - 2) * TILE_SIZE), // Bot Right
+                    ];
+                    boss.targetPos = choose(corners);
+                    boss.state = "moving_to_egg";
                 }
             }
         }
-        else if (boss.state === "moving") {
+        else if (boss.state === "moving" || boss.state === "moving_to_egg") {
             if (boss.targetPos) {
                 const dir = boss.targetPos.sub(boss.pos).unit();
                 boss.move(dir.scale(boss.speed));
@@ -109,8 +116,15 @@ export function spawnCrocodilo(startPos) {
                 }
 
                 if (boss.pos.dist(boss.targetPos) < 10) {
-                    boss.state = "idle";
-                    boss.timer = rand(0.5, 1.0);
+                    if (boss.state === "moving_to_egg") {
+                        // Arrived at corner, drop egg
+                        boss.state = "attack_egg";
+                        boss.timer = 0.5;
+                    } else {
+                        // Just finished moving
+                        boss.state = "idle";
+                        boss.timer = rand(0.5, 1.0);
+                    }
                 }
             }
         }
@@ -126,10 +140,8 @@ export function spawnCrocodilo(startPos) {
             }
 
             if (boss.timer <= 0) {
-                console.log("DEBUG: Starting Bomb Attack Sequence");
                 boss.play("attack_open");
                 wait(0.2, () => {
-                    console.log("DEBUG: Playing Sound");
                     play("rocket_shoot");
 
                     // Use clone() to prevent shared reference bugs
@@ -142,7 +154,6 @@ export function spawnCrocodilo(startPos) {
                     }
 
                     wait(0.5, () => {
-                        console.log("DEBUG: Attack Finished, scheduling reset");
                         // Defer play() to next frame to break call stack
                         boss.needsReset = true;
                         boss.state = "idle";
@@ -160,8 +171,14 @@ export function spawnCrocodilo(startPos) {
                     spawnEgg(boss.pos);
                     wait(0.5, () => {
                         boss.play("fly_down");
-                        boss.state = "idle";
-                        boss.timer = 2.0; // Rest after egg
+                        // Move back to center-ish or just random spot?
+                        // "move back to the middle to fight"
+                        // Approximate middle
+                        boss.targetPos = vec2(
+                            GRID_OFFSET_X + (GRID_WIDTH / 2) * TILE_SIZE,
+                            GRID_OFFSET_Y + (GRID_HEIGHT / 2) * TILE_SIZE
+                        );
+                        boss.state = "moving"; // Go to middle
                     });
                 });
                 boss.timer = 999;
