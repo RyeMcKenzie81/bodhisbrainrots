@@ -57,6 +57,7 @@ export function spawnCrocodilo(startPos) {
                 // Determine action
                 // Increased bomb weight: move (1), bomb (2), egg (2) -> 20%, 40%, 40%
                 const action = choose(["move", "bomb", "bomb", "egg", "egg"]);
+                console.log("[BOSS] Chosen action:", action); // DEBUG
 
                 if (action === "move") {
                     // Pick random spot within grid
@@ -75,6 +76,7 @@ export function spawnCrocodilo(startPos) {
                     boss.state = "attack_bomb";
                     boss.timer = 0.5; // Faster reaction (was 1.0)
                     const targets = gameState.players.filter(p => p.alive);
+                    console.log("[BOSS] Bomb Targets:", targets.length); // DEBUG
                     if (targets.length > 0) {
                         boss.targetPlayer = choose(targets);
                         boss.targetLockedPos = boss.targetPlayer.pos.clone();
@@ -227,6 +229,7 @@ export function spawnCrocodilo(startPos) {
 
     // Projectile Helper
     function spawnProjectile(startPos, targetPos) {
+        console.log("[BOSS] Spawning Projectile!", startPos, targetPos); // DEBUG
         const dir = targetPos.sub(startPos).unit();
 
         const proj = add([
