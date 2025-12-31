@@ -200,5 +200,5 @@ export function loadAssets() {
     loadSound("callout_boss", "sprites/callout_boss.mp3");
     loadSound("callout_minion", "sprites/callout_minion.mp3");
 
-    loadSprite("boss_missile", "sprites/boss_missile_v2.png");
+    loadSprite("boss_missile", "sprites/boss_missile_v4.png");
 }
