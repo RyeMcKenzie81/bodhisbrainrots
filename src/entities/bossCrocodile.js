@@ -41,22 +41,6 @@ export function spawnCrocodilo(startPos) {
 
     let reticle = null;
 
-    // DEBUG TEXT (Always On)
-    boss.debugText = add([
-        text("", { size: 16 }),
-        pos(boss.pos.x, boss.pos.y - 100),
-        anchor("center"),
-        color(255, 0, 255),
-        z(900),
-        "boss_debug_text"
-    ]);
-    boss.onUpdate(() => {
-        if (boss.debugText) {
-            boss.debugText.pos = boss.pos.sub(0, 100);
-            boss.debugText.text = `STATE: ${boss.state}\nANIM: ${boss.curAnim()}\nFRAME: ${boss.frame}`;
-        }
-    });
-
     boss.onUpdate(() => {
         // State Machine
         boss.timer -= dt();
@@ -221,10 +205,10 @@ export function spawnCrocodilo(startPos) {
         const dir = targetPos.sub(startPos).unit();
 
         const proj = add([
-            sprite("boss_items", { anim: "missile_fly" }),
+            sprite("boss_missile"),
             pos(startPos), // startPos is already a clone now
             anchor("center"),
-            area({ scale: 0.5 }),
+            scale(1), // Scale is 1 for 32x32 sprite
             z(200), // Above Boss
             move(dir, 300), // Fast
             lifespan(3), // Dies if misses

@@ -199,4 +199,6 @@ export function loadAssets() {
     loadSound("egg_lay", "sprites/egg_lay.mp3");
     loadSound("callout_boss", "sprites/callout_boss.mp3");
     loadSound("callout_minion", "sprites/callout_minion.mp3");
+
+    loadSprite("boss_missile", "sprites/boss_missile.png");
 }
