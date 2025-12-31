@@ -209,6 +209,7 @@ export function spawnCrocodilo(startPos) {
             pos(startPos), // startPos is already a clone now
             anchor("center"),
             scale(1), // Scale is 1 for 32x32 sprite
+            area({ scale: 0.5 }),
             z(200), // Above Boss
             move(dir, 300), // Fast
             lifespan(3), // Dies if misses
