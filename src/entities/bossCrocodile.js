@@ -121,6 +121,7 @@ export function spawnCrocodilo(startPos) {
                     if (boss.curAnim() !== "fly_side") boss.play("fly_side");
                     boss.flipX = dir.x > 0;
                 } else {
+                    boss.flipX = false; // Reset flip for up/down
                     if (dir.y < 0) {
                         if (boss.curAnim() !== "fly_up") boss.play("fly_up");
                     } else {
