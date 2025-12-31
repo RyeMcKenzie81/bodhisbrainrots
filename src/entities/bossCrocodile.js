@@ -119,7 +119,7 @@ export function spawnCrocodilo(startPos) {
 
                 if (Math.abs(dir.x) > Math.abs(dir.y)) {
                     if (boss.curAnim() !== "fly_side") boss.play("fly_side");
-                    boss.flipX = dir.x < 0;
+                    boss.flipX = dir.x > 0;
                 } else {
                     if (dir.y < 0) {
                         if (boss.curAnim() !== "fly_up") boss.play("fly_up");

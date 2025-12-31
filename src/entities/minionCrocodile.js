@@ -5,7 +5,7 @@ export function spawnMinion(startPos) {
         sprite("boss_minion"),
         pos(startPos),
         anchor("center"),
-        scale(1),
+        scale(0.25),
         area({ scale: 0.6 }),
         body(),
         "minion",
