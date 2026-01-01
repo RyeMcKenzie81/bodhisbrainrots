@@ -1,4 +1,4 @@
-import { TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_OFFSET_X, GRID_OFFSET_Y } from "../constants.js";
+import { TILE_SIZE, GRID_WIDTH, GRID_HEIGHT } from "../constants.js";
 import { gameState } from "../state.js";
 import { spawnEgg } from "./bossEgg.js";
 
@@ -67,8 +67,8 @@ export function spawnCrocodilo(startPos) {
                     const gridY = rand(2, GRID_HEIGHT - 3);
                     // Center on tile: Offset + (Index * 64) + 32
                     boss.targetPos = vec2(
-                        GRID_OFFSET_X + gridX * TILE_SIZE + TILE_SIZE / 2,
-                        GRID_OFFSET_Y + gridY * TILE_SIZE + TILE_SIZE / 2
+                        gridX * TILE_SIZE + TILE_SIZE / 2,
+                        gridY * TILE_SIZE + TILE_SIZE / 2
                     );
                     boss.state = "moving";
                 } else if (action === "bomb") {
@@ -97,10 +97,11 @@ export function spawnCrocodilo(startPos) {
                     const halfTile = TILE_SIZE / 2;
                     // User requested "pull them in one more"
                     // Use Index 3 and Index MAX-4
-                    const minX = GRID_OFFSET_X + TILE_SIZE * 3 + halfTile;
-                    const maxX = GRID_OFFSET_X + (GRID_WIDTH - 4) * TILE_SIZE + halfTile;
-                    const minY = GRID_OFFSET_Y + TILE_SIZE * 3 + halfTile;
-                    const maxY = GRID_OFFSET_Y + (GRID_HEIGHT - 4) * TILE_SIZE + halfTile;
+                    // Use Index 3 and Index MAX-4
+                    const minX = TILE_SIZE * 3 + halfTile;
+                    const maxX = (GRID_WIDTH - 4) * TILE_SIZE + halfTile;
+                    const minY = TILE_SIZE * 3 + halfTile;
+                    const maxY = (GRID_HEIGHT - 4) * TILE_SIZE + halfTile;
 
                     const allCorners = [
                         vec2(minX, minY), // Top Left
@@ -215,8 +216,8 @@ export function spawnCrocodilo(startPos) {
                         // "move back to the middle to fight"
                         // Approximate middle
                         boss.targetPos = vec2(
-                            GRID_OFFSET_X + (GRID_WIDTH / 2) * TILE_SIZE,
-                            GRID_OFFSET_Y + (GRID_HEIGHT / 2) * TILE_SIZE
+                            (GRID_WIDTH / 2) * TILE_SIZE,
+                            (GRID_HEIGHT / 2) * TILE_SIZE
                         );
                         boss.state = "moving"; // Go to middle
                     });
