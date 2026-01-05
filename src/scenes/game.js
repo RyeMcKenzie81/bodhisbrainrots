@@ -6,7 +6,8 @@ import { spawnPowerup, createLevel } from "../entities/environment.js";
 import { spawnCrocodilo } from "../entities/bossCrocodile.js";
 
 export function initGameScene() {
-    scene("game", () => {
+    scene("game", (levelIdx = 1) => {
+        gameState.currentLevel = levelIdx;
         window.MOBILE_PORTRAIT_MODE = false;
         if (window.fitCanvas) window.fitCanvas();
         gameState.isBossPhase = false;
@@ -383,14 +384,32 @@ export function initGameScene() {
                     if (!gameState.bossSpawned) return;
 
                     const boss = gameState.players.find(p => p.difficulty === "BOSS");
-                    if (boss && boss.alive) return;
+                    // Also check for boss entity (Crocodilo is not in players array usually? Wait.
+                    // Clown IS in players array. Croc is NOT.
+                    // We need to check both.
+                    const crocCheck = get("boss");
+                    const bossEntity = boss || (crocCheck.length > 0 ? crocCheck[0] : null);
+
+                    if (bossEntity && (bossEntity.alive || bossEntity.hp > 0)) return;
+                    // Note: Croc might use .hp or .health instead of .alive flag? 
+                    // Croc uses health(). kaboom entities with health() usually don't have .alive property automatically?
+                    // We'll trust on "death" event handling, but here we just check existence/health.
+                    // If croc dead, it destroys itself.
+                    if (crocCheck.length > 0) return; // Croc still exists
+                    if (boss && boss.alive) return; // Clown still alive
 
                     gameState.bossDefeated = true;
                 }
 
                 wait(1, () => {
-                    if (bgMusic && bgMusic.stop) bgMusic.stop();
-                    go("gameover", alivePlayers[0]?.name || "Nobody");
+                    if (gameState.bossDefeated && gameState.currentLevel === 1) {
+                        // Level 1 Complete -> Go to Level 2
+                        go("game", 2);
+                    } else {
+                        // Game Over (Win or Loss)
+                        if (bgMusic && bgMusic.stop) bgMusic.stop();
+                        go("gameover", alivePlayers[0]?.name || "Nobody");
+                    }
                 });
             }
         }
@@ -428,10 +447,15 @@ export function initGameScene() {
                 .then(() => wait(1.5, () => destroy(bossText)));
 
             // 2. Spawn Boss
-            // Use Index 3 (Bottom Right) for spawn position.
-            // Use Character 0 (Brainy) but the AI logic will tint it Red.
             wait(2, () => {
-                spawnAIPlayer(3, 0, "BOSS");
+                if (gameState.currentLevel === 1) {
+                    // Level 1: Cappuccino Clownino (AI Boss)
+                    // Use Index 3 (Bottom Right) position
+                    spawnAIPlayer(3, 0, "BOSS");
+                } else {
+                    // Level 2: Crocodilo Bombardino (Giant Entity Boss)
+                    spawnCrocodilo(vec2(width() / 2, height() / 2));
+                }
                 gameState.bossSpawned = true;
             });
         }

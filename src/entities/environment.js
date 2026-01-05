@@ -1,5 +1,6 @@
 import { TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, START_POSITIONS } from "../constants.js";
 import { getGridPos } from "../utils/grid.js";
+import { gameState } from "../state.js";
 
 // Destroy a block and maybe spawn powerup
 export function destroyBlock(block) {
@@ -126,51 +127,74 @@ export function spawnPowerup(gridX, gridY) {
 
 // Create the grid level
 export function createLevel() {
+    // Determine Theme based on Level
+    // Level 1: Standard (Blue/Wood)
+    // Level 2: Tropical (Sand/Palm/Bamboo)
+    const isTropical = gameState.currentLevel === 2;
+
+    const assets = {
+        floorSprite: isTropical ? "floor_tropical" : null,
+        floorColor: isTropical ? null : rgb(40, 40, 60),
+        wallSprite: isTropical ? "wall_tropical" : "diamondblock",
+        blockSprite: isTropical ? "block_tropical" : "woodblock",
+        wallTint: isTropical ? rgb(255, 255, 255) : rgb(120, 120, 140),
+    };
+
     for (let x = 0; x < GRID_WIDTH; x++) {
         for (let y = 0; y < GRID_HEIGHT; y++) {
             // Floor tile
-            add([
-                rect(TILE_SIZE - 2, TILE_SIZE - 2, { radius: 2 }),
-                pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
-                anchor("center"),
-                color(40, 40, 60),
-                z(-1),
-            ]);
+            if (assets.floorSprite) {
+                add([
+                    sprite(assets.floorSprite),
+                    pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
+                    anchor("center"),
+                    scale(TILE_SIZE / 400), // 400x400 source -> 64x64
+                    z(-1),
+                ]);
+            } else {
+                add([
+                    rect(TILE_SIZE - 2, TILE_SIZE - 2, { radius: 2 }),
+                    pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
+                    anchor("center"),
+                    color(assets.floorColor),
+                    z(-1),
+                ]);
+            }
 
             // Walls on edges and grid pattern
             if (x === 0 || x === GRID_WIDTH - 1 || y === 0 || y === GRID_HEIGHT - 1) {
                 add([
-                    sprite("diamondblock"),
+                    sprite(assets.wallSprite),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
                     scale((TILE_SIZE * 0.85) / 400),
-                    color(120, 120, 140), // Slightly blue-ish tint to distinguish from pillars
+                    color(assets.wallTint),
                     area({ scale: 0.9 }),
                     body({ isStatic: true }),
                     z(y),
                     "wall",
                 ]);
             }
-            // Indestructible pillars (every other tile) - diamond blocks
+            // Indestructible pillars (every other tile)
             else if (x % 2 === 0 && y % 2 === 0) {
                 add([
-                    sprite("diamondblock"),
+                    sprite(assets.wallSprite),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    scale((TILE_SIZE * 0.85) / 400),  // 85% of tile, accounting for image padding
+                    scale((TILE_SIZE * 0.85) / 400),
                     area({ scale: 0.9 }),
                     body({ isStatic: true }),
                     z(y),  // Z-order based on Y position
                     "wall",
                 ]);
             }
-            // Destructible blocks (random, but not in corners where players spawn) - wood blocks
+            // Destructible blocks
             else if (!isSpawnZone(x, y) && Math.random() > 0.35) {
                 add([
-                    sprite("woodblock"),
+                    sprite(assets.blockSprite),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    scale((TILE_SIZE * 0.85) / 400),  // 85% of tile, accounting for image padding
+                    scale((TILE_SIZE * 0.85) / 400),
                     area({ scale: 0.9 }),
                     body({ isStatic: true }),
                     z(y),  // Z-order based on Y position

@@ -1,6 +1,10 @@
 export const gameState = {
     players: [],
     gameStarted: false,
+    bossDefeated: false,
+    bossSpawned: false,
+    isBossPhase: false,
+    currentLevel: 1, // 1 = Standard, 2 = Tropical
 };
 
 // Game configuration (set by selection screens)
