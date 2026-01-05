@@ -148,7 +148,7 @@ export function createLevel() {
                     sprite(assets.floorSprite),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    scale(TILE_SIZE / 400), // 400x400 source -> 64x64
+                    scale(isTropical ? 1.0 : TILE_SIZE / 400), // 400x400 source -> 64x64
                     z(-1),
                 ]);
             } else {
@@ -163,11 +163,15 @@ export function createLevel() {
 
             // Walls on edges and grid pattern
             if (x === 0 || x === GRID_WIDTH - 1 || y === 0 || y === GRID_HEIGHT - 1) {
+                // Determine scale based on sprite type
+                // Standard assets (diamondblock) are ~400px, Tropical are 64px
+                const s = isTropical ? 1.0 : (TILE_SIZE * 0.85) / 400;
+
                 add([
                     sprite(assets.wallSprite),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    scale((TILE_SIZE * 0.85) / 400),
+                    scale(s),
                     color(assets.wallTint),
                     area({ scale: 0.9 }),
                     body({ isStatic: true }),
@@ -177,11 +181,12 @@ export function createLevel() {
             }
             // Indestructible pillars (every other tile)
             else if (x % 2 === 0 && y % 2 === 0) {
+                const s = isTropical ? 1.0 : (TILE_SIZE * 0.85) / 400;
                 add([
                     sprite(assets.wallSprite),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    scale((TILE_SIZE * 0.85) / 400),
+                    scale(s),
                     area({ scale: 0.9 }),
                     body({ isStatic: true }),
                     z(y),  // Z-order based on Y position
@@ -190,11 +195,12 @@ export function createLevel() {
             }
             // Destructible blocks
             else if (!isSpawnZone(x, y) && Math.random() > 0.35) {
+                const s = isTropical ? 1.0 : (TILE_SIZE * 0.85) / 400;
                 add([
                     sprite(assets.blockSprite),
                     pos(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2),
                     anchor("center"),
-                    scale((TILE_SIZE * 0.85) / 400),
+                    scale(s),
                     area({ scale: 0.9 }),
                     body({ isStatic: true }),
                     z(y),  // Z-order based on Y position
