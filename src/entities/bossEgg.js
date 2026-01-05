@@ -9,7 +9,7 @@ export function spawnEgg(startPos) {
         scale(1.5), // "At least size of regular character, maybe 50% bigger"
         area(),
         body({ isStatic: true }), // Solid
-        health(2),
+        health(1),
         z(10), // Above floor
         "egg",
         "enemy",
