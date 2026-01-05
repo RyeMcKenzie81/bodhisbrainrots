@@ -499,6 +499,11 @@ export function initGameScene() {
             spawnCrocodilo(vec2(width() / 2, height() / 2));
         });
 
+        // DEBUG CHEAT: Press '2' to Jump to Level 2 (Tropical)
+        onKeyPress("2", () => {
+            go("game", 2);
+        });
+
         // Create level and spawn players based on selection
         createLevel();
         let localPlayer = null;
